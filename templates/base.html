@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JETAMA HR & ESG System</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+* {
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  margin: 0;
+  background: url('/static/images/bg.jpg') no-repeat center/cover;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  position: fixed;
+  background: rgba(75, 125, 206, 0.55);
+  backdrop-filter: blur(20px);
+  padding: 20px;
+  color: white;
+  border-right: 1px solid rgba(255,255,255,0.2);
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* LOGO */
+.logo {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 30px;
+}
+
+/* MAIN MENU */
+.menu-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border-radius: 12px;
+  color: white;
+  text-decoration: none;
+  margin-bottom: 8px;
+  transition: 0.3s;
+}
+
+.menu-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ACTIVE */
+.active {
+  background: white;
+  color: #2E86DE !important;
+  font-weight: 600;
+}
+
+/* SUBMENU */
+.submenu {
+  max-height: 0;
+  overflow: hidden;
+  transition: 0.4s ease;
+  padding-left: 10px;
+}
+
+.submenu a {
+  display: block;
+  padding: 8px 12px;
+  margin: 4px 0;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+}
+
+.submenu a:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* BADGE */
+.badge-dot {
+  background: red;
+  color: white;
+  padding: 3px 7px;
+  border-radius: 50%;
+  font-size: 10px;
+}
+
+/* ===== MAIN ===== */
+.main {
+  margin-left: 260px;
+  padding: 20px;
+}
+
+/* ===== TOPBAR ===== */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(93, 136, 243, 0);
+  backdrop-filter: blur(15px);
+  padding: 15px 20px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  color: white;
+}
+
+/* PROFILE */
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logout-btn {
+  background: linear-gradient(135deg,#ff416c,#ff4b2b);
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 10px;
+}
+
+/* ICON ROTATION */
+.rotate {
+  transform: rotate(180deg);
+  transition: 0.3s;
+}
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 25px;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+}
+
+.topbar-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* ICON BUTTON */
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.3s;
+  color: white;
+  font-size: 18px;
+}
+
+.icon-btn:hover {
+  background: rgba(255,255,255,0.3);
+  transform: translateY(-2px);
+}
+
+/* USER NAME */
+.user-name {
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* LOGOUT SPECIAL COLOR */
+.logout {
+  background: rgba(255, 75, 75, 0.6);
+}
+
+.logout:hover {
+  background: #ff4b2b;
+}
+.menu-link.active {
+  background: white;
+  color: #2E86DE !important;
+  font-weight: 600;
+}
+
+/* fix submenu active */
+.submenu a.active {
+  background: white;
+  color: #2E86DE !important;
+}
+.menu-link.active {
+  box-shadow: 0 0 10px rgba(255,255,255,0.4);
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar">
+
+<div class="text-center mb-3">
+    <img src="{{ url_for('static', filename='images/logo jetamaa.jpg') }}" 
+      alt="JETAMA Logo" 
+      style="width: 140px; border-radius: 16px; object-fit: cover;">
+</div>
+
+<!-- TOP MENU -->
+<div>
+
+<!-- DASHBOARD -->
+<a href="/admin/dashboard"
+   class="menu-link {% if request.path == '/admin/dashboard' %}active{% endif %}">
+  <span><i class="bi bi-grid"></i> Dashboard</span>
+</a>
+
+<!-- LEAVE -->
+<div class="menu-link 
+{% if '/admin/leaves' in request.path %}active{% endif %}" 
+onclick="toggleMenu('leaveMenu', this)">
+
+  <span><i class="bi bi-calendar-check"></i> Leave</span>
+  <i class="bi bi-chevron-down"></i>
+</div>
+
+<div id="leaveMenu" class="submenu">
+  <a href="/admin/leaves/dashboard"
+     class="{% if request.path == '/admin/leaves/dashboard' %}active{% endif %}">
+     Leave Dashboard
+  </a>
+
+  <a href="/admin/dashboard/view/pending"
+     class="{% if request.path == '/admin/dashboard/view/pending' %}active{% endif %}">
+    Pending Approval
+    <span class="badge-dot">3</span>
+  </a>
+  <a href="/admin/leave-report/view"
+     class="{% if request.path == '/admin/leave-report/view' %}active{% endif %}">
+    Reports
+  </a>
+</div>
+
+<!-- CLAIM -->
+<div class="menu-link 
+{% if '/admin/claims' in request.path %}active{% endif %}" 
+onclick="toggleMenu('claimMenu', this)">
+
+  <span><i class="bi bi-receipt"></i> Claims</span>
+  <i class="bi bi-chevron-down"></i>
+</div>
+
+<div id="claimMenu" class="submenu">
+  <a href="/admin/claims/dashboard"
+     class="{% if request.path == '/admin/claims/dashboard' %}active{% endif %}">
+     Claim Dashboard
+  </a>
+  <a href="/admin/claims"
+     class="{% if request.path == '/admin/claims' %}active{% endif %}">
+     Review Claims
+  </a>
+  <a href="/dashboard"
+     class="{% if request.path == '/dashboard' %}active{% endif %}">
+     My Dashboard
+  </a>
+</div>
+
+<!-- USERS -->
+<a href="/admin/users" 
+  class="menu-link {% if request.path == '/admin/users' %}active{% endif %}">
+  <span><i class="bi bi-people"></i> MyStaff</span>
+</a>
+
+</div>
+
+
+<!-- BOTTOM MENU -->
+<div style="margin-top: auto;">
+
+<a href="/admin/policy" 
+  class="menu-link {% if request.path == '/admin/policy' %}active{% endif %}">
+  <span><i class="bi bi-file-earmark-text"></i> Jetama Policy</span>
+</a>
+
+</div>
+
+</div>
+
+
+<!-- ===== MAIN ===== -->
+<div class="main">
+
+<div class="topbar">
+
+  <!-- LEFT: PAGE TITLE -->
+  <div class="topbar-title">
+    {% block page_title %}{% endblock %}
+  </div>
+
+  <!-- RIGHT: ICONS -->
+  <div class="topbar-right">
+    
+    <div class="icon-btn">
+      <i class="bi bi-bell"></i>
+    </div>
+
+    <!-- User Name -->
+    <div class="user-name">
+      {{ session.name }}
+    </div>
+
+    <!-- Logout Icon -->
+    <a href="/logout" class="icon-btn logout">
+      <i class="bi bi-box-arrow-right"></i>
+    </a>
+
+  </div>
+
+</div>
+
+{% block content %}{% endblock %}
+
+</div>
+
+<!-- ===== JS ===== -->
+<script>
+
+function toggleMenu(menuId, element) {
+  const menu = document.getElementById(menuId);
+  const icon = element.querySelector("i:last-child");
+
+  if (menu.style.maxHeight) {
+    menu.style.maxHeight = null;
+    icon.classList.remove("rotate");
+  } else {
+    menu.style.maxHeight = menu.scrollHeight + "px";
+    icon.classList.add("rotate");
+  }
+}
+
+/* AUTO OPEN ACTIVE MENU */
+window.onload = function() {
+
+  if (window.location.pathname.includes("/admin/leaves")) {
+    let m = document.getElementById("leaveMenu");
+    m.style.maxHeight = m.scrollHeight + "px";
+  }
+
+  if (window.location.pathname.includes("/admin/claims")) {
+    let m = document.getElementById("claimMenu");
+    m.style.maxHeight = m.scrollHeight + "px";
+  }
+
+}
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block page_title %}
+Review Claims
+{% endblock %}
+{% block content %}
+
+<style>
+body {
+  height: 100vh;
+
+  background: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
+    url('/static/images/DJI_0094.JPG');
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  overflow-x: hidden;
+}
+
+.glass {
+  background: rgba(12, 137, 254, 0.37);
+  backdrop-filter: blur(18px);
+  border-radius: 18px;
+  padding: 20px;
+  color: white;
+}
+
+.stat {
+  font-size: 28px;
+  font-weight: bold;
+}
+</style>
+
+<div class="row g-3">
+
+<div class="col-md-3"><div class="glass">Total<br><div class="stat">{{ total }}</div></div></div>
+<div class="col-md-3"><div class="glass">Pending<br><div class="stat">{{ pending }}</div></div></div>
+<div class="col-md-3"><div class="glass">Approved<br><div class="stat">{{ approved }}</div></div></div>
+<div class="col-md-3"><div class="glass">Rejected<br><div class="stat">{{ rejected }}</div></div></div>
+
+</div>
+
+<div class="glass mt-4">
+<h5>My Claim History</h5>
+
+<table class="table text-white">
+<tr><th>Title</th><th>Amount</th><th>Status</th></tr>
+
+{% for c in claims %}
+<tr>
+<td>{{ c.title }}</td>
+<td>RM {{ c.amount }}</td>
+<td>{{ c.status }}</td>
+</tr>
+{% endfor %}
+
+</table>
+</div>
+
+{% endblock %}

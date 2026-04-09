@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Management System</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ===== BODY ===== */
+body {
+  height: 100vh;
+
+  background: 
+    linear-gradient(rgba(0, 0, 0, 0.45), rgba(12, 32, 146, 0.45)), 
+    url('/static/images/DJI_0094.JPG');
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  overflow-x: hidden;
+}
+
+/* ===== HEADER ===== */
+.header {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    background: linear-gradient(to right, #2c3e50, #3498db);
+    border-radius: 50px;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-left img {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* ===== ROLE BUTTON ===== */
+.role-btn {
+    background: linear-gradient(135deg,#2E86DE,#1B4F72);
+    border: none;
+    padding: 8px 25px;
+    border-radius: 20px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.role-btn.user {
+    background: linear-gradient(135deg,#00c9a7,#43e97b);
+}
+
+/* ===== MAIN ===== */
+.container {
+    display: flex;
+    height: 100vh;
+    align-items: center;
+    justify-content: space-between;
+    padding: 80px;
+}
+
+/* LEFT */
+.left {
+    color: white;
+    width: 50%;
+}
+
+.left h1 {
+    font-size: 60px;
+    font-weight: 700;
+}
+
+.tag-box {
+    margin-top: 40px;
+    background: rgba(0, 255, 200, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 20px;
+    width: 80%;
+}
+
+.tag-box p {
+    color: #00ffcc;
+    font-size: 20px;
+}
+
+/* ===== LOGIN CARD ===== */
+.login-card {
+    width: 400px;
+    padding: 40px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(15px);
+    color: white;
+}
+
+.login-card h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.input-group {
+    margin: 15px 0;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+}
+
+/* BUTTON */
+.btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(to right, #2e86de, #1b4f72);
+    color: white;
+    font-weight: 600;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+/* ERROR */
+.error {
+    color: #ff6b6b;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="header-left">
+        <img src="/static/images/logo jetamaa.jpg" alt="Logo">
+        <span><b>JETAMA</b> | HR & ESG DEPARTMENT</span>
+    </div>
+
+    <button id="roleBtn" class="role-btn">ADMIN</button>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+
+    <!-- LEFT -->
+    <div class="left">
+        <h1>HR MANAGEMENT<br>SYSTEM</h1>
+
+        <div class="tag-box">
+            <p>Revolutionizing the way<br>
+            Businesses Manage<br>
+            Human Resources</p>
+        </div>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="login-card">
+        <h2>My-Employee</h2>
+
+        <!-- FORM FIXED -->
+        <form method="POST">
+
+            <div class="input-group">
+                <label>Email</label>
+                <input type="text" name="email" placeholder="Enter email" required>
+            </div>
+
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Enter password" required>
+            </div>
+
+            <button type="submit" class="btn">Log In</button>
+
+        </form>
+
+        <!-- ERROR DISPLAY -->
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <div class="footer">
+            © JETAMA HR - All rights ©Amira 2026.
+        </div>
+    </div>
+
+</div>
+
+<!-- JS -->
+<script>
+const btn = document.getElementById("roleBtn");
+let currentRole = "admin";
+
+btn.addEventListener("click", function() {
+    if (currentRole === "admin") {
+        currentRole = "user";
+        btn.innerText = "USER";
+        btn.classList.add("user");
+    } else {
+        currentRole = "admin";
+        btn.innerText = "ADMIN";
+        btn.classList.remove("user");
+    }
+});
+
+window.onload = function() {
+    let role = "{{ session.role }}";
+
+    if (role === "user") {
+        btn.innerText = "USER";
+        btn.classList.add("user");
+        currentRole = "user";
+    }
+};
+</script>
+
+</body>
+</html>

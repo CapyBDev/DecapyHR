@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: MiraJetama HR-system
+    env: python
+    buildCommand: ""
+    startCommand: gunicorn app:app

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block page_title %}
+CLAIM RECORDS
+{% endblock %}
+{% block content %}
+
+<style>
+body {
+  height: 100vh;
+
+  background: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
+    url('/static/images/DJI_0094.JPG');
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  overflow-x: hidden;
+}
+
+.glass {
+  background: rgba(12, 137, 254, 0.37);
+  backdrop-filter: blur(18px);
+  border-radius: 18px;
+  padding: 20px;
+  color: white;
+}
+
+.stat-card {
+  padding: 20px;
+  border-radius: 18px;
+  color: white;
+  background: rgba(72, 190, 249, 0.63);
+}
+
+.table { color:white; }
+</style>
+
+<div class="container-fluid mt-4">
+
+<div class="row g-3 mb-4">
+
+<div class="col-md-3"><div class="stat-card">Total {{total}}</div></div>
+<div class="col-md-3"><div class="stat-card">Pending {{pending}}</div></div>
+<div class="col-md-3"><div class="stat-card">Approved {{approved}}</div></div>
+<div class="col-md-3"><div class="stat-card">Rejected {{rejected}}</div></div>
+
+</div>
+
+<div class="glass">
+
+<table class="table">
+<tr>
+<th>Name</th>
+<th>Title</th>
+<th>Amount</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+
+{% for c in claims %}
+<tr>
+<td>{{c[1]}}</td>
+<td>{{c[2]}}</td>
+<td>RM {{c[3]}}</td>
+<td>{{c[5]}}</td>
+<td>
+<a href="/approve/{{c[0]}}" class="btn btn-success btn-sm">Approve</a>
+<a href="/reject/{{c[0]}}" class="btn btn-danger btn-sm">Reject</a>
+</td>
+</tr>
+{% endfor %}
+
+</table>
+
+</div>
+
+</div>
+
+{% endblock %}

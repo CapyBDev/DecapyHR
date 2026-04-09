@@ -1,0 +1,107 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="glass mb-4">
+  <div class="section-title">Notice Board</div>
+
+  <p>
+    {{ notice[0] if notice else "No announcement yet" }}
+  </p>
+</div>
+
+<div class="glass mb-4">
+  <div class="section-title">Company Policy</div>
+
+  {% if policy %}
+    <a href="/policy" target="_blank" class="btn btn-light">
+      View Policy
+    </a>
+  {% else %}
+    <p>No policy available</p>
+  {% endif %}
+</div>
+
+<div class="topbar">
+    <div>
+        <h3>My Claims</h3>
+        <p class="text-muted">Track and manage all your expense claims</p>
+    </div>
+
+    <a href="/claims/submit" class="btn btn-primary">Submit Claim</a>
+</div>
+
+<!-- STATS -->
+<div class="row">
+
+<div class="col-md-3">
+<div class="card-box">
+<p>Total Claims</p>
+<h3>{{total}}</h3>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card-box">
+<p>Pending</p>
+<h3>🟠 {{pending}}</h3>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card-box">
+<p>Approved</p>
+<h3>🟢 {{approved}}</h3>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card-box">
+<p>Rejected</p>
+<h3>🔴 {{rejected}}</h3>
+</div>
+</div>
+
+</div>
+
+<br>
+
+<!-- TABS -->
+<div class="card-box mb-3">
+    <div class="d-flex justify-content-between">
+        <strong>All ({{total}})</strong>
+        <span>Pending ({{pending}})</span>
+        <span>Approved ({{approved}})</span>
+        <span>Rejected ({{rejected}})</span>
+    </div>
+</div>
+
+<!-- CLAIM LIST -->
+{% for c in claims %}
+<div class="claim-card">
+
+<div>
+    <h5>CLM-{{loop.index}}</h5>
+
+    {% if c[3]=='Pending' %}
+        <span class="badge badge-pending">Pending</span>
+    {% elif c[3]=='Approved' %}
+        <span class="badge badge-approved">Approved</span>
+    {% else %}
+        <span class="badge badge-rejected">Rejected</span>
+    {% endif %}
+
+    <p class="text-muted mb-0">
+        Category: {{c[2]}} <br>
+        Submitted: {{c[4]}}
+    </p>
+</div>
+
+<div class="text-end">
+    <h4 class="text-primary">RM {{c[1]}}</h4>
+    <a href="/static/uploads/{{c[5]}}" class="btn btn-outline-secondary btn-sm">View</a>
+</div>
+
+</div>
+{% endfor %}
+
+{% endblock %}
