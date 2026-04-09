@@ -730,4 +730,5 @@ def reset_login(id):
 
 # ================= RUN =================
 if __name__ == "__main__":
+    init_db()
     app.run()
