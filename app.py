@@ -10,11 +10,6 @@ app.secret_key = "secret123"
 UPLOAD_FOLDER = "static/uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-# ================= DB =================
-# def get_db():
-#     return psycopg2.connect(
-#         "postgresql://claim_db_iw7g_user:VqDnpd2yPdNqtEKGla3esCEUMlEa3Kq7@dpg-d71nmima2pns73fas9b0-a.singapore-postgres.render.com/claim_db_iw7g"
-#     )
 def get_db():
     return psycopg2.connect(
         os.environ.get("DATABASE_URL"),
