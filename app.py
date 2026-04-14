@@ -125,7 +125,7 @@ def login():
             session["user_id"] = 2
             session["role"] = "user"
             session["name"] = "User"
-            return redirect("/dashboard")
+            return redirect("/users")
 
         else:
             return render_template("login.html", error="Invalid email or password")
@@ -516,7 +516,7 @@ def submit_claim():
         conn.commit()
         conn.close()
 
-        return redirect("/dashboard")
+        return redirect("/users")
 
     return render_template("claims/submit_claim.html")
 
