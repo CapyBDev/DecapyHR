@@ -139,8 +139,8 @@ def logout():
     return redirect("/")
 
 # ================= USER DASHBOARD =================
-@app.route("/dashboard")
-def dashboard():
+@app.route("/users")
+def users():
     if "user_id" not in session:
         return redirect("/")
 
@@ -192,7 +192,7 @@ def dashboard():
 
     conn.close()
 
-    return render_template("dashboard.html",
+    return render_template("users.html",
         total=total,
         pending=pending,
         approved=approved,
