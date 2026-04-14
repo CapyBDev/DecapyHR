@@ -2,6 +2,27 @@
 {% block content %}
 
 <style>
+body {
+  height: 100vh;
+
+  background: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
+    url('/static/images/DJI_0094.JPG');
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  overflow-x: hidden;
+}
+
+.glass {
+  background: rgba(131, 199, 255, 0.79);
+  backdrop-filter: blur(18px);
+  border-radius: 18px;
+  padding: 20px;
+  color: white;
+}
   .user-row { cursor: pointer; }
   .details-panel {
     background: linear-gradient(135deg, #b3e6ff, #a2ffe8);
