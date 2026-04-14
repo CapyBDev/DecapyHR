@@ -224,7 +224,7 @@ body {
       </div>
 
       <!-- DETAILS PANEL -->
-      <div class="col-4">
+      <div id="detailsPanel" class="col-4 details-panel hidden">
 
         <form id="updateUserForm" method="post">
 
@@ -272,6 +272,13 @@ body {
 <script>
 function showDetails(user){
 
+  const panel = document.getElementById("detailsPanel");
+  const overlay = document.getElementById("overlay");
+
+  // SHOW PANEL
+  panel.classList.remove("hidden");
+  overlay.classList.add("active");
+
   document.getElementById("empId").value = user.id;
   document.getElementById("empName").value = user.full_name || "";
   document.getElementById("empEmail").value = user.email || "";
@@ -287,6 +294,12 @@ function showDetails(user){
   document.getElementById("deleteUserForm").action =
     `/admin/users/delete/${user.id}`;
 }
+
+/* CLICK OUTSIDE → CLOSE PANEL */
+document.getElementById("overlay").onclick = function(){
+  document.getElementById("detailsPanel").classList.add("hidden");
+  this.classList.remove("active");
+};
 
 document.getElementById("updateUserForm").onsubmit = function(e){
   e.preventDefault();
