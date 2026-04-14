@@ -33,27 +33,68 @@ body {
 </style>
 
 <div class="container-fluid mt-4">
+  <div class="d-flex justify-content-between align-items-center">
+  <h5>Manage Users</h5>
+
+  <div>
+    <button class="btn btn-secondary">Manage Departments</button>
+    <button class="btn btn-primary">+ Add New Employee</button>
+  </div>
+</div>
 
 <div class="glass">
 
-<table class="table">
-<tr>
-<th>ID</th>
-<th>Name</th>
-<th>Email</th>
-<th>Role</th>
-</tr>
+<table class="table table-hover mt-3">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Department</th>
+      <th>Position</th>
+      <th>Availability</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for u in users %}
+    <tr>
+      <td>{{ u.full_name }}</td>
+      <td>{{ u.department_name or 'N/A' }}</td>
+      <td>{{ u.position }}</td>
 
-{% for u in users %}
-<tr>
-<td>{{u[0]}}</td>
-<td>{{u[1]}}</td>
-<td>{{u[2]}}</td>
-<td>{{u[3]}}</td>
-</tr>
-{% endfor %}
-
+      <td>
+        {% if u.availability == "Available" %}
+          <span class="badge bg-success">Available</span>
+        {% elif u.availability == "On Leave" %}
+          <span class="badge bg-danger">On Leave</span>
+        {% elif u.availability == "Out" %}
+          <span class="badge bg-primary">Out</span>
+        {% else %}
+          <span class="badge bg-secondary">{{ u.availability }}</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
 </table>
+
+<div class="d-flex gap-2 mb-3">
+  <input type="text" class="form-control" placeholder="Type a name...">
+
+  <select class="form-control">
+    <option>All Departments</option>
+    {% for d in departments %}
+      <option value="{{ d.id }}">{{ d.name }}</option>
+    {% endfor %}
+  </select>
+
+  <select class="form-control">
+    <option>All</option>
+    <option>Available</option>
+    <option>On Leave</option>
+    <option>Out</option>
+  </select>
+
+  <button class="btn btn-primary">Filter</button>
+</div>
 
 </div>
 
