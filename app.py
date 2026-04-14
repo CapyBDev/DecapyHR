@@ -288,7 +288,7 @@ def admin_leave_dashboard():
 
     # list
     cur.execute("""
-        SELECT l.id, u.name, l.leave_type, l.start_date, l.end_date, l.status
+        SELECT l.id, u.full_name, l.leave_type, l.start_date, l.end_date, l.status
         FROM leaves l
         JOIN users u ON l.user_id = u.id
         ORDER BY l.created_at DESC
@@ -327,7 +327,7 @@ def admin_claim_dashboard():
 
     # list
     cur.execute("""
-        SELECT c.id, u.name, c.title, c.amount, c.category, c.status
+        SELECT c.id, u.full_name, c.title, c.amount, c.category, c.status
         FROM claims c
         JOIN users u ON c.user_id = u.id
         ORDER BY c.created_at DESC
@@ -457,7 +457,7 @@ def admin_leaves():
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT l.*, u.name 
+        SELECT l.*, u.full_name 
         FROM leaves l
         JOIN users u ON l.user_id = u.id
         ORDER BY l.created_at DESC
@@ -576,7 +576,7 @@ def admin_users():
     cur.execute("""
         SELECT 
             u.id,
-            u.name,
+            u.full_name,
             u.email,
             u.phone,
             u.address,
