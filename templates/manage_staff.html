@@ -1,99 +1,120 @@
 {% extends "base.html" %}
-{% block page_title %}Staff Management{% endblock %}
 {% block content %}
 
-<style>
-body {
-  height: 100vh;
+<div class="card">
+  <div class="card-body">
 
-  background: 
-    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
-    url('/static/images/DJI_0094.JPG');
+    <h4>Manage Users</h4>
 
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+    <div class="row">
 
-  overflow-x: hidden;
-}
+      <!-- TABLE -->
+      <div class="col-8">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Department</th>
+              <th>Position</th>
+              <th>Availability</th>
+            </tr>
+          </thead>
 
-.glass {
-  background: rgba(12, 137, 254, 0.37);
-  backdrop-filter: blur(10px);
-  border-radius: 18px;
-  padding: 20px;
-  color: white;
-}
+          <tbody>
+            {% for u in users %}
+            <tr class="user-row"
+                data-name="{{ u.full_name }}"
+                data-dept="{{ u.department_name }}"
+                data-avail="{{ u.availability }}"
+                onclick='showDetails({{ u|tojson }})'>
 
+              <td>{{ u.full_name }}</td>
+              <td>{{ u.department_name or "-" }}</td>
+              <td>{{ u.position or "-" }}</td>
+              <td>{{ u.availability }}</td>
 
-.table {
-  color: white;
-}
-</style>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
-<div class="container-fluid mt-4">
+      <!-- DETAILS -->
+      <div class="col-4">
 
-  <div>
-    <button class="btn btn-secondary">Manage Departments</button>
-    <button class="btn btn-primary">+ Add New Employee</button>
+        <form id="updateUserForm">
+
+          <input type="hidden" id="empId" name="id">
+
+          <input type="text" id="empName" name="full_name" placeholder="Name" class="form-control mb-2">
+          <input type="email" id="empEmail" name="email" placeholder="Email" class="form-control mb-2">
+          <input type="text" id="empPhone" name="phone" placeholder="Phone" class="form-control mb-2">
+          <input type="text" id="empAddress" name="address" placeholder="Address" class="form-control mb-2">
+          <input type="text" id="empPosition" name="position" placeholder="Position" class="form-control mb-2">
+
+          <select id="empDept" name="dept_id" class="form-select mb-2">
+            {% for d in departments %}
+              <option value="{{ d.id }}">{{ d.name }}</option>
+            {% endfor %}
+          </select>
+
+          <input type="number" id="empEntitlement" name="entitlement" class="form-control mb-2">
+
+          <select id="empAvailability" name="availability" class="form-select mb-2">
+            <option>Available</option>
+            <option>Out</option>
+            <option>WFH</option>
+            <option>MC</option>
+          </select>
+
+          <button class="btn btn-success w-100">Save</button>
+
+        </form>
+
+        <form id="deleteUserForm" method="post">
+          <button class="btn btn-danger w-100 mt-2">Delete</button>
+        </form>
+
+      </div>
+
+    </div>
   </div>
-
-<div class="glass">
-
-<table class="table table-hover mt-3">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Department</th>
-      <th>Position</th>
-      <th>Availability</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for u in users %}
-    <tr>
-      <td>{{ u.full_name }}</td>
-      <td>{{ u.department_name or 'N/A' }}</td>
-      <td>{{ u.position }}</td>
-
-      <td>
-        {% if u.availability == "Available" %}
-          <span class="badge bg-success">Available</span>
-        {% elif u.availability == "On Leave" %}
-          <span class="badge bg-danger">On Leave</span>
-        {% elif u.availability == "Out" %}
-          <span class="badge bg-primary">Out</span>
-        {% else %}
-          <span class="badge bg-secondary">{{ u.availability }}</span>
-        {% endif %}
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-<div class="d-flex gap-2 mb-3">
-  <input type="text" class="form-control" placeholder="Type a name...">
-
-  <select class="form-control">
-    <option>All Departments</option>
-    {% for d in departments %}
-      <option value="{{ d.id }}">{{ d.name }}</option>
-    {% endfor %}
-  </select>
-
-  <select class="form-control">
-    <option>All</option>
-    <option>Available</option>
-    <option>On Leave</option>
-    <option>Out</option>
-  </select>
-
-  <button class="btn btn-primary">Filter</button>
 </div>
 
-</div>
+<script>
+function showDetails(user){
 
-</div>
+  empId.value = user.id;
+  empName.value = user.full_name;
+  empEmail.value = user.email;
+  empPhone.value = user.phone;
+  empAddress.value = user.address;
+  empPosition.value = user.position;
+  empDept.value = user.dept_id;
+  empEntitlement.value = user.entitlement;
+  empAvailability.value = user.availability;
+
+  document.getElementById("deleteUserForm").action =
+    `/admin/users/delete/${user.id}`;
+}
+
+updateUserForm.onsubmit = e => {
+  e.preventDefault();
+
+  fetch(`/admin/users/update/${empId.value}`, {
+    method: "POST",
+    body: new FormData(updateUserForm)
+  }).then(()=>location.reload());
+};
+
+deleteUserForm.onsubmit = e => {
+  e.preventDefault();
+
+  if(confirm("Delete user?")){
+    fetch(deleteUserForm.action, {method:"POST"})
+    .then(()=>location.reload());
+  }
+};
+</script>
 
 {% endblock %}

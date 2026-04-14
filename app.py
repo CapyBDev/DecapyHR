@@ -573,10 +573,12 @@ def admin_users():
     conn = get_db()
     cur = conn.cursor()
 
+    # GET USERS + DEPARTMENT NAME
     cur.execute("""
         SELECT 
             u.id,
             u.full_name,
+            u.username,
             u.email,
             u.phone,
             u.address,
@@ -584,7 +586,7 @@ def admin_users():
             u.entitlement,
             u.availability,
             u.dept_id,
-            d.name as department_name
+            d.name AS department_name
         FROM users u
         LEFT JOIN departments d ON u.dept_id = d.id
         ORDER BY u.id DESC
@@ -593,6 +595,7 @@ def admin_users():
     columns = [desc[0] for desc in cur.description]
     users = [dict(zip(columns, row)) for row in cur.fetchall()]
 
+    # GET DEPARTMENTS
     cur.execute("SELECT id, name FROM departments")
     departments = [dict(id=r[0], name=r[1]) for r in cur.fetchall()]
 
@@ -602,7 +605,8 @@ def admin_users():
                            users=users,
                            departments=departments)
 
-# ============= ADD USERS ================
+
+# ================= CREATE USER =================
 @app.route("/admin/users/create", methods=["POST"])
 def create_user():
     conn = get_db()
@@ -610,8 +614,8 @@ def create_user():
 
     cur.execute("""
         INSERT INTO users 
-        (full_name, username, email, phone, ic_number, address, position,
-         dept_id, role, password, enrollment_date, entitlement)
+        (full_name, username, email, phone, ic_number, address,
+         position, dept_id, role, password, enrollment_date, entitlement)
         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
     """, (
         request.form["full_name"],
@@ -633,7 +637,8 @@ def create_user():
 
     return redirect("/admin/users")
 
-# ============ UPDATE USERS =============
+
+# ================= UPDATE USER =================
 @app.route("/admin/users/update/<int:id>", methods=["POST"])
 def update_user(id):
     conn = get_db()
@@ -667,7 +672,8 @@ def update_user(id):
 
     return "OK"
 
-# ============ DELETE USERS =============
+
+# ================= DELETE USER =================
 @app.route("/admin/users/delete/<int:id>", methods=["POST"])
 def delete_user(id):
     conn = get_db()
@@ -680,7 +686,8 @@ def delete_user(id):
 
     return "OK"
 
-# ============ MANAGE DEPARTMENTS =============
+
+# ================= DEPARTMENTS =================
 @app.route("/admin/departments", methods=["POST"])
 def manage_departments():
     conn = get_db()
@@ -707,7 +714,8 @@ def delete_department(dept_id):
 
     return redirect("/admin/users")
 
-# ============ RESET LOGIN =============
+
+# ================= RESET LOGIN =================
 @app.route("/admin/users/reset_login/<int:id>", methods=["POST"])
 def reset_login(id):
     data = request.get_json()
