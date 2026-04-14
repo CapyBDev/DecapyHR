@@ -1,10 +1,177 @@
 {% extends "base.html" %}
 {% block content %}
 
+<style>
+  .user-row { cursor: pointer; }
+  .details-panel {
+    background: linear-gradient(135deg, #b3e6ff, #a2ffe8);
+    border-left: 3px solid #54ffc9;
+    backdrop-filter: blur(10px);
+    min-height: 600px;
+    padding: 25px;
+    border-radius: 12px;
+    transition: all .3s ease;
+    color: #083444;
+  }
+
+  .details-panel.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(40px);
+  }
+
+  .details-panel input.form-control,
+  .details-panel select.form-select {
+    background: #ffffff;
+    border: 1px solid #b5f8f3;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 14px;
+    color: #144652;
+  }
+  .details-panel label {
+  font-weight: 600;
+  color: #083444;
+  font-size: 14px;
+}
+
+  .details-panel input:focus,
+  .details-panel select:focus {
+    border-color: #00b7ff;
+    box-shadow: 0 0 0 3px rgba(31, 219, 198, 0.35);
+    outline: none;
+  }
+
+  .details-panel h5 {
+    font-weight: 700;
+    color: #083444;
+  }
+
+  .details-panel hr {
+    border-color: rgba(8, 52, 68, 0.25);
+    }
+    .details-panel .btn-success {
+    background-color: #34c968;
+    border-color: #34c968;
+  }
+
+  .details-panel .btn-outline-danger {
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+  }
+
+  .details-panel .btn-outline-danger:hover {
+    background-color: #ff6b6b;
+    color: #fff;
+  }
+  #overlay.active { display: block; }
+  .search-bar input, .search-bar select { min-width: 180px; }
+</style>
+
+<style>
+/* 🎨 MODAL BODY GRADIENT PANEL */
+#addEmployeeModal .modal-body {
+  background: linear-gradient(135deg, #b3e6ff, #a2ffe8);
+  border-top: 3px solid #54ffc9;
+  padding: 25px;
+}
+
+/* 👤 LEFT PROFILE PANEL (Soft Aqua) */
+#addEmployeeModal .col-md-3 {
+  background: linear-gradient(160deg, #9ce4ff, #8dfde5);
+  border: 1px solid #3fb2ff;
+  border-radius: 6px;
+  padding: 20px 10px;
+}
+
+/* 📋 FORM BLOCK (Blue-Green Smooth) */
+#addEmployeeModal .col-md-9 {
+  background: linear-gradient(180deg, #7ed8ff, #76ffea);
+  border: 1px solid #77f1ff;
+  border-radius: 6px;
+  padding: 15px;
+}
+
+/* ✏ FORM INPUT / SELECT STYLE */
+#addEmployeeModal input.form-control,
+#addEmployeeModal select.form-select {
+  background: #ffffff;
+  border: 1px solid #b5f8f3;
+  border-radius: 5px;
+  padding: 7px 10px;
+  font-size: 14px;
+  color: #144652;
+}
+
+#addEmployeeModal input:focus,
+#addEmployeeModal select:focus {
+  border-color: #00b7ff;
+  box-shadow: 0 0 0 3px rgba(31, 219, 198, 0.4);
+  outline: none;
+}
+
+/* 🏷 LABEL STYLING */
+#addEmployeeModal label {
+  font-weight: 600;
+  color: #083444;
+  font-size: 14px;
+}
+
+/* 💾 BUTTON SAVE (Green ocean) */
+#addEmployeeModal .modal-footer .btn-success {
+  background-color: #34c968;
+  border-color: #34c968;
+}
+
+/* BUTTON CANCEL (Soft aqua) */
+#addEmployeeModal .modal-footer .btn-light {
+  background-color: #b2fff5;
+  border-color: #7ce7da;
+}
+
+#addEmployeeModal .modal-footer .btn-light:hover {
+  background-color: #8af7e6;
+}
+
+/* 📸 Disabled Upload Icon Panel */
+#addEmployeeModal .btn-outline-secondary {
+  border-color: #67e7d5;
+  color: #0a8091;
+}
+
+#addEmployeeModal .btn-outline-secondary:hover {
+  background: #89f4e6;
+  color: #ffffff;
+}
+
+/* 👤 USER ICON COLOR */
+#addEmployeeModal .bi-person {
+  color: #146ab3;
+  opacity: 0.9;
+}
+</style>
+
+<div id="overlay"></div>
+
 <div class="card">
   <div class="card-body">
 
     <h4>Manage Users</h4>
+
+    <div class="d-flex gap-2 mb-3">
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+        + Add Employee
+      </button>
+
+      <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#manageDepartmentModal">
+        Manage Departments
+      </button>
+    </div>
+
+    <!-- TABLE HERE -->
+
+    {% include "add_employee.html" %}
+    {% include "manage_department.html" %}
 
     <div class="row">
 
