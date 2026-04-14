@@ -158,6 +158,7 @@
 
     <h4>Manage Users</h4>
 
+    <!-- BUTTONS -->
     <div class="d-flex gap-2 mb-3">
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
         + Add Employee
@@ -167,11 +168,6 @@
         Manage Departments
       </button>
     </div>
-
-    <!-- TABLE HERE -->
-
-    {% include "add_employee.html" %}
-    {% include "manage_department.html" %}
 
     <div class="row">
 
@@ -191,14 +187,14 @@
             {% for u in users %}
             <tr class="user-row"
                 data-name="{{ u.full_name }}"
-                data-dept="{{ u.department_name }}"
-                data-avail="{{ u.availability }}"
+                data-dept="{{ u.department_name or '' }}"
+                data-avail="{{ u.availability or 'Available' }}"
                 onclick='showDetails({{ u|tojson }})'>
 
               <td>{{ u.full_name }}</td>
               <td>{{ u.department_name or "-" }}</td>
               <td>{{ u.position or "-" }}</td>
-              <td>{{ u.availability }}</td>
+              <td>{{ u.availability or "Available" }}</td>
 
             </tr>
             {% endfor %}
@@ -206,10 +202,10 @@
         </table>
       </div>
 
-      <!-- DETAILS -->
+      <!-- DETAILS PANEL -->
       <div class="col-4">
 
-        <form id="updateUserForm">
+        <form id="updateUserForm" method="post">
 
           <input type="hidden" id="empId" name="id">
 
@@ -220,6 +216,7 @@
           <input type="text" id="empPosition" name="position" placeholder="Position" class="form-control mb-2">
 
           <select id="empDept" name="dept_id" class="form-select mb-2">
+            <option value="">Select Department</option>
             {% for d in departments %}
               <option value="{{ d.id }}">{{ d.name }}</option>
             {% endfor %}
@@ -228,10 +225,10 @@
           <input type="number" id="empEntitlement" name="entitlement" class="form-control mb-2">
 
           <select id="empAvailability" name="availability" class="form-select mb-2">
-            <option>Available</option>
-            <option>Out</option>
-            <option>WFH</option>
-            <option>MC</option>
+            <option value="Available">Available</option>
+            <option value="Out">Out</option>
+            <option value="WFH">WFH</option>
+            <option value="MC">MC</option>
           </select>
 
           <button class="btn btn-success w-100">Save</button>
@@ -248,37 +245,43 @@
   </div>
 </div>
 
+<!-- ✅ MODALS MUST BE OUTSIDE ROW -->
+{% include "add_employee.html" %}
+{% include "manage_department.html" %}
+
 <script>
 function showDetails(user){
 
-  empId.value = user.id;
-  empName.value = user.full_name;
-  empEmail.value = user.email;
-  empPhone.value = user.phone;
-  empAddress.value = user.address;
-  empPosition.value = user.position;
-  empDept.value = user.dept_id;
-  empEntitlement.value = user.entitlement;
-  empAvailability.value = user.availability;
+  document.getElementById("empId").value = user.id;
+  document.getElementById("empName").value = user.full_name || "";
+  document.getElementById("empEmail").value = user.email || "";
+  document.getElementById("empPhone").value = user.phone || "";
+  document.getElementById("empAddress").value = user.address || "";
+  document.getElementById("empPosition").value = user.position || "";
+  document.getElementById("empDept").value = user.dept_id || "";
+  document.getElementById("empEntitlement").value = user.entitlement || 0;
+
+  document.getElementById("empAvailability").value =
+    user.availability || "Available";
 
   document.getElementById("deleteUserForm").action =
     `/admin/users/delete/${user.id}`;
 }
 
-updateUserForm.onsubmit = e => {
+document.getElementById("updateUserForm").onsubmit = function(e){
   e.preventDefault();
 
-  fetch(`/admin/users/update/${empId.value}`, {
+  fetch(`/admin/users/update/${document.getElementById("empId").value}`, {
     method: "POST",
-    body: new FormData(updateUserForm)
+    body: new FormData(this)
   }).then(()=>location.reload());
 };
 
-deleteUserForm.onsubmit = e => {
+document.getElementById("deleteUserForm").onsubmit = function(e){
   e.preventDefault();
 
   if(confirm("Delete user?")){
-    fetch(deleteUserForm.action, {method:"POST"})
+    fetch(this.action, {method:"POST"})
     .then(()=>location.reload());
   }
 };
