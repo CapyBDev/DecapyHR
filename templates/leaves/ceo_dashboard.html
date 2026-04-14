@@ -1,0 +1,459 @@
+{% extends "base.html" %}
+{% block title %}CEO Dashboard | J-Leave{% endblock %}
+{% block content %}
+
+<style>
+.dashboard-foreground{position:relative;z-index:9999;}
+
+/* ================= SUMMARY BAR ================= */
+.stats-bar{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 equal cards */
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* base stat card */
+.stat-card{
+  width: 100%;
+  min-width: 0;
+  padding: 18px 20px;
+  border-radius: 18px;
+  box-shadow: 0 4px 10px rgba(0,0,0,.15);
+  cursor: pointer;
+  color: white;
+  transition: 0.3s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.stat-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 8px 18px rgba(0,0,0,.25);
+}
+
+/* ===== DIFFERENT COLORS ===== */
+.pending-card{
+  background: linear-gradient(135deg, #f89b38, #ffff52ef);
+}
+.approved-card{
+  background: linear-gradient(135deg, #38f848, #2ff6d5);
+}
+.rejected-card{
+  background: linear-gradient(135deg, #f83838, #f9851f);
+}
+
+.circle{
+  width:70px;
+  height:70px;
+  border-radius:50%;
+  border:4px solid rgba(255, 255, 255, 0.93);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+  color:white;
+}
+
+/* ================= TOOLBAR ================= */
+.graph-toolbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:10px 0;
+}
+
+/* ================= EQUAL GRAPH CARDS ================= */
+.equal-card {
+  height: 360px;              
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.equal-card canvas {
+  max-height: 240px !important;
+}
+
+/* ================= LEAVE LIST CARD ================= */
+.leave-card{
+  border-radius:16px;
+  margin-bottom:22px;
+  background: linear-gradient(135deg,#f0f9ff,#e0f2fe);
+  box-shadow:0 6px 18px rgba(0,0,0,.18);
+  color:#0f172a;
+}
+
+.leave-header{
+  background:linear-gradient(135deg, #38f8d5, #36a3f6);
+  color:#fff;
+  padding:15px;
+  border-radius:16px 16px 0 0;
+  display:flex;
+  justify-content:space-between;
+}
+.leave-body{padding:15px;}
+.back-btn{margin-bottom:15px}
+
+/* ================= TEXT ================= */
+.foreground-text{
+  color:#fff;
+  text-shadow:0 2px 6px rgba(27, 215, 235, 0.5);
+  font-weight:700;
+}
+
+/* ================= DATA CARDS (GRAPHS) ================= */
+.data-card{
+  background: linear-gradient(135deg, #99fff6bc, #ffffff);
+  padding:12px;
+  border-radius:15px;
+  box-shadow:0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ================= SELECT BUTTON ================= */
+.btn-select{
+  padding:5px 10px;
+  border-radius:6px;
+  border:1px solid #059e75;
+  background:linear-gradient(135deg, #e0f2fe, #36e7e7);
+  color:#0f172a;
+  font-weight:600;
+}
+
+/* Smaller graph */
+#leaveChart{
+  max-height:240px;
+}
+/* ===== TREND FILTER FIX ===== */
+.trend-filters{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;             
+  width: 100%;
+}
+
+.trend-filters select{
+  flex: 1;                     
+  min-width: 150px;            
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+</style>
+
+<div class="dashboard-foreground">
+
+<div class="ceo-header foreground-text">
+  <h3><i class="bi bi-shield-check"></i> CEO Dashboard</h3>
+  <p>Chief Executive Officer</p>
+</div>
+
+<!-- ================= SUMMARY CARDS ================= -->
+<div class="stats-bar">
+
+  <!-- Pending -->
+  <div class="stat-card pending-card" onclick="showList('pending')">
+    <div>
+      <p>Pending Leave</p>
+      <h2>{{ pending_count }}</h2>
+    </div>
+    <div class="circle">⏳</div>
+  </div>
+
+  <!-- Approved -->
+  <div class="stat-card approved-card" onclick="showList('approved')">
+    <div>
+      <p>Approved Leave</p>
+      <h2>{{ approved_count }}</h2>
+    </div>
+    <div class="circle">✔</div>
+  </div>
+
+  <!-- Rejected -->
+  <div class="stat-card rejected-card" onclick="showList('rejected')">
+    <div>
+      <p>Rejected Leave</p>
+      <h2>{{ rejected_count }}</h2>
+    </div>
+    <div class="circle">✖</div>
+  </div>
+
+</div>
+
+<hr>
+
+<!-- ================= LISTS ================= -->
+<div id="pendingList" style="display:none;">
+<button class="btn btn-secondary back-btn" onclick="backToDashboard()">⬅ Back</button>
+<h5>🕒 Pending Approvals</h5>
+{% for leave in pending_leaves %}
+<div class="leave-card">
+  <div class="leave-header">
+    <strong>{{ leave.full_name }}</strong>
+    <span class="badge bg-warning">{{ leave.status }}</span>
+  </div>
+  <div class="leave-body">
+    <p><b>Department:</b> {{ leave.department_name }}</p>
+    <p><b>Period:</b> {{ leave.start_date }} → {{ leave.end_date }}</p>
+    <p><b>Reason:</b> {{ leave.reason }}</p>
+    
+    <form method="POST" action="{{ url_for('ceo_reject_leave', leave_id=leave.id) }}" class="d-inline">
+      <button class="btn btn-danger btn-sm">Reject</button>
+    </form>
+
+    <form method="POST" action="{{ url_for('ceo_approve_leave', leave_id=leave.id) }}" class="d-inline">
+      <button class="btn btn-success btn-sm">Approve</button>
+    </form>
+
+  </div>
+</div>
+{% endfor %}
+</div>
+
+<div id="approvedList" style="display:none;">
+<button class="btn btn-secondary back-btn" onclick="backToDashboard()">⬅ Back</button>
+<h5>✅ Approved Leaves</h5>
+{% for leave in approved_leaves %}
+<div class="leave-card">
+  <div class="leave-header">
+    <strong>{{ leave.full_name }}</strong>
+    <span class="badge bg-success">Approved</span>
+  </div>
+  <div class="leave-body">
+    <p><b>Department:</b> {{ leave.department_name }}</p>
+    <p><b>Approved At:</b> {{ leave.approved_at }}</p>
+    <p><b>Period:</b> {{ leave.start_date }} → {{ leave.end_date }}</p>
+  </div>
+</div>
+{% endfor %}
+</div>
+
+<div id="rejectedList" style="display:none;">
+<button class="btn btn-secondary back-btn" onclick="backToDashboard()">⬅ Back</button>
+<h5>❌ Rejected Leaves</h5>
+{% for leave in rejected_leaves %}
+<div class="leave-card">
+  <div class="leave-header">
+    <strong>{{ leave.full_name }}</strong>
+    <span class="badge bg-danger">Rejected</span>
+  </div>
+  <div class="leave-body">
+    <p><b>Department:</b> {{ leave.department_name }}</p>
+    <p><b>Rejected At:</b> {{ leave.approved_at }}</p>
+    <p><b>Period:</b> {{ leave.start_date }} → {{ leave.end_date }}</p>
+  </div>
+</div>
+{% endfor %}
+</div>
+
+<hr>
+
+<!-- ================= MAIN GROUPED BAR GRAPH ================= -->
+<div class="data-card mb-4">
+  <div class="graph-toolbar">
+    <h6>Statics of Active Application</h6>
+    <select id="yearSelect" class="btn-select" onchange="updateMainGraph()">
+      {% for y in years %}
+        <option value="{{ y }}">{{ y }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <canvas id="leaveChart" height="120"></canvas>
+</div>
+
+<!-- ================= BOTTOM GRAPHS ================= -->
+<div class="row">
+
+  <!-- Leave Trend -->
+  <div class="col-lg-6">
+    <div class="data-card mb-4 equal-card">
+      <h6><i class="bi bi-graph-up-arrow"></i> Leave Trend</h6>
+
+      <div class="trend-filters d-flex gap-2 mb-2">
+        <select id="yearFilter" class="btn-select">
+          <option value="all">All Years</option>
+        </select>
+        <select id="monthFilter" class="btn-select">
+          <option value="all">All Months</option>
+        </select>
+        <select id="deptFilter" class="btn-select">
+          <option value="all">All Departments</option>
+        </select>
+      </div>
+
+      <canvas id="trendChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- Leave Type Distribution -->
+  <div class="col-lg-6">
+    <div class="data-card mb-4 equal-card">
+      <h6>Leave Type Distribution</h6>
+      <canvas id="typePieChart" height="200"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const labels = {{ labels|default([])|tojson }};
+const approvedData = {{ approved_data|default([])|tojson }};
+const rejectedData = {{ rejected_data|default([])|tojson }};
+const totalData = {{ total_data|default([])|tojson }};
+
+const rawData = {{ stats|default([])|tojson }};
+const rawTrendData = {{ trend_raw|default([])|tojson }};
+const leaveTypes = {{ leave_types|default([])|tojson }};
+const leaveCounts = {{ leave_type_count|default([])|tojson }};
+
+// Month labels fixed JAN–DEC
+const monthOrder = ["01","02","03","04","05","06","07","08","09","10","11","12"];
+const monthMap = {
+ "01":"JAN","02":"FEB","03":"MAR","04":"APR",
+ "05":"MAY","06":"JUN","07":"JUL","08":"AUG",
+ "09":"SEP","10":"OCT","11":"NOV","12":"DEC"
+};
+
+/* PIE */
+new Chart(document.getElementById("typePieChart"),{
+ type:"doughnut",
+ data:{labels:leaveTypes,datasets:[{data:leaveCounts,backgroundColor:["#42e5f7","#4ade80","#facc15","#f87171","#a78bfa","#ff49cb","#2660ff"]}]}
+});
+
+/* ===== MAIN GROUPED BAR CHART ===== */
+const mainCtx = document.getElementById("leaveChart");
+
+let mainChart = new Chart(mainCtx,{
+ type:"bar",
+ data:{
+   labels: labels,
+   datasets:[
+     {
+       label:"Total Leave",
+       backgroundColor:"#246ae1",
+       data: totalData
+     },
+     {
+       label:"Approved",
+       backgroundColor:"#4ff68c",
+       data: approvedData
+     },
+     {
+       label:"Rejected",
+       backgroundColor:"#f72020",
+       data: rejectedData
+     }
+   ]
+ },
+ options:{
+  responsive:true,
+  plugins:{legend:{position:"top"}},
+  scales:{y:{beginAtZero:true}},
+  maintainAspectRatio:false
+ }
+});
+
+function updateMainGraph(){
+
+ const yearSelect = document.getElementById("yearSelect");
+ if(!yearSelect) return;
+
+ const year = yearSelect.value;
+
+ // Convert month to 2-digit string for comparison
+ const filtered = rawData
+   .filter(r => String(r.year) === String(year))
+   .map(r => ({
+       ...r,
+       monthStr: String(r.month).padStart(2,"0")
+   }));
+
+ const labels = monthOrder.map(m => monthMap[m]);
+
+ const totalData = monthOrder.map(m=>{
+   const rows = filtered.filter(r=>r.monthStr === m);
+   return rows.reduce((s,r)=>s + Number(r.approved) + Number(r.rejected),0);
+ });
+
+ const approvedData = monthOrder.map(m=>{
+   const rows = filtered.filter(r=>r.monthStr === m);
+   return rows.reduce((s,r)=>s + Number(r.approved),0);
+ });
+
+ const rejectedData = monthOrder.map(m=>{
+   const rows = filtered.filter(r=>r.monthStr === m);
+   return rows.reduce((s,r)=>s + Number(r.rejected),0);
+ });
+
+ mainChart.data.labels = labels;
+ mainChart.data.datasets[0].data = totalData;
+ mainChart.data.datasets[1].data = approvedData;
+ mainChart.data.datasets[2].data = rejectedData;
+ mainChart.update();
+}
+
+/* ===== TREND LINE CHART ===== */
+const yearFilter=document.getElementById("yearFilter");
+const monthFilter=document.getElementById("monthFilter");
+const deptFilter=document.getElementById("deptFilter");
+
+[...new Set(rawTrendData.map(r=>r.year))].forEach(y=>yearFilter.innerHTML+=`<option>${y}</option>`);
+const uniqueMonths = [...new Set(rawTrendData.map(r=>r.month))].sort();
+
+uniqueMonths.forEach(m=>{
+  monthFilter.innerHTML += `<option value="${m}">${monthMap[m]}</option>`;
+});
+
+[...new Set(rawTrendData.map(r=>r.department))].forEach(d=>deptFilter.innerHTML+=`<option>${d}</option>`);
+
+const trendChart=new Chart(document.getElementById("trendChart"),{
+ type:"line",data:{labels:[],datasets:[]}
+});
+
+function updateTrendChart(){
+ let f=rawTrendData;
+ if(yearFilter.value!="all")f=f.filter(r=>r.year==yearFilter.value);
+ if(monthFilter.value!="all")f=f.filter(r=>r.month==monthFilter.value);
+ if(deptFilter.value!="all")f=f.filter(r=>r.department==deptFilter.value);
+
+ const labels=[...new Set(f.map(r=>`${r.year}-${r.month}`))];
+ const grouped={};
+
+ f.forEach(r=>{
+  if(!grouped[r.department])grouped[r.department]={};
+  grouped[r.department][`${r.year}-${r.month}`]=r.total;
+ });
+
+ const colors=["#fd0ded","#008f2b","#dc3545","#f2ff5e","#8737c8", "#237bff"];
+ const datasets=Object.keys(grouped).map((d,i)=>({
+   label:d,
+   data:labels.map(l=>grouped[d][l]||0),
+   borderColor:colors[i%colors.length],
+   fill:false
+ }));
+
+ trendChart.data.labels=labels;
+ trendChart.data.datasets=datasets;
+ trendChart.update();
+}
+
+yearFilter.onchange=monthFilter.onchange=deptFilter.onchange=updateTrendChart;
+
+function showList(type){
+ ["pendingList","approvedList","rejectedList"].forEach(id=>document.getElementById(id).style.display="none");
+ document.querySelector(".stats-bar").style.display="none";
+ document.getElementById(type+"List").style.display="block";
+}
+function backToDashboard(){
+ ["pendingList","approvedList","rejectedList"].forEach(id=>document.getElementById(id).style.display="none");
+ document.querySelector(".stats-bar").style.display="flex";
+}
+
+updateMainGraph();
+updateTrendChart();
+</script>
+
+{% endblock %}
+  

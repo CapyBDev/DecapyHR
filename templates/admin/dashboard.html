@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% block page_title %}Dashboard Overview{% endblock %}
+{% block content %}
+
+<style>
+body {
+  height: 100vh;
+
+  background: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
+    url('/static/images/DJI_0094.JPG');
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  overflow-x: hidden;
+}
+
+.glass {
+  background: rgba(131, 199, 255, 0.79);
+  backdrop-filter: blur(18px);
+  border-radius: 18px;
+  padding: 20px;
+  color: white;
+}
+
+.stat-card {
+  padding: 20px;
+  border-radius: 18px;
+  color: white;
+  background: rgba(72, 190, 249, 0.63);
+}
+
+.table { color:white; }
+
+.section-title {
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+.notice-content {
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.notice-line {
+  margin-bottom: 6px;
+}
+
+.notice-highlight {
+  font-weight: 600;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  color: #ffffff;
+}
+
+.notice-divider {
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+  margin: 12px 0;
+}
+
+.notice-space {
+  height: 8px;
+}
+</style>
+
+<div class="container-fluid mt-4">
+
+<!-- ================= NOTICE BOARD ================= -->
+<div class="glass mb-4" style="background: linear-gradient(135deg, #005ec9, #43d8e9);">
+
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h5><i class="bi bi-megaphone"></i> Notice Board</h5>
+
+    <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#noticeModal">
+      ✏️ Edit
+    </button>
+  </div>
+
+  <div class="notice-content">
+
+    {% if notice %}
+    
+      {% for line in notice[0].split('\n') %}
+        
+        {% if "===" in line %}
+          <div class="notice-divider"></div>
+
+        {% elif line.strip() == "" %}
+          <div class="notice-space"></div>
+
+        {% elif line.startswith("**") %}
+          <div class="notice-highlight">📌 {{ line.replace("**","") }}</div>
+
+        {% else %}
+          <div class="notice-line">{{ line }}</div>
+
+        {% endif %}
+
+      {% endfor %}
+
+    {% else %}
+      <i>No announcement available</i>
+    {% endif %}
+
+  </div>
+
+  {% if notice and notice|length > 1 and notice[1] %}
+  <div class="mt-3">
+    <a href="{{ url_for('static', filename='uploads/' + notice[1]) }}" 
+       target="_blank"
+       class="btn btn-dark btn-sm">
+      📎 View Attachment
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- ================= MODAL ================= -->
+<div class="modal fade" id="noticeModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <form method="POST" action="/admin/notice" enctype="multipart/form-data">
+
+        <div class="modal-header bg-primary text-white">
+          <h5>Edit Notice</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <label>Message (emoji allowed 🎉🔥)</label>
+          <textarea name="content" class="form-control" rows="4">{{ notice[0] if notice else "" }}</textarea>
+          <label>Attach File</label>
+          <input type="file" name="file" class="form-control">
+
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-success">Save</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================= MAIN ================= -->
+<div class="row g-4">
+
+<div class="col-md-7">
+
+<div class="glass">
+<div class="section-title">Latest Leave Requests</div>
+<table class="table">
+<tr><th>Name</th><th>Type</th><th>Status</th></tr>
+</table>
+</div>
+
+<br>
+
+<div class="glass">
+<div class="section-title">Employees On Leave</div>
+<table class="table">
+<tr><th>Name</th><th>Department</th><th>Return</th></tr>
+</table>
+</div>
+
+</div>
+
+<div class="col-md-5">
+
+<div class="glass">
+<div class="section-title">Recent Claims</div>
+</div>
+
+<br>
+
+<div class="glass">
+<div class="section-title">Leave Trend</div>
+<canvas id="trendChart"></canvas>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+new Chart(document.getElementById('trendChart'), {
+  type: 'line',
+  data: {
+    labels: {{ trend_labels | tojson }},
+    datasets: [{
+      label: 'Leaves',
+      data: {{ trend_data | tojson }},
+      borderColor: '#ffffff',
+      backgroundColor: 'rgba(255,255,255,0.2)',
+      tension: 0.4,
+      pointBackgroundColor: '#ffffff',
+      pointBorderColor: '#ffffff',
+      borderWidth: 3,
+      pointRadius: 4
+    }]
+  },
+  options: {
+    plugins: {
+      legend: {
+        labels: {
+          color: '#ffffff' // legend text
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: '#ffffff' // x-axis text
+        },
+        grid: {
+          color: 'rgba(255,255,255,0.2)' // grid lines
+        }
+      },
+      y: {
+        ticks: {
+          color: '#ffffff' // y-axis text
+        },
+        grid: {
+          color: 'rgba(255,255,255,0.2)'
+        }
+      }
+    }
+  }
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block page_title %}
+LEAVE RECORDS
+{% endblock %}
+{% block content %}
+
+<style>
+body {
+  height: 100vh;
+
+  background: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
+    url('/static/images/DJI_0094.JPG');
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  overflow-x: hidden;
+}
+
+.glass {
+  background: rgba(12, 137, 254, 0.37);
+  backdrop-filter: blur(18px);
+  border-radius: 18px;
+  padding: 20px;
+  color: white;
+}
+
+.stat-card {
+  padding: 20px;
+  border-radius: 18px;
+  color: white;
+  background: rgba(72, 190, 249, 0.63);
+}
+
+.blue { border-left: 5px solid #00f2fe; }
+.green { border-left: 5px solid #43e97b; }
+.orange { border-left: 5px solid #ffd200; }
+.red { border-left: 5px solid #ff4b2b; }
+.table {
+  color: white;
+}
+
+</style>
+
+<div class="container-fluid mt-4">
+
+<!-- STATS -->
+<div class="row g-3 mb-4">
+
+<div class="col-md-3">
+<div class="stat-card blue">
+<div>Total</div>
+<h3>{{total}}</h3>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="stat-card orange">
+<div>Pending</div>
+<h3>{{pending}}</h3>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="stat-card green">
+<div>Approved</div>
+<h3>{{approved}}</h3>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="stat-card red">
+<div>Rejected</div>
+<h3>{{rejected}}</h3>
+</div>
+</div>
+
+</div>
+
+<!-- TABLE -->
+<div class="glass">
+
+<table class="table">
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Start</th>
+<th>End</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+
+{% for l in leaves %}
+<tr>
+<td>{{l[1]}}</td>
+<td>{{l[2]}}</td>
+<td>{{l[3]}}</td>
+<td>{{l[4]}}</td>
+<td>{{l[5]}}</td>
+<td>
+<a href="/leave/update/{{l[0]}}/Approved" class="btn btn-success btn-sm">Approve</a>
+<a href="/leave/update/{{l[0]}}/Rejected" class="btn btn-danger btn-sm">Reject</a>
+</td>
+</tr>
+{% endfor %}
+
+</table>
+
+</div>
+
+</div>
+
+{% endblock %}

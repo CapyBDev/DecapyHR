@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<style>
+/* ===== BACKGROUND MATCH LOGIN ===== */
+body {
+  background: 
+    linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), 
+    url('/static/images/DJI_0094.JPG');
+  background-size: cover;
+  background-position: center;
+}
+.glass {
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(18px);
+  border-radius: 18px;
+  padding: 20px;
+  color: white;
+}
+</style>
+
+<h3 class="text-white mb-4">Review Claims</h3>
+
+<div class="glass">
+
+<table class="table text-white">
+<tr>
+<th>Title</th>
+<th>Amount</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+
+{% for c in claims %}
+<tr>
+<td>{{ c.title }}</td>
+<td>RM {{ c.amount }}</td>
+<td>{{ c.status }}</td>
+<td>
+<a href="/approve/{{ c.id }}" class="btn btn-success btn-sm">Approve</a>
+<a href="/reject/{{ c.id }}" class="btn btn-danger btn-sm">Reject</a>
+</td>
+</tr>
+{% endfor %}
+
+</table>
+
+</div>
+
+{% endblock %}

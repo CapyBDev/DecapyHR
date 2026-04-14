@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block page_title %}
+Company Policy
+{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+body {
+  height: 100vh;
+
+  background: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
+    url('/static/images/DJI_0094.JPG');
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  overflow-x: hidden;
+}
+
+.glass {
+  background: rgba(12, 137, 254, 0.37);
+  backdrop-filter: blur(18px);
+  border-radius: 18px;
+  padding: 20px;
+  color: white;
+}
+.pdf-viewer {
+  width: 100%;
+  height: 600px;
+  border-radius: 12px;
+  border: none;
+  margin-top: 15px;
+  background: white;
+  display: none; /* hidden first */
+}
+</style>
+
+<div class="container-fluid mt-4 text-white">
+
+  <!-- UPLOAD -->
+  <div class="glass">
+    <h5 class="mb-3">Update Company Policy</h5>
+
+    <form method="POST" enctype="multipart/form-data">
+      <input type="file" name="policy_file" class="form-control mb-3" required>
+      <button class="btn btn-success">Upload / Update</button>
+    </form>
+  </div>
+
+  <!-- VIEW BUTTON -->
+  {% if policy %}
+  <div class="glass mt-4">
+
+    <h6>Company Policy</h6>
+
+    <button class="btn btn-light" onclick="togglePDF()">
+      <i class="fa-solid fa-file-shield"></i> View Policy
+    </button>
+
+    <!-- PDF VIEWER -->
+    <iframe 
+      id="pdfViewer"
+      src="{{ url_for('static', filename='uploads/' + policy[0]) }}#toolbar=0"
+      class="pdf-viewer">
+    </iframe>
+
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- JS TOGGLE -->
+<script>
+function togglePDF() {
+  const viewer = document.getElementById("pdfViewer");
+
+  if (viewer.style.display === "none") {
+    viewer.style.display = "block";
+  } else {
+    viewer.style.display = "none";
+  }
+}
+</script>
+
+{% endblock %}

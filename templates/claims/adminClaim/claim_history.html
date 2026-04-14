@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>Claim History</h3>
+
+<table class="table table-bordered mt-3 bg-white">
+<tr>
+<th>Title</th>
+<th>Amount</th>
+<th>Category</th>
+<th>Status</th>
+<th>Date</th>
+<th>Receipt</th>
+</tr>
+
+{% for c in claims %}
+<tr>
+<td>{{c[0]}}</td>
+<td>RM {{c[1]}}</td>
+<td>{{c[2]}}</td>
+<td>
+<span class="badge bg-{% if c[3]=='Approved' %}success{% elif c[3]=='Rejected' %}danger{% else %}warning{% endif %}">
+{{c[3]}}
+</span>
+</td>
+<td>
+{% if c[4] %}
+<a href="/static/uploads/{{c[4]}}" target="_blank" class="btn btn-sm btn-info">View</a>
+{% else %}
+-
+{% endif %}
+</td>
+</tr>
+{% endfor %}
+
+</table>
+
+{% endblock %}

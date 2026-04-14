@@ -1,0 +1,389 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<style>
+.summary-card {
+  border-radius: 16px;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  transition: 0.25s;
+}
+
+.summary-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+}
+
+.sc-entitlement {
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+}
+
+.sc-used {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+}
+
+.sc-balance {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.summary-card h6 {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.summary-card h3 {
+  font-weight: 700;
+}
+</style>
+
+
+<!-- ========================= -->
+<!-- 🟢 WELCOME / QUICK ACTION -->
+<!-- ========================= -->
+<div class="row g-3 mb-3">
+  <div class="col-12">
+    <div class="card glass-card">
+      <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+          <h4 class="mb-2">
+            <i class="bi bi-emoji-smile"></i>
+            Welcome, {{ session.get('full_name') }}!
+          </h4>
+          <p class="mb-1">Quick actions</p>
+
+          <a class="btn btn-primary me-2 mb-2" href="{{ url_for('apply_leave') }}">
+            <i class="bi bi-file-earmark-plus"></i> Apply Leave
+          </a>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= -->
+<!-- 📊 LEAVE SUMMARY -->
+<!-- ========================= -->
+<div class="row g-3 mb-4">
+
+  <div class="col-md-4">
+    <div class="card summary-card sc-entitlement text-center">
+      <div class="card-body">
+        <h6><i class="bi bi-calendar-check"></i> Total Entitlement</h6>
+        <h3>{{ entitlement }} days</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card summary-card sc-used text-center">
+      <div class="card-body">
+        <h6><i class="bi bi-calendar-minus"></i> Used Leave</h6>
+        <h3>{{ used_leave }} days</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card summary-card sc-balance text-center">
+      <div class="card-body">
+        <h6><i class="bi bi-calendar-plus"></i> Balance Leave</h6>
+        <h3>{{ balance_leave }} days</h3>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+<!-- ========================= -->
+<!-- 🩺 MC + MY LEAVES -->
+<!-- ========================= -->
+<div class="row g-3">
+
+  <!-- ========================= -->
+  <!-- 🩺 MEDICAL CERTIFICATE -->
+  <!-- ========================= -->
+  <div class="col-lg-8">
+    <div class="card glass-card h-100">
+      <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">
+            <i class="bi bi-file-earmark-medical text-danger"></i>
+            Medical Certificate
+          </h4>
+
+          <button class="btn btn-outline-danger btn-sm"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#uploadMCForm">
+            <i class="bi bi-upload"></i> Upload MC
+          </button>
+        </div>
+
+        <!-- Upload MC -->
+        <div class="collapse mb-3" id="uploadMCForm">
+          <form method="POST"
+                action="{{ url_for('user_upload_mc') }}"
+                enctype="multipart/form-data">
+
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">MC Number</label>
+                <input type="text" name="mc_number" class="form-control">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Start Date</label>
+                <input type="date" name="mc_start" class="form-control">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">End Date</label>
+                <input type="date" name="mc_end" class="form-control">
+              </div>
+              <div class="col-12">
+                <label class="form-label">MC File</label>
+                <input type="file" name="mc_file" class="form-control" required>
+              </div>
+            </div>
+
+            <div class="text-end mt-3">
+              <button class="btn btn-danger btn-sm">
+                <i class="bi bi-check-circle"></i> Submit MC
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- MC LIST -->
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>#</th>
+                <th>MC No.</th>
+                <th>Period</th>
+                <th>Uploaded</th>
+                <th>Document</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for mc in my_mc %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ mc.mc_number or '-' }}</td>
+                <td>{{ mc.start_date or '-' }} → {{ mc.end_date or '-' }}</td>
+                <td><small class="text-muted">{{ mc.created_at[:10] }}</small></td>
+                <td>
+                  {% if mc.pdf_path %}
+                  <a href="{{ url_for('static', filename='uploads/leave_docs/' + mc.pdf_path) }}"
+                     target="_blank"
+                     class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-file-earmark-pdf"></i> View
+                  </a>
+                  {% else %}-{% endif %}
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="5" class="text-center text-muted">
+                  No MC uploaded
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================= -->
+  <!-- 🟢 MY RECENT LEAVES -->
+  <!-- ========================= -->
+  <div class="col-lg-4">
+    <div class="card glass-card h-100">
+      <div class="card-body">
+        <h5 class="mb-3">
+          <i class="bi bi-list-check"></i>
+          My Recent Leaves
+        </h5>
+
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Period</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for l in my_leaves %}
+              <tr>
+                <td>{{ l.leave_type }}</td>
+                <td><small>{{ l.start_date }} → {{ l.end_date }}</small></td>
+                <td>
+                  <span class="badge 
+                    {% if l.status=='Approved' %}bg-success
+                    {% elif l.status=='Rejected' %}bg-danger
+                    {% else %}bg-warning text-dark{% endif %}">
+                    {{ l.status }}
+                  </span>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="3" class="text-muted text-center">No leave records</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ========================= -->
+<!-- 📜 LEAVE HISTORY -->
+<!-- ========================= -->
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card glass-card">
+      <div class="card-body">
+
+        <h5 class="mb-3">
+          <i class="bi bi-clock-history"></i>
+          Leave History
+        </h5>
+
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>#</th>
+                <th>Leave Type</th>
+                <th>Period</th>
+                <th>Date Applied</th>
+                <th>Status</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for l in my_leaves %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ l.leave_type }}</td>
+                <td>{{ l.start_date }} → {{ l.end_date }}</td>
+                <td class="text-muted">{{ l.created_at[:10] }}</td>
+                <td>
+                  <span class="badge
+                    {% if l.status == 'Approved' %}bg-success
+                    {% elif l.status == 'Rejected' %}bg-danger
+                    {% else %}bg-warning text-dark{% endif %}">
+                    {{ l.status }}
+                  </span>
+                </td>
+                <td>
+                  <a href="{{ url_for('user_leave_details', leave_id=l.id) }}"
+                     class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-eye"></i> View
+                  </a>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="6" class="text-center text-muted">
+                  No leave history found
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ========================= -->
+<!-- 🔔 ROLE BASED ACTIONS -->
+<!-- ========================= -->
+{% if my_pos == "CEO" %}
+
+<!-- ===== CEO DASHBOARD ===== -->
+<div class="card glass-card mt-4">
+  <div class="card-body">
+    <h5 class="mb-3">
+      <i class="bi bi-shield-check"></i>
+      CEO Pending Approvals
+    </h5>
+
+    {% if pending_actions %}
+      {% for l in pending_actions %}
+        <p>
+          <strong>{{ l.full_name }}</strong> — {{ l.leave_type }}
+          <span class="badge bg-warning ms-2">
+            Waiting for Approval
+          </span>
+        </p>
+
+        <a href="{{ url_for('leave_details', leave_id=l.id) }}"
+           class="btn btn-success btn-sm mb-3">
+          <i class="bi bi-eye"></i> Review & Approve
+        </a>
+        <hr>
+      {% endfor %}
+    {% else %}
+      <p class="text-muted">No leave requests assigned to CEO.</p>
+    {% endif %}
+  </div>
+</div>
+
+{% else %}
+
+{% if pending_actions %}
+<div class="card glass-card mt-4">
+  <div class="card-body">
+
+    <h5 class="mb-3">
+      <i class="bi bi-bell-fill"></i>
+      Pending Actions
+    </h5>
+
+    {% for l in pending_actions %}
+      <p>
+        <strong>{{ l.full_name }}</strong> — {{ l.leave_type }}
+
+        <span class="badge bg-warning ms-2">
+          {% if l.status == "Pending Recommender" %}
+            Waiting Status Recommender
+          {% elif l.status == "Pending Approval" %}
+            Waiting Status Approval
+          {% else %}
+            {{ l.status }}
+          {% endif %}
+        </span>
+      </p>
+
+      <a href="{{ url_for('leave_details', leave_id=l.id) }}"
+         class="btn btn-primary btn-sm mb-3">
+        <i class="bi bi-eye"></i> Review & Take Action
+      </a>
+      <hr>
+    {% endfor %}
+
+  </div>
+</div>
+{% endif %}
+
+{% endif %}
+
+
+{% endblock %}

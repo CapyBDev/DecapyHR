@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Individual Leave Report</title>
+
+<style>
+
+/* ===== FORCE A4 PORTRAIT & COLORS ===== */
+@page {
+  size: A4 portrait;
+  margin: 10mm;
+}
+
+* {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+body{
+  margin:0;
+  padding:0;
+  background:white;
+  font-family:Arial,Helvetica,sans-serif;
+}
+
+.page{
+  position:relative;
+  width:210mm;
+  height:297mm;
+  margin:0 auto;
+  background:white;
+  padding:10mm;
+  box-sizing:border-box;
+}
+
+/* WATERMARK */
+.watermark{
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:65%;
+  transform:translate(-50%,-50%);
+  opacity:0.05;
+  z-index:0;
+}
+.watermark img{width:100%;}
+
+.content{position:relative;z-index:1;}
+
+/* TITLES */
+.section-title{
+  background:#1f4fa3 !important;
+  color:white !important;
+  padding:6px;
+  text-align:center;
+  margin:6mm 0 4mm;
+  border-radius:6px;
+  font-size:12px;
+}
+
+/* TABLES */
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:11px;
+}
+th,td{
+  border:1px solid #2f5fff;
+  padding:4px;
+}
+th{
+  background:#eaf0ff !important;
+}
+
+/* SUMMARY */
+.summary-container{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+}
+.summary-box{
+  width:30%;
+  border:2px solid #2f5fff;
+  border-radius:10px;
+  padding:8px;
+  text-align:center;
+}
+.summary-used{border-color:#ff4b4b;}
+.summary-balance{border-color:#1bc95a;}
+
+/* DETAILS GRID */
+.details-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+  margin-top:6px;
+}
+
+/* CARD */
+.details-card{
+  border:1px solid #2f5fff;
+  border-radius:8px;
+  overflow:hidden;
+  background:#f9fbff !important;
+}
+.details-card.mc{
+  border-color:#ff4b4b;
+  background:#fff2f2 !important;
+}
+
+/* MONTH HEADER */
+.month-header{
+  background:#1f4fa3 !important;
+  color:white !important;
+  padding:4px;
+  text-align:center;
+  font-weight:bold;
+}
+.details-card.mc .month-header{
+  background:#ff4b4b !important;
+}
+
+.details-body{padding:5px;}
+
+.details-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:10px;
+}
+.details-table th,
+.details-table td{
+  border:1px solid #ccc;
+  padding:4px;
+}
+.details-table th{
+  background:#eef2ff !important;
+}
+.details-card.mc th{
+  background:#ffecec !important;
+}
+
+/* FOOTER FIXED AT BOTTOM */
+.footer{
+  position:absolute;
+  bottom:10mm;
+  left:0;
+  width:100%;
+  text-align:center;
+  font-size:10px;
+  font-style:italic;
+}
+
+/* PRINT MODE */
+@media print{
+  body{background:white;}
+  .no-print{display:none;}
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+<div class="watermark">
+<img src="{{ url_for('static', filename='logoJ.png') }}">
+</div>
+
+<div class="content">
+
+<!-- HEADER -->
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4mm;">
+  <img src="{{ url_for('static', filename='logo jetamaa.jpg') }}" style="height:55px;">
+  <div style="font-size:10px;text-align:right;">
+    <b>Printed Date:</b><br>{{ printed_date }}
+  </div>
+</div>
+
+<h2 style="text-align:center;margin:4px 0;">LEAVE FORM REPORT</h2>
+<div style="text-align:center;font-size:11px;margin-bottom:6mm;">
+INDIVIDUAL REPORT – {{ year }}
+</div>
+
+<!-- EMPLOYEE INFO -->
+<table>
+<tr>
+<th style="width:20%">Name</th>
+<td style="width:40%">{{ employee.name }}</td>
+<th style="width:20%">Position</th>
+<td>{{ employee.position }}</td>
+</tr>
+<tr>
+<th>Department</th>
+<td colspan="3">{{ department }}</td>
+</tr>
+</table>
+
+<!-- SUMMARY -->
+<div class="section-title">EMPLOYEE LEAVE SUMMARY</div>
+<div class="summary-container">
+  <div class="summary-box"><b>ENTITLED</b><div style="font-size:18px;">{{ summary.entitled }}</div></div>
+  <div class="summary-box summary-used"><b>USED</b><div style="font-size:18px;color:red;">{{ summary.used }}</div></div>
+  <div class="summary-box summary-balance"><b>BALANCE</b><div style="font-size:18px;color:green;">{{ summary.balance }}</div></div>
+</div>
+
+<!-- TOTAL LEAVE -->
+<div class="section-title">EMPLOYEE TOTAL LEAVE</div>
+<table>
+<tr>
+<th>Leave Type</th>
+{% for m in months %}<th>{{ m }}</th>{% endfor %}
+<th>Total</th>
+</tr>
+
+{% for lt in leave_types %}
+<tr>
+<td>{{ lt }}</td>
+{% set total=0 %}
+{% for m in months %}
+{% set val=monthly[m].get(lt,0) %}
+<td style="text-align:center">{{ val }}</td>
+{% set total=total+val %}
+{% endfor %}
+<td style="text-align:center"><b>{{ total }}</b></td>
+</tr>
+{% endfor %}
+</table>
+
+<!-- REPORT DETAILS -->
+<div class="section-title">REPORT DETAILS</div>
+<div class="details-grid">
+
+{% for m in months %}
+{% set ns = namespace(list=[]) %}
+{% for l in approved_leaves %}
+{% if l.start_date and (
+    l.start_date.strftime('%m') == month_map[m] 
+    or l.end_date.strftime('%m') == month_map[m]
+) %}
+{% set _=ns.list.append(l) %}
+{% endif %}
+{% endfor %}
+
+{% if ns.list %}
+<div class="details-card">
+<div class="month-header">{{ m }}</div>
+<div class="details-body">
+<table class="details-table">
+<tr><th>Leave Type</th><th>Period</th></tr>
+{% for l in ns.list %}
+<tr>
+<td>{{ l.leave_type }}</td>
+<td>{{ l.start_date }} → {{ l.end_date }} ({{ l.total_days }} day(s))</td>
+</tr>
+{% endfor %}
+</table>
+</div>
+</div>
+{% endif %}
+{% endfor %}
+</div>
+
+<!-- MC -->
+<div class="section-title">Medical Certificate (MC)</div>
+<div class="details-grid">
+
+{% for m in months %}
+{% set ns = namespace(list=[]) %}
+{% for mc in mc_records %}
+{% if mc.start_date and (
+    mc.start_date.strftime('%m') == month_map[m] 
+    or mc.end_date.strftime('%m') == month_map[m]
+) %}
+{% set _=ns.list.append(mc) %}
+{% endif %}
+{% endfor %}
+
+{% if ns.list %}
+<div class="details-card mc">
+<div class="month-header">{{ m }}</div>
+<div class="details-body">
+<table class="details-table">
+<tr><th>MC No.</th><th>Period</th></tr>
+{% for mc in ns.list %}
+<tr>
+<td>{{ mc.mc_number or mc.mc_no or '-' }}</td>
+<td>From {{ mc.start_date }} Until {{ mc.end_date }}</td>
+</tr>
+{% endfor %}
+</table>
+</div>
+</div>
+{% endif %}
+{% endfor %}
+</div>
+
+</div>
+
+<div class="footer">
+© Authorised by Jetama Sdn Bhd © {{ current_year }}
+</div>
+
+<div class="no-print" style="text-align:center;margin-top:10px;">
+<button onclick="history.back()">← Back</button>
+<button onclick="window.print()">⬇ Download</button>
+</div>
+
+</div>
+
+
+
+</body>
+</html>

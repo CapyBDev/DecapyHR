@@ -1,0 +1,306 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<style>
+.info-icon {
+  cursor: pointer;
+  position: relative;
+  color: #69ebed;
+}
+
+.info-bubble {
+  position: absolute;
+  top: -5px;
+  left: 20px;
+  background: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  width: 240px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  display: none;
+  z-index: 1000;
+}
+
+</style>
+
+<div class="row justify-content-center">
+  <div class="col-lg-10">
+    <div class="card glass-card">
+      <div class="card-body">
+        <h4 class="mb-3"><i class="bi bi-file-earmark-plus"></i> Apply for Leave</h4>
+
+        <!-- Remaining Leave -->
+        <div class="alert alert-info d-flex justify-content-between align-items-center">
+          <strong>Total Leave Remaining:</strong>
+          <span class="badge bg-primary fs-5">{{ remaining_leave }} Days</span>
+        </div>
+
+        <form method="post" action="{{ url_for('apply_leave') }}" enctype="multipart/form-data" class="row g-3">
+
+          <!-- From Applicant -->
+          <div class="col-md-6">
+            <label class="form-label">From The Applicant</label>
+            <input type="text" class="form-control" value="{{ full_name }}" readonly>
+          </div>
+
+          <!-- Date of Application -->
+          <div class="col-md-6">
+            <label class="form-label">Date of Application</label>
+            <input type="text" class="form-control" value="{{ current_date }}" readonly>
+          </div>
+
+          <!-- Recommended By -->
+          <div class="col-md-6">
+            <label class="form-label">Recommended By</label>
+
+            {% if status == "Pending Recommender" %}
+              <input type="text" class="form-control" value="{{ checker_name }}" readonly>
+            {% else %}
+              <input type="text" class="form-control" value="-- Not Required --" readonly>
+            {% endif %}
+
+            <input type="hidden" name="checker" value="{{ checker_name or '' }}">
+          </div>
+
+          <!-- Approved By -->
+          <div class="col-md-6">
+            <label class="form-label">Approved By</label>
+
+            {% if approver_name %}
+              <input type="text" class="form-control" value="{{ approver_name }}" readonly>
+            {% else %}
+              <input type="text" class="form-control" value="-- Assigned Automatically --" readonly>
+            {% endif %}
+
+            <input type="hidden" name="approver" value="{{ approver_name or '' }}">
+          </div>
+
+          <!-- Leave Applied From -->
+          <div class="col-md-6">
+            <label class="form-label">Leave Applied From</label>
+            <input type="date" class="form-control"
+                  name="start_date"
+                  id="start_date"
+                  required>
+          </div>
+
+          <!-- Leave Applied To -->
+          <div class="col-md-6">
+            <label class="form-label">Leave Applied To</label>
+            <input type="date" class="form-control"
+                  name="end_date"
+                  id="end_date"
+                  required>
+          </div>
+
+          <!-- Leave Categories -->
+          <div class="col-12 mt-3">
+            <h5>Leave Category</h5>
+          </div>
+
+          <div class="col-md-4">
+            <strong>Annual Leave</strong><br>
+            <input type="radio" name="leave_type" value="Normal" required> Normal<br>
+            <input type="radio" name="leave_type" value="Emergency"> Emergency<br>
+          </div>
+
+          <div class="col-md-4">
+            <strong>Compassionate Leave</strong><br>
+            <input type="radio" name="leave_type" value="Death of Immediate Family Members"> Death of Immediate Family Members<br>
+            <input type="radio" name="leave_type" value="Disaster (Flood/Fire)"> Disaster (Flood/Fire)<br>
+          </div>
+
+          <div class="col-md-4">
+            <strong>Others</strong><br>
+            <input type="radio" name="leave_type" value="Leave-in-Lieu"> Leave-in-Lieu<br>
+            <input type="radio" name="leave_type" value="Unpaid Leave"> Unpaid Leave<br>
+            <input type="radio" name="leave_type" value="Maternity/Paternity"> Maternity / Paternity<br>
+            <input type="radio" name="leave_type" value="Special Paid Leave"> Special Paid Leave<br>
+          </div>
+
+          <!-- Reason -->
+          <div class="col-12 mt-2">
+            <label class="form-label">
+              Specify Reason
+              <span class="info-icon" onclick="showTip(this)">
+                <i class="bi bi-info-circle"></i>
+                <span class="info-bubble">
+                  Please specify your leave reason, or if no reason type "No reason".
+                </span>
+              </span>
+            </label>
+
+            <textarea class="form-control" name="reason" id="reason" rows="2" required></textarea>
+          </div>
+
+          <!-- Contact Address -->
+          <div class="col-md-9">
+            <label class="form-label">
+              Contact Address During Leave
+              <span class="info-icon" onclick="showTip(this)">
+                <i class="bi bi-info-circle"></i>
+                <span class="info-bubble">
+                  Write your contact address during leave.
+                </span>
+              </span>
+            </label>
+
+            <input type="text" class="form-control" name="contact_address" id="contact_address" required>
+          </div>
+
+          <!-- Phone -->
+          <div class="col-md-3">
+            <label class="form-label">
+              Phone Number
+              <span class="info-icon" onclick="showTip(this)">
+                <i class="bi bi-info-circle"></i>
+                <span class="info-bubble">
+                  Please fill in numbers only, eg. 0128764321.
+                </span>
+              </span>
+            </label>
+
+            <input type="text" class="form-control" name="contact_phone" id="contact_phone" required
+                  oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+
+          </div>
+
+          <!-- Supporting Document -->
+          <div class="col-12">
+            <label class="form-label">
+              Supporting Document (Optional)
+              <span class="info-icon" onclick="showTip(this)">
+                <i class="bi bi-info-circle"></i>
+                <span class="info-bubble">
+                  Upload your supporting reason leave in any types of file, for example Letter.pdf / Letter.jpg.
+                </span>
+              </span>
+            </label>
+
+            <input type="file" class="form-control" name="support_doc">
+          </div>
+
+          <!-- Buttons -->
+          <div class="col-12 d-flex justify-content-end mt-3">
+            <a href="{{ url_for('user_dashboard') }}" class="btn btn-outline-light">Cancel</a>
+            <button class="btn btn-primary">Submit</button>
+          </div>
+
+          <div id="infoToast" class="info-toast"></div>
+
+
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================= DATE CONTROL =================
+document.addEventListener("DOMContentLoaded", function(){
+
+  const startDate = document.getElementById("start_date");
+  const endDate   = document.getElementById("end_date");
+
+  const today = new Date().toISOString().split("T")[0];
+
+  // Prevent selecting past dates
+  startDate.min = today;
+  endDate.min = today;
+
+  startDate.addEventListener("change", function(){
+
+    // Set minimum end date equal to selected start date
+    endDate.min = this.value;
+
+    // If already selected earlier end date → reset it
+    if(endDate.value && endDate.value < this.value){
+      endDate.value = this.value;
+    }
+  });
+
+});
+
+let toastTimer;
+
+function showInfo(msg){
+  const toast = document.getElementById("infoToast");
+  toast.innerText = msg;
+  toast.style.display = "block";
+
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{
+    toast.style.display = "none";
+  },60000); // 1 minute
+}
+
+// Form validation
+document.querySelector("form").addEventListener("submit", function(e){
+
+  const reason = document.getElementById("reason").value.trim();
+  const address = document.getElementById("contact_address").value.trim();
+  const start = document.getElementById("start_date").value;
+  const end   = document.getElementById("end_date").value;
+  const phone = document.getElementById("contact_phone").value.trim();
+
+  if(reason === ""){
+    e.preventDefault();
+    showInfo('Please specify your leave reason, or if no reason type "No reason"');
+    return;
+  }
+
+  if(address === ""){
+    e.preventDefault();
+    showInfo("Write your contact address during leave");
+    return;
+  }
+  
+  if(start === "" || end === ""){
+    e.preventDefault();
+    showInfo("Please select leave dates");
+    return;
+  }
+
+  if(end < start){
+    e.preventDefault();
+    showInfo("End date cannot be earlier than start date");
+    return;
+  }
+
+  if(phone === ""){
+    e.preventDefault();
+    showInfo("Please fill in phone number");
+    return;
+  }
+
+  if(!/^[0-9]+$/.test(phone)){
+    e.preventDefault();
+    showInfo("Please fill in numbers only, eg. 0128764321");
+    return;
+  }
+});
+</script>
+<script>
+function showTip(el){
+  const bubble = el.querySelector(".info-bubble");
+
+  // hide other open tips
+  document.querySelectorAll(".info-bubble").forEach(b=>{
+    if(b !== bubble) b.style.display = "none";
+  });
+
+  bubble.style.display = "block";
+
+  setTimeout(()=>{
+    bubble.style.display = "none";
+  },60000); // 1 minute
+}
+</script>
+
+
+
+{% endblock %}
