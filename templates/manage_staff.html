@@ -2,11 +2,12 @@
 {% block content %}
 
 <style>
+/* ===== BODY BACKGROUND ===== */
 body {
   height: 100vh;
 
   background: 
-    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
+    linear-gradient(rgba(0, 0, 0, 0.5), rgba(41, 87, 157, 0.85)), 
     url('/static/images/DJI_0094.JPG');
 
   background-size: cover;
@@ -16,83 +17,143 @@ body {
   overflow-x: hidden;
 }
 
-.glass {
-  background: rgba(131, 199, 255, 0.79);
-  backdrop-filter: blur(18px);
+
+/* ===== MAIN CARD (WHITE GLASS CLEAN) ===== */
+.card {
+  background: rgba(255, 255, 255, 0.9);   /* 🔥 CLEAN WHITE */
+  backdrop-filter: blur(12px);
   border-radius: 18px;
-  padding: 20px;
-  color: white;
+  border: none;
+
+  max-width: 1100px;
+  margin: auto;
 }
+
 .card-body {
   padding: 30px;
 }
-.card {
-  background: rgba(151, 163, 255, 0.41);  /* 🔥 white glass */
-  backdrop-filter: blur(18px);
-  border-radius: 18px;
-  padding: 20px;
-  border: none;
 
-  max-width: 1100px;   /* 🔥 IMPORTANT */
-  margin: auto; 
+
+/* ===== TABLE WRAPPER (CENTER FIX) ===== */
+.table-wrapper {
+  width: 100%;
+  max-width: 900px;   /* 🔥 CONTROL TABLE SIZE */
 }
-.user-row { cursor: pointer; }
 
+
+/* ===== TABLE STYLE ===== */
+#userTable {
+  background: white;   /* 🔥 IMPORTANT (NO TRANSPARENCY) */
+  border-radius: 12px;
+  overflow: hidden;
+
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+#userTable th {
+  background: #f5f7fa;
+  font-weight: 600;
+}
+
+#userTable th, 
+#userTable td {
+  padding: 12px 16px;
+  vertical-align: middle;
+}
+
+
+/* ===== TABLE ROW HOVER ===== */
+.user-row {
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.user-row:hover {
+  background: rgba(0, 183, 255, 0.08);
+}
+
+
+/* ===== DETAILS PANEL (RIGHT SLIDE) ===== */
 .details-panel {
-  position: fixed;              /* 🔥 FLOAT */
+  position: fixed;
   top: 90px;
-  right: -420px;                /* hidden outside */
+  right: -420px; /* hidden */
+
   width: 400px;
   height: calc(100% - 120px);
 
-  background: linear-gradient(135deg, #b3e6ff, #a2ffe8);
+  background: linear-gradient(135deg, #d9f7ff, #c2fff0); /* softer */
+
   border-left: 4px solid #00c6a9;
   border-radius: 12px 0 0 12px;
 
   padding: 25px;
+
   z-index: 999;
 
-  box-shadow: -10px 0 25px rgba(0,0,0,0.2);
+  box-shadow: -10px 0 25px rgba(0,0,0,0.25);
 
   transition: all 0.4s ease;
 }
 
-/* SHOW */
+/* SHOW PANEL */
 .details-panel.active {
   right: 0;
 }
 
-.details-panel.hidden {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateX(40px);
-}
 
+/* ===== OVERLAY (NO BLUR) ===== */
 #overlay {
   position: fixed;
-  top:0; left:0;
-  width:100%; height:100%;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
 
-  background: rgba(0,0,0,0.5);   /* dark only */
-  display:none;
-  z-index:998;
+  background: rgba(0,0,0,0.35);  /* 🔥 DIM ONLY */
+  display: none;
+
+  z-index: 998;
 }
 
-#overlay.active { display:block; }
-.table-wrapper {
-  width: 100%;
-  max-width: 900px;   /* 🔥 CONTROL SIZE HERE */
+#overlay.active {
+  display: block;
+  cursor: pointer;
 }
 
-#userTable {
-  background: rgba(255,255,255,0.9);
-  border-radius: 10px;
-  overflow: hidden;
+
+/* ===== INPUT STYLE (INSIDE PANEL) ===== */
+.details-panel input.form-control,
+.details-panel select.form-select {
+  background: #ffffff;
+  border: 1px solid #b5f8f3;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
 }
 
-/* nicer spacing */
-#userTable th, #userTable td {
-  padding: 12px 16px;
+.details-panel input:focus,
+.details-panel select:focus {
+  border-color: #00b7ff;
+  box-shadow: 0 0 0 3px rgba(31, 219, 198, 0.35);
+  outline: none;
+}
+
+
+/* ===== BUTTON IMPROVE ===== */
+.btn-success {
+  background-color: #1e8f5a;
+  border: none;
+}
+
+.btn-warning {
+  background-color: #f0ad4e;
+  border: none;
+}
+
+.btn-primary {
+  background-color: #2c7be5;
+  border: none;
 }
 </style>
 
