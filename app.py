@@ -11,10 +11,15 @@ UPLOAD_FOLDER = "static/uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 def get_db():
-    return psycopg2.connect(
-        os.environ.get("DATABASE_URL"),
-        sslmode='require'
-    )
+    db_url = os.environ.get("DATABASE_URL")
+
+    if not db_url:
+        raise Exception("DATABASE_URL not set")
+
+    if "localhost" in db_url:
+        return psycopg2.connect(db_url, sslmode='disable')
+    else:
+        return psycopg2.connect(db_url, sslmode='require')
     
 def init_db():
     conn = get_db()
