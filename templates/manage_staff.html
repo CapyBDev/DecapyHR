@@ -23,153 +23,33 @@ body {
   padding: 20px;
   color: white;
 }
-  .user-row { cursor: pointer; }
-  .details-panel {
-    background: linear-gradient(135deg, #b3e6ff, #a2ffe8);
-    border-left: 3px solid #54ffc9;
-    backdrop-filter: blur(10px);
-    min-height: 600px;
-    padding: 25px;
-    border-radius: 12px;
-    transition: all .3s ease;
-    color: #083444;
-  }
+.user-row { cursor: pointer; }
 
-  .details-panel.hidden {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateX(40px);
-  }
-
-  .details-panel input.form-control,
-  .details-panel select.form-select {
-    background: #ffffff;
-    border: 1px solid #b5f8f3;
-    border-radius: 6px;
-    padding: 8px 10px;
-    font-size: 14px;
-    color: #144652;
-  }
-  .details-panel label {
-  font-weight: 600;
-  color: #083444;
-  font-size: 14px;
-}
-
-  .details-panel input:focus,
-  .details-panel select:focus {
-    border-color: #00b7ff;
-    box-shadow: 0 0 0 3px rgba(31, 219, 198, 0.35);
-    outline: none;
-  }
-
-  .details-panel h5 {
-    font-weight: 700;
-    color: #083444;
-  }
-
-  .details-panel hr {
-    border-color: rgba(8, 52, 68, 0.25);
-    }
-    .details-panel .btn-success {
-    background-color: #34c968;
-    border-color: #34c968;
-  }
-
-  .details-panel .btn-outline-danger {
-    border-color: #ff6b6b;
-    color: #ff6b6b;
-  }
-
-  .details-panel .btn-outline-danger:hover {
-    background-color: #ff6b6b;
-    color: #fff;
-  }
-  #overlay.active { display: block; }
-  .search-bar input, .search-bar select { min-width: 180px; }
-</style>
-
-<style>
-/* 🎨 MODAL BODY GRADIENT PANEL */
-#addEmployeeModal .modal-body {
+.details-panel {
   background: linear-gradient(135deg, #b3e6ff, #a2ffe8);
-  border-top: 3px solid #54ffc9;
+  border-left: 3px solid #54ffc9;
+  min-height: 600px;
   padding: 25px;
+  border-radius: 12px;
+  transition: all .3s ease;
 }
 
-/* 👤 LEFT PROFILE PANEL (Soft Aqua) */
-#addEmployeeModal .col-md-3 {
-  background: linear-gradient(160deg, #9ce4ff, #8dfde5);
-  border: 1px solid #3fb2ff;
-  border-radius: 6px;
-  padding: 20px 10px;
+.details-panel.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(40px);
 }
 
-/* 📋 FORM BLOCK (Blue-Green Smooth) */
-#addEmployeeModal .col-md-9 {
-  background: linear-gradient(180deg, #7ed8ff, #76ffea);
-  border: 1px solid #77f1ff;
-  border-radius: 6px;
-  padding: 15px;
+#overlay {
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.3);
+  display:none;
+  z-index:10;
 }
 
-/* ✏ FORM INPUT / SELECT STYLE */
-#addEmployeeModal input.form-control,
-#addEmployeeModal select.form-select {
-  background: #ffffff;
-  border: 1px solid #b5f8f3;
-  border-radius: 5px;
-  padding: 7px 10px;
-  font-size: 14px;
-  color: #144652;
-}
-
-#addEmployeeModal input:focus,
-#addEmployeeModal select:focus {
-  border-color: #00b7ff;
-  box-shadow: 0 0 0 3px rgba(31, 219, 198, 0.4);
-  outline: none;
-}
-
-/* 🏷 LABEL STYLING */
-#addEmployeeModal label {
-  font-weight: 600;
-  color: #083444;
-  font-size: 14px;
-}
-
-/* 💾 BUTTON SAVE (Green ocean) */
-#addEmployeeModal .modal-footer .btn-success {
-  background-color: #34c968;
-  border-color: #34c968;
-}
-
-/* BUTTON CANCEL (Soft aqua) */
-#addEmployeeModal .modal-footer .btn-light {
-  background-color: #b2fff5;
-  border-color: #7ce7da;
-}
-
-#addEmployeeModal .modal-footer .btn-light:hover {
-  background-color: #8af7e6;
-}
-
-/* 📸 Disabled Upload Icon Panel */
-#addEmployeeModal .btn-outline-secondary {
-  border-color: #67e7d5;
-  color: #0a8091;
-}
-
-#addEmployeeModal .btn-outline-secondary:hover {
-  background: #89f4e6;
-  color: #ffffff;
-}
-
-/* 👤 USER ICON COLOR */
-#addEmployeeModal .bi-person {
-  color: #146ab3;
-  opacity: 0.9;
-}
+#overlay.active { display:block; }
 </style>
 
 <div id="overlay"></div>
@@ -177,24 +57,47 @@ body {
 <div class="card">
   <div class="card-body">
 
-    <h4>Manage Users</h4>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4>Manage Staff</h4>
 
-    <!-- BUTTONS -->
+      <div class="d-flex gap-2">
+        <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#manageDepartmentModal">
+          Manage Departments
+        </button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+          + Add Employee
+        </button>
+      </div>
+    </div>
+
+    <!-- FILTER -->
     <div class="d-flex gap-2 mb-3">
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
-        + Add Employee
-      </button>
+      <input type="text" id="searchName" class="form-control" placeholder="Search name">
 
-      <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#manageDepartmentModal">
-        Manage Departments
-      </button>
+      <select id="filterDept" class="form-select">
+        <option value="">All Department</option>
+        {% for d in departments %}
+          <option value="{{ d.name }}">{{ d.name }}</option>
+        {% endfor %}
+      </select>
+
+      <select id="filterAvail" class="form-select">
+        <option value="">All</option>
+        <option value="Available">Available</option>
+        <option value="Out">Out</option>
+        <option value="WFH">WFH</option>
+        <option value="MC">MC</option>
+      </select>
+
+      <button id="applyFilter" class="btn btn-primary">Filter</button>
     </div>
 
     <div class="row">
 
       <!-- TABLE -->
       <div class="col-8">
-        <table class="table table-hover">
+        <table id="userTable" class="table table-hover">
           <thead>
             <tr>
               <th>Name</th>
@@ -206,16 +109,28 @@ body {
 
           <tbody>
             {% for u in users %}
+            {% set avail = u.availability or 'Available' %}
             <tr class="user-row"
                 data-name="{{ u.full_name }}"
-                data-dept="{{ u.department_name or '' }}"
-                data-avail="{{ u.availability or 'Available' }}"
+                data-dept="{{ u.department_name }}"
+                data-avail="{{ avail }}"
                 onclick='showDetails({{ u|tojson }})'>
 
               <td>{{ u.full_name }}</td>
               <td>{{ u.department_name or "-" }}</td>
               <td>{{ u.position or "-" }}</td>
-              <td>{{ u.availability or "Available" }}</td>
+
+              <td>
+                <span class="badge
+                {% if avail == 'Available' %} bg-success
+                {% elif avail == 'Out' %} bg-primary
+                {% elif avail == 'MC' %} bg-warning text-dark
+                {% elif avail == 'WFH' %} bg-info text-dark
+                {% else %} bg-secondary
+                {% endif %}">
+                  {{ avail }}
+                </span>
+              </td>
 
             </tr>
             {% endfor %}
@@ -226,16 +141,26 @@ body {
       <!-- DETAILS PANEL -->
       <div id="detailsPanel" class="col-4 details-panel hidden">
 
-        <form id="updateUserForm" method="post">
+        <form id="updateUserForm">
 
           <input type="hidden" id="empId" name="id">
 
-          <input type="text" id="empName" name="full_name" placeholder="Name" class="form-control mb-2">
-          <input type="email" id="empEmail" name="email" placeholder="Email" class="form-control mb-2">
-          <input type="text" id="empPhone" name="phone" placeholder="Phone" class="form-control mb-2">
-          <input type="text" id="empAddress" name="address" placeholder="Address" class="form-control mb-2">
-          <input type="text" id="empPosition" name="position" placeholder="Position" class="form-control mb-2">
+          <label>Name</label>
+          <input type="text" id="empName" name="full_name" class="form-control mb-2">
 
+          <label>Email</label>
+          <input type="email" id="empEmail" name="email" class="form-control mb-2">
+
+          <label>Phone</label>
+          <input type="text" id="empPhone" name="phone" class="form-control mb-2">
+
+          <label>Address</label>
+          <input type="text" id="empAddress" name="address" class="form-control mb-2">
+
+          <label>Position</label>
+          <input type="text" id="empPosition" name="position" class="form-control mb-2">
+
+          <label>Department</label>
           <select id="empDept" name="dept_id" class="form-select mb-2">
             <option value="">Select Department</option>
             {% for d in departments %}
@@ -243,8 +168,10 @@ body {
             {% endfor %}
           </select>
 
+          <label>Entitlement</label>
           <input type="number" id="empEntitlement" name="entitlement" class="form-control mb-2">
 
+          <label>Availability</label>
           <select id="empAvailability" name="availability" class="form-select mb-2">
             <option value="Available">Available</option>
             <option value="Out">Out</option>
@@ -252,11 +179,21 @@ body {
             <option value="MC">MC</option>
           </select>
 
-          <button class="btn btn-success w-100">Save</button>
+          <button class="btn btn-success w-100 mt-2">Save</button>
+
+          <button type="button" class="btn btn-warning w-100 mt-2" onclick="toggleResetLogin()">
+            Reset Login
+          </button>
+
+          <div id="resetLoginBox" style="display:none;" class="mt-2">
+            <input type="text" id="newUsername" class="form-control mb-2" placeholder="New Username">
+            <input type="password" id="newPassword" class="form-control mb-2" placeholder="New Password">
+            <button type="button" class="btn btn-primary w-100" onclick="submitNewLogin()">Update Login</button>
+          </div>
 
         </form>
 
-        <form id="deleteUserForm" method="post">
+        <form id="deleteUserForm">
           <button class="btn btn-danger w-100 mt-2">Delete</button>
         </form>
 
@@ -266,58 +203,81 @@ body {
   </div>
 </div>
 
-{% include "components/modals/add_employee.html" %}
-{% include "components/modals/manage_department.html" %}
-
 <script>
-function showDetails(user){
+// FILTER
+document.getElementById("applyFilter").onclick = () => {
+  let name = searchName.value.toLowerCase();
+  let dept = filterDept.value.toLowerCase();
+  let avail = filterAvail.value.toLowerCase();
 
-  const panel = document.getElementById("detailsPanel");
-  const overlay = document.getElementById("overlay");
-
-  // SHOW PANEL
-  panel.classList.remove("hidden");
-  overlay.classList.add("active");
-
-  document.getElementById("empId").value = user.id;
-  document.getElementById("empName").value = user.full_name || "";
-  document.getElementById("empEmail").value = user.email || "";
-  document.getElementById("empPhone").value = user.phone || "";
-  document.getElementById("empAddress").value = user.address || "";
-  document.getElementById("empPosition").value = user.position || "";
-  document.getElementById("empDept").value = user.dept_id || "";
-  document.getElementById("empEntitlement").value = user.entitlement || 0;
-
-  document.getElementById("empAvailability").value =
-    user.availability || "Available";
-
-  document.getElementById("deleteUserForm").action =
-    `/admin/users/delete/${user.id}`;
-}
-
-/* CLICK OUTSIDE → CLOSE PANEL */
-document.getElementById("overlay").onclick = function(){
-  document.getElementById("detailsPanel").classList.add("hidden");
-  this.classList.remove("active");
+  document.querySelectorAll("#userTable tbody tr").forEach(row => {
+    row.style.display =
+      row.dataset.name.toLowerCase().includes(name) &&
+      (dept === "" || row.dataset.dept.toLowerCase() === dept) &&
+      (avail === "" || row.dataset.avail.toLowerCase() === avail)
+      ? "" : "none";
+  });
 };
 
-document.getElementById("updateUserForm").onsubmit = function(e){
+// SHOW DETAILS
+function showDetails(user){
+  detailsPanel.classList.remove("hidden");
+  overlay.classList.add("active");
+
+  empId.value = user.id;
+  empName.value = user.full_name || "";
+  empEmail.value = user.email || "";
+  empPhone.value = user.phone || "";
+  empAddress.value = user.address || "";
+  empPosition.value = user.position || "";
+  empDept.value = user.dept_id || ""; // FIXED
+  empEntitlement.value = user.entitlement || 0;
+  empAvailability.value = user.availability || "Available";
+
+  deleteUserForm.action = `/admin/users/delete/${user.id}`;
+}
+
+// CLOSE PANEL
+overlay.onclick = () => {
+  detailsPanel.classList.add("hidden");
+  overlay.classList.remove("active");
+};
+
+// UPDATE
+updateUserForm.onsubmit = e => {
   e.preventDefault();
 
-  fetch(`/admin/users/update/${document.getElementById("empId").value}`, {
+  fetch(`/admin/users/update/${empId.value}`, {
     method: "POST",
-    body: new FormData(this)
+    body: new FormData(updateUserForm)
   }).then(()=>location.reload());
 };
 
-document.getElementById("deleteUserForm").onsubmit = function(e){
+// DELETE
+deleteUserForm.onsubmit = function(e){
   e.preventDefault();
-
   if(confirm("Delete user?")){
     fetch(this.action, {method:"POST"})
     .then(()=>location.reload());
   }
 };
+
+// RESET LOGIN
+function toggleResetLogin(){
+  const box = document.getElementById("resetLoginBox");
+  box.style.display = box.style.display === "none" ? "block" : "none";
+}
+
+function submitNewLogin(){
+  fetch(`/admin/users/reset_login/${empId.value}`, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      username: newUsername.value,
+      password: newPassword.value
+    })
+  }).then(()=>alert("Login updated"));
+}
 </script>
 
 {% endblock %}
