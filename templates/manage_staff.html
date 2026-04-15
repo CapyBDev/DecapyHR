@@ -2,29 +2,23 @@
 {% block content %}
 
 <style>
-/* ===== BODY BACKGROUND ===== */
 body {
   height: 100vh;
-
   background: 
     linear-gradient(rgba(0, 0, 0, 0.5), rgba(41, 87, 157, 0.85)), 
     url('/static/images/DJI_0094.JPG');
-
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-
   overflow-x: hidden;
 }
 
-
-/* ===== MAIN CARD (WHITE GLASS CLEAN) ===== */
+/* ===== CARD ===== */
 .card {
-  background: rgba(255, 255, 255, 0.9);   /* 🔥 CLEAN WHITE */
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(12px);
   border-radius: 18px;
   border: none;
-
   max-width: 1100px;
   margin: auto;
 }
@@ -33,127 +27,80 @@ body {
   padding: 30px;
 }
 
-
-/* ===== TABLE WRAPPER (CENTER FIX) ===== */
+/* ===== TABLE ===== */
 .table-wrapper {
   width: 100%;
-  max-width: 900px;   /* 🔥 CONTROL TABLE SIZE */
+  max-width: 900px;
 }
 
-
-/* ===== TABLE STYLE ===== */
 #userTable {
-  background: white;   /* 🔥 IMPORTANT (NO TRANSPARENCY) */
+  background: white;
   border-radius: 12px;
   overflow: hidden;
-
   box-shadow: 0 8px 20px rgba(0,0,0,0.1);
 }
 
 #userTable th {
   background: #f5f7fa;
-  font-weight: 600;
 }
 
-#userTable th, 
-#userTable td {
+#userTable th, #userTable td {
   padding: 12px 16px;
-  vertical-align: middle;
 }
 
-
-/* ===== TABLE ROW HOVER ===== */
 .user-row {
   cursor: pointer;
-  transition: 0.2s;
 }
 
 .user-row:hover {
   background: rgba(0, 183, 255, 0.08);
 }
 
-
-/* ===== DETAILS PANEL (RIGHT SLIDE) ===== */
+/* ===== PANEL ===== */
 .details-panel {
   position: fixed;
-  top: 90px;
-  right: -420px; /* hidden */
+  top: 80px;
+  right: -420px;
 
-  width: 400px;
-  height: calc(100% - 120px);
+  width: 360px;
+  max-width: 90%;
+  height: calc(100% - 100px);
 
-  background: linear-gradient(135deg, #d9f7ff, #c2fff0); /* softer */
-
+  background: linear-gradient(135deg, #d9f7ff, #c2fff0);
   border-left: 4px solid #00c6a9;
   border-radius: 12px 0 0 12px;
 
-  padding: 25px;
-
-  z-index: 999;
+  padding: 20px;
+  z-index: 1050;
 
   box-shadow: -10px 0 25px rgba(0,0,0,0.25);
-
   transition: all 0.4s ease;
 }
 
-/* SHOW PANEL */
 .details-panel.active {
   right: 0;
 }
 
-
-/* ===== OVERLAY (NO BLUR) ===== */
+/* ===== OVERLAY ===== */
 #overlay {
   position: fixed;
   top:0;
   left:0;
   width:100%;
   height:100%;
-
-  background: rgba(0,0,0,0.35);  /* 🔥 DIM ONLY */
+  background: rgba(0,0,0,0.35);
   display: none;
-
-  z-index: 998;
+  z-index: 1040;
 }
 
 #overlay.active {
   display: block;
-  cursor: pointer;
 }
 
-
-/* ===== INPUT STYLE (INSIDE PANEL) ===== */
-.details-panel input.form-control,
-.details-panel select.form-select {
-  background: #ffffff;
-  border: 1px solid #b5f8f3;
-  border-radius: 6px;
-  padding: 8px 10px;
-  font-size: 14px;
-}
-
-.details-panel input:focus,
-.details-panel select:focus {
-  border-color: #00b7ff;
-  box-shadow: 0 0 0 3px rgba(31, 219, 198, 0.35);
-  outline: none;
-}
-
-
-/* ===== BUTTON IMPROVE ===== */
-.btn-success {
-  background-color: #1e8f5a;
-  border: none;
-}
-
-.btn-warning {
-  background-color: #f0ad4e;
-  border: none;
-}
-
-.btn-primary {
-  background-color: #2c7be5;
-  border: none;
+/* ===== INPUT ===== */
+.details-panel input,
+.details-panel select {
+  margin-bottom: 10px;
 }
 </style>
 
@@ -163,18 +110,17 @@ body {
   <div class="card-body">
 
     <!-- HEADER -->
-      <div class="d-flex gap-2">
-        <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#manageDepartmentModal">
-          Manage Departments
-        </button>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
-          + Add Employee
-        </button>
-      </div>
+    <div class="d-flex gap-2 mb-3">
+      <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#manageDepartmentModal">
+        Manage Departments
+      </button>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+        + Add Employee
+      </button>
     </div>
 
     <!-- FILTER -->
-    <div class="d-flex gap-2 mb-3">
+    <div class="d-flex gap-2 mb-4">
       <input type="text" id="searchName" class="form-control" placeholder="Search name">
 
       <select id="filterDept" class="form-select">
@@ -195,9 +141,10 @@ body {
       <button id="applyFilter" class="btn btn-primary">Filter</button>
     </div>
 
-      <!-- TABLE -->
+    <!-- TABLE -->
     <div class="d-flex justify-content-center">
       <div class="table-wrapper">
+
         <table id="userTable" class="table table-hover">
           <thead>
             <tr>
@@ -237,73 +184,46 @@ body {
             {% endfor %}
           </tbody>
         </table>
-      </div>
-
-      <!-- DETAILS PANEL -->
-      <div id="detailsPanel" class="details-panel">
-
-        <form id="updateUserForm">
-
-          <input type="hidden" id="empId" name="id">
-
-          <label>Name</label>
-          <input type="text" id="empName" name="full_name" class="form-control mb-2">
-
-          <label>Email</label>
-          <input type="email" id="empEmail" name="email" class="form-control mb-2">
-
-          <label>Phone</label>
-          <input type="text" id="empPhone" name="phone" class="form-control mb-2">
-
-          <label>Address</label>
-          <input type="text" id="empAddress" name="address" class="form-control mb-2">
-
-          <label>Position</label>
-          <input type="text" id="empPosition" name="position" class="form-control mb-2">
-
-          <label>Department</label>
-          <select id="empDept" name="dept_id" class="form-select mb-2">
-            <option value="">Select Department</option>
-            {% for d in departments %}
-              <option value="{{ d.id }}">{{ d.name }}</option>
-            {% endfor %}
-          </select>
-
-          <label>Entitlement</label>
-          <input type="number" id="empEntitlement" name="entitlement" class="form-control mb-2">
-
-          <label>Availability</label>
-          <select id="empAvailability" name="availability" class="form-select mb-2">
-            <option value="Available">Available</option>
-            <option value="Out">Out</option>
-            <option value="WFH">WFH</option>
-            <option value="MC">MC</option>
-          </select>
-
-          <button class="btn btn-success w-100 mt-2">Save</button>
-
-          <button type="button" class="btn btn-warning w-100 mt-2" onclick="toggleResetLogin()">
-            Reset Login
-          </button>
-
-          <div id="resetLoginBox" style="display:none;" class="mt-2">
-            <input type="text" id="newUsername" class="form-control mb-2" placeholder="New Username">
-            <input type="password" id="newPassword" class="form-control mb-2" placeholder="New Password">
-            <button type="button" class="btn btn-primary w-100" onclick="submitNewLogin()">Update Login</button>
-          </div>
-
-        </form>
-
-        <form id="deleteUserForm">
-          <button class="btn btn-danger w-100 mt-2">Delete</button>
-        </form>
 
       </div>
-
     </div>
+
   </div>
 </div>
 
+<!-- PANEL -->
+<div id="detailsPanel" class="details-panel">
+
+  <form id="updateUserForm">
+    <input type="hidden" id="empId">
+
+    <input type="text" id="empName" class="form-control" placeholder="Name">
+    <input type="email" id="empEmail" class="form-control" placeholder="Email">
+    <input type="text" id="empPhone" class="form-control" placeholder="Phone">
+    <input type="text" id="empAddress" class="form-control" placeholder="Address">
+    <input type="text" id="empPosition" class="form-control" placeholder="Position">
+
+    <select id="empDept" class="form-select">
+      {% for d in departments %}
+        <option value="{{ d.id }}">{{ d.name }}</option>
+      {% endfor %}
+    </select>
+
+    <input type="number" id="empEntitlement" class="form-control">
+
+    <select id="empAvailability" class="form-select">
+      <option>Available</option>
+      <option>Out</option>
+      <option>WFH</option>
+      <option>MC</option>
+    </select>
+
+    <button class="btn btn-success w-100 mt-2">Save</button>
+  </form>
+
+</div>
+{% include "components/modals/add_employee.html" %}
+{% include "components/modals/manage_department.html" %}
 <script>
 // FILTER
 document.getElementById("applyFilter").onclick = () => {
@@ -320,7 +240,7 @@ document.getElementById("applyFilter").onclick = () => {
   });
 };
 
-// SHOW DETAILS
+// SHOW PANEL
 function showDetails(user){
   detailsPanel.classList.add("active");
   overlay.classList.add("active");
@@ -331,54 +251,16 @@ function showDetails(user){
   empPhone.value = user.phone || "";
   empAddress.value = user.address || "";
   empPosition.value = user.position || "";
-  empDept.value = user.dept_id || ""; // FIXED
+  empDept.value = user.dept_id || "";
   empEntitlement.value = user.entitlement || 0;
   empAvailability.value = user.availability || "Available";
-
-  deleteUserForm.action = `/admin/users/delete/${user.id}`;
 }
 
-// CLOSE PANEL
+// CLOSE
 overlay.onclick = () => {
   detailsPanel.classList.remove("active");
   overlay.classList.remove("active");
 };
-
-// UPDATE
-updateUserForm.onsubmit = e => {
-  e.preventDefault();
-
-  fetch(`/admin/users/update/${empId.value}`, {
-    method: "POST",
-    body: new FormData(updateUserForm)
-  }).then(()=>location.reload());
-};
-
-// DELETE
-deleteUserForm.onsubmit = function(e){
-  e.preventDefault();
-  if(confirm("Delete user?")){
-    fetch(this.action, {method:"POST"})
-    .then(()=>location.reload());
-  }
-};
-
-// RESET LOGIN
-function toggleResetLogin(){
-  const box = document.getElementById("resetLoginBox");
-  box.style.display = box.style.display === "none" ? "block" : "none";
-}
-
-function submitNewLogin(){
-  fetch(`/admin/users/reset_login/${empId.value}`, {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      username: newUsername.value,
-      password: newPassword.value
-    })
-  }).then(()=>alert("Login updated"));
-}
 </script>
 
 {% endblock %}
