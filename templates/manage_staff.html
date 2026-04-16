@@ -2,13 +2,28 @@
 {% block content %}
 
 <style>
-/* ===== BACKGROUND ===== */
 body {
-  background: linear-gradient(135deg, #6c8ebf, #3f5fa3);
-  min-height: 100vh;
+  height: 100vh;
+
+  background: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
+    url('/static/images/DJI_0094.JPG');
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  overflow-x: hidden;
 }
 
-/* blur overlay */
+.glass {
+  background: rgba(131, 199, 255, 0.79);
+  backdrop-filter: blur(18px);
+  border-radius: 18px;
+  padding: 20px;
+  color: white;
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -17,14 +32,12 @@ body::before {
   z-index: -1;
 }
 
-/* ===== CONTAINER ===== */
 .page-container {
   max-width: 1200px;
   margin: auto;
   padding: 20px;
 }
 
-/* ===== HEADER ===== */
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -33,46 +46,29 @@ body::before {
 }
 
 .page-header h4 {
-  font-weight: 600;
   color: #fff;
+  font-weight: 600;
 }
 
-/* ===== CARD ===== */
+/* CARD */
 .card {
   border-radius: 14px;
-  border: none;
   background: rgba(255,255,255,0.9);
   backdrop-filter: blur(10px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  border: none;
 }
 
-.card-body {
-  padding: 20px;
-}
-
-/* ===== FILTER ROW (FIX HERE) ===== */
+/* FILTER ROW */
 .filter-row {
   display: flex;
   gap: 10px;
-  align-items: center;
-  flex-wrap: nowrap;
   margin-bottom: 20px;
 }
 
-.filter-row input {
-  flex: 2;
-}
+.filter-row input { flex: 2; }
+.filter-row select { flex: 1; }
 
-.filter-row select {
-  flex: 1;
-}
-
-.filter-row button {
-  flex: 0;
-  white-space: nowrap;
-}
-
-/* ===== TABLE ===== */
+/* TABLE */
 #userTable thead {
   background: #f1f3f6;
 }
@@ -81,40 +77,7 @@ body::before {
   background: #f5f8ff;
   cursor: pointer;
 }
-
-/* ===== PANEL ===== */
-.details-panel {
-  position: fixed;
-  top: 0;
-  right: -400px;
-  width: 380px;
-  height: 100%;
-  background: #ffffff;
-  border-left: 1px solid #ddd;
-  padding: 20px;
-  z-index: 1050;
-  transition: 0.3s ease;
-}
-
-.details-panel.active {
-  right: 0;
-}
-
-/* ===== OVERLAY ===== */
-#overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.3);
-  display: none;
-  z-index: 1040;
-}
-
-#overlay.active {
-  display: block;
-}
 </style>
-
-<div id="overlay"></div>
 
 <div class="page-container">
 
@@ -132,13 +95,11 @@ body::before {
     </div>
   </div>
 
-  <!-- CARD -->
-
   <div class="card">
     <div class="card-body">
 
-
-  <!-- ✅ FILTER IN ONE ROW -->
+```
+  <!-- FILTER -->
   <div class="filter-row">
     <input type="text" id="searchName" class="form-control" placeholder="Search staff">
 
@@ -178,7 +139,7 @@ body::before {
           data-name="{{ u.full_name }}"
           data-dept="{{ u.department_name }}"
           data-avail="{{ avail }}"
-          onclick='showDetails({{ u|tojson }})'>
+          onclick='openEditModal({{ u|tojson }})'>
 
         <td><strong>{{ u.full_name }}</strong></td>
         <td>{{ u.department_name or "-" }}</td>
@@ -202,47 +163,61 @@ body::before {
   </table>
 
 </div>
-
+```
 
   </div>
 </div>
 
-<!-- PANEL -->
+<!-- ✅ EDIT MODAL (CENTER POPUP) -->
 
-<div id="detailsPanel" class="details-panel">
+<div class="modal fade" id="editEmployeeModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
 
-  <h5>Edit Staff</h5>
+```
+  <div class="modal-header">
+    <h5 class="modal-title">Edit Staff</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+  </div>
 
-  <form id="updateUserForm">
-    <input type="hidden" id="empId">
+  <div class="modal-body">
+    <form id="updateUserForm">
 
+      <input type="hidden" id="empId">
 
-<input type="text" id="empName" class="form-control" placeholder="Full Name">
-<input type="email" id="empEmail" class="form-control" placeholder="Email">
-<input type="text" id="empPhone" class="form-control" placeholder="Phone">
-<input type="text" id="empAddress" class="form-control" placeholder="Address">
-<input type="text" id="empPosition" class="form-control" placeholder="Position">
+      <input type="text" id="empName" class="form-control mb-2" placeholder="Full Name">
+      <input type="email" id="empEmail" class="form-control mb-2" placeholder="Email">
+      <input type="text" id="empPhone" class="form-control mb-2" placeholder="Phone">
+      <input type="text" id="empAddress" class="form-control mb-2" placeholder="Address">
+      <input type="text" id="empPosition" class="form-control mb-2" placeholder="Position">
 
-<select id="empDept" class="form-select">
-  {% for d in departments %}
-  <option value="{{ d.id }}">{{ d.name }}</option>
-  {% endfor %}
-</select>
+      <select id="empDept" class="form-select mb-2">
+        {% for d in departments %}
+        <option value="{{ d.id }}">{{ d.name }}</option>
+        {% endfor %}
+      </select>
 
-<input type="number" id="empEntitlement" class="form-control">
+      <input type="number" id="empEntitlement" class="form-control mb-2" placeholder="Leave Entitlement">
 
-<select id="empAvailability" class="form-select">
-  <option>Available</option>
-  <option>Out</option>
-  <option>WFH</option>
-  <option>MC</option>
-</select>
+      <select id="empAvailability" class="form-select mb-2">
+        <option>Available</option>
+        <option>Out</option>
+        <option>WFH</option>
+        <option>MC</option>
+      </select>
 
-<button class="btn btn-success w-100 mt-2">Save Changes</button>
+    </form>
+  </div>
 
+  <div class="modal-footer">
+    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button class="btn btn-success">Save Changes</button>
+  </div>
 
-  </form>
+</div>
+```
 
+  </div>
 </div>
 
 {% include "components/modals/add_employee.html" %}
@@ -264,11 +239,8 @@ document.getElementById("applyFilter").onclick = () => {
   });
 };
 
-// SHOW PANEL
-function showDetails(user){
-  detailsPanel.classList.add("active");
-  overlay.classList.add("active");
-
+// ✅ OPEN MODAL INSTEAD OF PANEL
+function openEditModal(user){
   empId.value = user.id;
   empName.value = user.full_name || "";
   empEmail.value = user.email || "";
@@ -278,13 +250,10 @@ function showDetails(user){
   empDept.value = user.dept_id || "";
   empEntitlement.value = user.entitlement || 0;
   empAvailability.value = user.availability || "Available";
-}
 
-// CLOSE
-overlay.onclick = () => {
-  detailsPanel.classList.remove("active");
-  overlay.classList.remove("active");
-};
+  let modal = new bootstrap.Modal(document.getElementById('editEmployeeModal'));
+  modal.show();
+}
 </script>
 
 {% endblock %}
