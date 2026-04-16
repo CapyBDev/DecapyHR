@@ -163,59 +163,84 @@ body::before {
   </table>
 
 </div>
-```
 
   </div>
 </div>
 
 <!-- ✅ EDIT MODAL (CENTER POPUP) -->
 
-<div class="modal fade" id="editEmployeeModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
+  <h5><i class="bi bi-person-lines-fill"></i> Employee Details</h5>
+        <hr>
 
-```
-  <div class="modal-header">
-    <h5 class="modal-title">Edit Staff</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-  </div>
+        <!-- UPDATE FORM -->
+        <form id="updateUserForm" method="post">
 
-  <div class="modal-body">
-    <form id="updateUserForm">
+          <input type="hidden" name="id" id="empId">
 
-      <input type="hidden" id="empId">
+          <label>Full Name</label>
+          <input type="text" name="full_name" id="empName" class="form-control mb-2">
 
-      <input type="text" id="empName" class="form-control mb-2" placeholder="Full Name">
-      <input type="email" id="empEmail" class="form-control mb-2" placeholder="Email">
-      <input type="text" id="empPhone" class="form-control mb-2" placeholder="Phone">
-      <input type="text" id="empAddress" class="form-control mb-2" placeholder="Address">
-      <input type="text" id="empPosition" class="form-control mb-2" placeholder="Position">
+          <label>Email</label>
+          <input type="email" name="email" id="empEmail" class="form-control mb-2">
 
-      <select id="empDept" class="form-select mb-2">
-        {% for d in departments %}
-        <option value="{{ d.id }}">{{ d.name }}</option>
-        {% endfor %}
-      </select>
+          <label>Phone</label>
+          <input type="text" name="phone" id="empPhone" class="form-control mb-2">
 
-      <input type="number" id="empEntitlement" class="form-control mb-2" placeholder="Leave Entitlement">
+          <label>Address</label>
+          <input type="text" name="address" id="empAddress" class="form-control mb-2">
 
-      <select id="empAvailability" class="form-select mb-2">
-        <option>Available</option>
-        <option>Out</option>
-        <option>WFH</option>
-        <option>MC</option>
-      </select>
+          <label>Department</label>
+          <select name="dept_id" id="empDept" class="form-select mb-2">
+            <option value="">- Select Department -</option>
+            {% for d in departments %}
+              <option value="{{ d.id }}">{{ d.name }}</option>
+            {% endfor %}
+          </select>
 
-    </form>
-  </div>
+          <label>Position</label>
+          <input type="text" name="position" id="empPosition" class="form-control mb-2">
 
-  <div class="modal-footer">
-    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-    <button class="btn btn-success">Save Changes</button>
-  </div>
+          <label>Entitlement</label>
+          <input type="number" name="entitlement" id="empEntitlement" class="form-control mb-2">
 
-</div>
-```
+          <label>Availability</label>
+          <select id="empAvailability" name="availability" class="form-select mb-2">
+            <option value="Available">Available</option>
+            <option value="Out">Out</option>
+            <option value="WFH">WFH</option>
+            <option value="MC">MC</option>
+            <option value="Resign">Resign</option>
+          </select>
+
+          <button type="submit" class="btn btn-success w-100 mt-3">
+            <i class="bi bi-save"></i> Save
+          </button>
+
+          <button type="button" class="btn btn-warning w-100 mt-2" onclick="toggleResetLogin()">
+            <i class="bi bi-key"></i> New Username / Password
+          </button>
+
+          <!-- Hidden reset login form -->
+          <div id="resetLoginBox" style="display:none;" class="mt-3 p-2 border rounded bg-light">
+
+            <label>New Username</label>
+            <input type="text" id="newUsername" class="form-control mb-2">
+
+            <label>New Password</label>
+            <input type="password" id="newPassword" class="form-control mb-2">
+
+            <button type="button" class="btn btn-primary w-100" onclick="submitNewLogin()">
+              <i class="bi bi-check-circle"></i> Update Login
+            </button>
+          </div>
+        </form>
+
+        <!-- DELETE FORM (SEPARATE) -->
+        <form id="deleteUserForm" method="post" class="mt-2">
+          <button type="submit" class="btn btn-outline-danger w-100">
+            <i class="bi bi-trash"></i> Delete
+          </button>
+        </form>
 
   </div>
 </div>
@@ -253,6 +278,11 @@ function openEditModal(user){
 
   let modal = new bootstrap.Modal(document.getElementById('editEmployeeModal'));
   modal.show();
+}
+
+function toggleResetLogin(){
+  let box = document.getElementById("resetLoginBox");
+  box.style.display = (box.style.display === "none") ? "block" : "none";
 }
 </script>
 
