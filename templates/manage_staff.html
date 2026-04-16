@@ -24,14 +24,7 @@ body {
   color: white;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  backdrop-filter: blur(8px);
-  z-index: -1;
-}
-
+/* ===== LAYOUT ===== */
 .page-container {
   max-width: 1200px;
   margin: auto;
@@ -50,13 +43,16 @@ body::before {
   font-weight: 600;
 }
 
+/* ===== CARD ===== */
 .card {
   border-radius: 14px;
-  background: rgba(255,255,255,0.9);
-  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
   border: none;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
+/* ===== FILTER ===== */
 .filter-row {
   display: flex;
   gap: 10px;
@@ -66,12 +62,80 @@ body::before {
 .filter-row input { flex: 2; }
 .filter-row select { flex: 1; }
 
+/* ===== TABLE ===== */
 #userTable thead {
   background: #f1f3f6;
 }
 
 .user-row:hover {
   background: #f5f8ff;
+}
+
+/* ===== MODAL PREMIUM ===== */
+.modal-content {
+  border-radius: 16px;
+  border: none;
+  padding: 10px;
+}
+
+.modal-body {
+  padding: 25px 30px;
+}
+
+.modal-body h5 {
+  font-weight: 600;
+}
+
+/* FORM STYLE */
+label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+
+.form-control,
+.form-select {
+  border-radius: 8px;
+  padding: 10px 12px;
+  border: 1px solid #dee2e6;
+  transition: 0.2s;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #4a7bd0;
+  box-shadow: 0 0 0 2px rgba(74,123,208,0.15);
+}
+
+/* BUTTON ROW */
+.action-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.action-row .btn {
+  flex: 1;
+  height: 45px;
+  font-weight: 500;
+}
+
+/* DELETE BUTTON STYLE */
+.btn-outline-danger {
+  border: 1px solid #f1b0b7;
+  color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+  background: #dc3545;
+  color: #fff;
+}
+
+/* RESET BOX */
+#resetLoginBox {
+  background: #f8f9fa;
+  border-radius: 10px;
 }
 </style>
 
@@ -96,7 +160,7 @@ body::before {
   <div class="card">
     <div class="card-body">
 
-```
+
   <!-- FILTER -->
   <div class="filter-row">
     <input type="text" id="searchName" class="form-control" placeholder="Search staff">
@@ -177,18 +241,18 @@ body::before {
   </table>
 
 </div>
-```
+
 
   </div>
 </div>
 
-<!-- EDIT MODAL -->
+<!-- PREMIUM EDIT MODAL -->
 
 <div class="modal fade" id="editEmployeeModal" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
 
-```
+
   <div class="modal-body">
 
     <h5><i class="bi bi-person-lines-fill"></i> Employee Details</h5>
@@ -199,33 +263,33 @@ body::before {
       <input type="hidden" name="id" id="empId">
 
       <label>Full Name</label>
-      <input type="text" name="full_name" id="empName" class="form-control mb-2">
+      <input type="text" name="full_name" id="empName" class="form-control mb-3">
 
       <label>Email</label>
-      <input type="email" name="email" id="empEmail" class="form-control mb-2">
+      <input type="email" name="email" id="empEmail" class="form-control mb-3">
 
       <label>Phone</label>
-      <input type="text" name="phone" id="empPhone" class="form-control mb-2">
+      <input type="text" name="phone" id="empPhone" class="form-control mb-3">
 
       <label>Address</label>
-      <input type="text" name="address" id="empAddress" class="form-control mb-2">
+      <input type="text" name="address" id="empAddress" class="form-control mb-3">
 
       <label>Department</label>
-      <select name="dept_id" id="empDept" class="form-select mb-2">
+      <select name="dept_id" id="empDept" class="form-select mb-3">
         <option value="">- Select Department -</option>
         {% for d in departments %}
-          <option value="{{ d.id }}">{{ d.name }}</option>
+        <option value="{{ d.id }}">{{ d.name }}</option>
         {% endfor %}
       </select>
 
       <label>Position</label>
-      <input type="text" name="position" id="empPosition" class="form-control mb-2">
+      <input type="text" name="position" id="empPosition" class="form-control mb-3">
 
       <label>Entitlement</label>
-      <input type="number" name="entitlement" id="empEntitlement" class="form-control mb-2">
+      <input type="number" name="entitlement" id="empEntitlement" class="form-control mb-3">
 
       <label>Availability</label>
-      <select id="empAvailability" name="availability" class="form-select mb-2">
+      <select id="empAvailability" name="availability" class="form-select mb-3">
         <option value="Available">Available</option>
         <option value="Out">Out</option>
         <option value="WFH">WFH</option>
@@ -233,18 +297,18 @@ body::before {
         <option value="Resign">Resign</option>
       </select>
 
-      <!-- BUTTON ROW -->
-      <div class="d-flex gap-2 mt-3">
+      <!-- ACTION ROW -->
+      <div class="action-row">
 
-        <button type="submit" class="btn btn-success flex-fill">
+        <button type="submit" class="btn btn-success">
           <i class="bi bi-save"></i> Save
         </button>
 
-        <button type="button" class="btn btn-warning flex-fill" onclick="toggleResetLogin()">
+        <button type="button" class="btn btn-warning" onclick="toggleResetLogin()">
           <i class="bi bi-key"></i> Login
         </button>
 
-        <form id="deleteUserForm" method="post" class="flex-fill">
+        <form id="deleteUserForm" method="post">
           <button type="submit" class="btn btn-outline-danger w-100">
             <i class="bi bi-trash"></i>
           </button>
@@ -253,7 +317,7 @@ body::before {
       </div>
 
       <!-- RESET LOGIN -->
-      <div id="resetLoginBox" style="display:none;" class="mt-3 p-3 border rounded bg-light">
+      <div id="resetLoginBox" style="display:none;" class="mt-3 p-3">
         <label>New Username</label>
         <input type="text" id="newUsername" class="form-control mb-2">
 
@@ -270,7 +334,7 @@ body::before {
   </div>
 
 </div>
-```
+
 
   </div>
 </div>
@@ -279,7 +343,6 @@ body::before {
 {% include "components/modals/manage_department.html" %}
 
 <script>
-// FILTER
 document.getElementById("applyFilter").onclick = () => {
   let name = searchName.value.toLowerCase();
   let dept = filterDept.value.toLowerCase();
@@ -294,7 +357,6 @@ document.getElementById("applyFilter").onclick = () => {
   });
 };
 
-// OPEN MODAL
 function openEditModal(row){
   empId.value = row.dataset.id || "";
   empName.value = row.dataset.name || "";
@@ -310,7 +372,6 @@ function openEditModal(row){
   modal.show();
 }
 
-// TOGGLE RESET
 function toggleResetLogin(){
   let box = document.getElementById("resetLoginBox");
   box.style.display = (box.style.display === "none") ? "block" : "none";
