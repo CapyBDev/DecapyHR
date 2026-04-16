@@ -2,13 +2,22 @@
 {% block content %}
 
 <style>
-/* ===== GLOBAL ===== */
+/* ===== BACKGROUND ===== */
 body {
-  background: #f4f6f9;
-  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: linear-gradient(135deg, #6c8ebf, #3f5fa3);
+  min-height: 100vh;
 }
 
-/* ===== MAIN CONTAINER ===== */
+/* blur overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  backdrop-filter: blur(8px);
+  z-index: -1;
+}
+
+/* ===== CONTAINER ===== */
 .page-container {
   max-width: 1200px;
   margin: auto;
@@ -25,71 +34,52 @@ body {
 
 .page-header h4 {
   font-weight: 600;
-  color: #2c3e50;
+  color: #fff;
 }
 
 /* ===== CARD ===== */
 .card {
-  border-radius: 12px;
+  border-radius: 14px;
   border: none;
-  background: #ffffff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
 .card-body {
   padding: 20px;
 }
 
-/* ===== TOOLBAR ===== */
-.toolbar {
+/* ===== FILTER ROW (FIX HERE) ===== */
+.filter-row {
   display: flex;
-  flex-wrap: wrap;
   gap: 10px;
+  align-items: center;
+  flex-wrap: nowrap;
   margin-bottom: 20px;
 }
 
-.toolbar input,
-.toolbar select {
-  min-width: 160px;
+.filter-row input {
+  flex: 2;
+}
+
+.filter-row select {
+  flex: 1;
+}
+
+.filter-row button {
+  flex: 0;
+  white-space: nowrap;
 }
 
 /* ===== TABLE ===== */
-.table-wrapper {
-  width: 100%;
-}
-
-#userTable {
-  border-radius: 10px;
-  overflow: hidden;
-}
-
 #userTable thead {
   background: #f1f3f6;
 }
 
-#userTable th {
-  font-weight: 600;
-  color: #555;
-}
-
-#userTable td {
-  vertical-align: middle;
-}
-
-.user-row {
-  cursor: pointer;
-  transition: 0.2s;
-}
-
 .user-row:hover {
-  background: #f9fbfd;
-}
-
-/* ===== BADGE ===== */
-.badge {
-  padding: 6px 10px;
-  font-size: 12px;
-  border-radius: 6px;
+  background: #f5f8ff;
+  cursor: pointer;
 }
 
 /* ===== PANEL ===== */
@@ -97,17 +87,12 @@ body {
   position: fixed;
   top: 0;
   right: -400px;
-
   width: 380px;
   height: 100%;
-
   background: #ffffff;
   border-left: 1px solid #ddd;
-
   padding: 20px;
   z-index: 1050;
-
-  box-shadow: -5px 0 20px rgba(0,0,0,0.1);
   transition: 0.3s ease;
 }
 
@@ -115,18 +100,10 @@ body {
   right: 0;
 }
 
-.details-panel h5 {
-  margin-bottom: 15px;
-  font-weight: 600;
-}
-
 /* ===== OVERLAY ===== */
 #overlay {
   position: fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
+  inset: 0;
   background: rgba(0,0,0,0.3);
   display: none;
   z-index: 1040;
@@ -135,29 +112,6 @@ body {
 #overlay.active {
   display: block;
 }
-
-/* ===== FORM ===== */
-.details-panel input,
-.details-panel select {
-  margin-bottom: 12px;
-  border-radius: 6px;
-}
-
-/* ===== BUTTON ===== */
-.btn-primary {
-  background: #2c7be5;
-  border: none;
-}
-
-.btn-primary:hover {
-  background: #1a68d1;
-}
-
-.btn-secondary {
-  background: #6c757d;
-  border: none;
-}
-
 </style>
 
 <div id="overlay"></div>
@@ -178,12 +132,14 @@ body {
     </div>
   </div>
 
+  <!-- CARD -->
+
   <div class="card">
     <div class="card-body">
 
-```
-  <!-- TOOLBAR -->
-  <div class="toolbar">
+
+  <!-- ✅ FILTER IN ONE ROW -->
+  <div class="filter-row">
     <input type="text" id="searchName" class="form-control" placeholder="Search staff">
 
     <select id="filterDept" class="form-select">
@@ -205,50 +161,48 @@ body {
   </div>
 
   <!-- TABLE -->
-  <div class="table-wrapper">
-    <table id="userTable" class="table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Department</th>
-          <th>Position</th>
-          <th>Status</th>
-        </tr>
-      </thead>
+  <table id="userTable" class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Department</th>
+        <th>Position</th>
+        <th>Status</th>
+      </tr>
+    </thead>
 
-      <tbody>
-        {% for u in users %}
-        {% set avail = u.availability or 'Available' %}
-        <tr class="user-row"
-            data-name="{{ u.full_name }}"
-            data-dept="{{ u.department_name }}"
-            data-avail="{{ avail }}"
-            onclick='showDetails({{ u|tojson }})'>
+    <tbody>
+      {% for u in users %}
+      {% set avail = u.availability or 'Available' %}
+      <tr class="user-row"
+          data-name="{{ u.full_name }}"
+          data-dept="{{ u.department_name }}"
+          data-avail="{{ avail }}"
+          onclick='showDetails({{ u|tojson }})'>
 
-          <td><strong>{{ u.full_name }}</strong></td>
-          <td>{{ u.department_name or "-" }}</td>
-          <td>{{ u.position or "-" }}</td>
+        <td><strong>{{ u.full_name }}</strong></td>
+        <td>{{ u.department_name or "-" }}</td>
+        <td>{{ u.position or "-" }}</td>
 
-          <td>
-            <span class="badge
-            {% if avail == 'Available' %} bg-success
-            {% elif avail == 'Out' %} bg-primary
-            {% elif avail == 'MC' %} bg-warning text-dark
-            {% elif avail == 'WFH' %} bg-info text-dark
-            {% else %} bg-secondary
-            {% endif %}">
-              {{ avail }}
-            </span>
-          </td>
+        <td>
+          <span class="badge
+          {% if avail == 'Available' %} bg-success
+          {% elif avail == 'Out' %} bg-primary
+          {% elif avail == 'MC' %} bg-warning text-dark
+          {% elif avail == 'WFH' %} bg-info text-dark
+          {% else %} bg-secondary
+          {% endif %}">
+            {{ avail }}
+          </span>
+        </td>
 
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 
 </div>
-```
+
 
   </div>
 </div>
@@ -262,7 +216,7 @@ body {
   <form id="updateUserForm">
     <input type="hidden" id="empId">
 
-```
+
 <input type="text" id="empName" class="form-control" placeholder="Full Name">
 <input type="email" id="empEmail" class="form-control" placeholder="Email">
 <input type="text" id="empPhone" class="form-control" placeholder="Phone">
@@ -275,7 +229,7 @@ body {
   {% endfor %}
 </select>
 
-<input type="number" id="empEntitlement" class="form-control" placeholder="Leave Entitlement">
+<input type="number" id="empEntitlement" class="form-control">
 
 <select id="empAvailability" class="form-select">
   <option>Available</option>
@@ -285,7 +239,7 @@ body {
 </select>
 
 <button class="btn btn-success w-100 mt-2">Save Changes</button>
-```
+
 
   </form>
 
