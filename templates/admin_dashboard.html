@@ -1,216 +1,178 @@
 {% extends "base.html" %}
-{% block page_title %}Admin Dashboard{% endblock %}
 {% block content %}
 
 <style>
+/* ===== BACKGROUND (KEEP YOUR STYLE) ===== */
 body {
-  height: 100vh;
-
-  background: 
-    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
+  background:
+    linear-gradient(rgba(0,0,0,0.6), rgba(41,87,157,0.9)),
     url('/static/images/DJI_0094.JPG');
-
   background-size: cover;
-  background-position: center;
   background-attachment: fixed;
 }
 
-/* ===== GLASS ===== */
-.glass {
+/* ===== LAYOUT ===== */
+.main-layout {
+  display: flex;
+  height: 100vh;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 250px;
+  background: linear-gradient(180deg, #0f9bba, #0a6c86);
+  color: white;
+  padding: 20px;
+}
+
+.sidebar h2 {
+  margin-bottom: 30px;
+}
+
+.sidebar a {
+  display: block;
+  padding: 12px;
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  margin-bottom: 5px;
+  transition: 0.3s;
+}
+
+.sidebar a:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* ===== MAIN ===== */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== TOPBAR ===== */
+.topbar {
+  height: 70px;
   background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(18px);
-  border-radius: 18px;
-  padding: 20px;
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30px;
   color: white;
 }
 
-/* ===== STAT CARDS ===== */
-.stat-card {
-  padding: 20px;
+/* ===== CONTENT ===== */
+.content {
+  padding: 30px;
+  overflow-y: auto;
+}
+
+/* ===== CARD ===== */
+.card-box {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(15px);
   border-radius: 15px;
+  padding: 20px;
   color: white;
-  font-weight: 600;
-  background: linear-gradient(135deg,#1b9aaa,#43e97b);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
 
-.stat-card h3 {
-  margin: 10px 0;
-  font-size: 28px;
+/* ===== STATS ===== */
+.stat {
+  font-size: 25px;
+  font-weight: bold;
 }
 
 /* ===== TABLE ===== */
 .table {
   color: white;
 }
-
-/* ===== TITLE ===== */
-.section-title {
-  margin-bottom: 15px;
-  font-weight: 600;
-  font-size: 18px;
-}
-
-/* ===== NOTICE ===== */
-.notice-content { line-height: 1.8; }
-.notice-divider { border-bottom: 1px solid rgba(255,255,255,0.3); margin: 10px 0; }
-
 </style>
 
-<div class="container-fluid mt-4">
+<div class="main-layout">
 
-<!-- ================= ADMIN OVERVIEW ================= -->
-<div class="row g-4 mb-4">
+  <!-- ===== SIDEBAR ===== -->
+  <div class="sidebar">
+    <h2>JETAMA</h2>
 
-  <div class="col-md-3">
-    <div class="stat-card">
-      👥 Total Employees
-      <h3>{{ total_employees }}</h3>
+    <a href="#">🏠 Dashboard</a>
+    <a href="#">👥 Employees</a>
+    <a href="#">📄 Leave</a>
+    <a href="#">💰 Claims</a>
+    <a href="#">🏢 Departments</a>
+    <a href="#">⚙️ Settings</a>
+  </div>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div>👋 Hello Admin</div>
+      <div>🔔 Notifications | 👤 Profile</div>
     </div>
-  </div>
 
-  <div class="col-md-3">
-    <div class="stat-card" style="background: linear-gradient(135deg,#ff7e5f,#feb47b);">
-      🏢 Departments
-      <h3>{{ total_departments }}</h3>
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- STATS -->
+      <div class="row mb-4">
+
+        <div class="col-md-3">
+          <div class="card-box">
+            Employees
+            <div class="stat">{{ total_employees }}</div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card-box">
+            Departments
+            <div class="stat">{{ total_departments }}</div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card-box">
+            Pending Leave
+            <div class="stat">{{ pending_leaves }}</div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card-box">
+            Claims
+            <div class="stat">{{ total_claims }}</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TABLE -->
+      <div class="card-box">
+        <h5>Employee List</h5>
+
+        <table class="table">
+          <tr>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Email</th>
+          </tr>
+
+          {% for user in users %}
+          <tr>
+            <td>{{ user.name }}</td>
+            <td>{{ user.department }}</td>
+            <td>{{ user.email }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+
     </div>
-  </div>
 
-  <div class="col-md-3">
-    <div class="stat-card" style="background: linear-gradient(135deg,#6a11cb,#2575fc);">
-      📝 Pending Leaves
-      <h3>{{ pending_leaves }}</h3>
-    </div>
-  </div>
-
-  <div class="col-md-3">
-    <div class="stat-card" style="background: linear-gradient(135deg,#11998e,#38ef7d);">
-      💰 Claims
-      <h3>{{ total_claims }}</h3>
-    </div>
   </div>
 
 </div>
-
-<!-- ================= NOTICE BOARD ================= -->
-<div class="glass mb-4">
-
-  <div class="d-flex justify-content-between align-items-center mb-2">
-    <h5>📢 Notice Board</h5>
-
-    <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#noticeModal">
-      Edit
-    </button>
-  </div>
-
-  <div class="notice-content">
-    {% if notice %}
-      {% for line in notice[0].split('\n') %}
-        {% if "===" in line %}
-          <div class="notice-divider"></div>
-        {% else %}
-          <div>{{ line }}</div>
-        {% endif %}
-      {% endfor %}
-    {% else %}
-      <i>No announcement</i>
-    {% endif %}
-  </div>
-
-</div>
-
-<!-- ================= MAIN GRID ================= -->
-<div class="row g-4">
-
-<!-- LEFT SIDE -->
-<div class="col-md-7">
-
-  <div class="glass">
-    <div class="section-title">Latest Leave Requests</div>
-    <table class="table">
-      <tr><th>Name</th><th>Type</th><th>Status</th></tr>
-      {% for leave in latest_leaves %}
-      <tr>
-        <td>{{ leave.name }}</td>
-        <td>{{ leave.type }}</td>
-        <td>{{ leave.status }}</td>
-      </tr>
-      {% endfor %}
-    </table>
-  </div>
-
-  <br>
-
-  <div class="glass">
-    <div class="section-title">Employees On Leave</div>
-    <table class="table">
-      <tr><th>Name</th><th>Department</th><th>Return</th></tr>
-      {% for emp in on_leave %}
-      <tr>
-        <td>{{ emp.name }}</td>
-        <td>{{ emp.department }}</td>
-        <td>{{ emp.return_date }}</td>
-      </tr>
-      {% endfor %}
-    </table>
-  </div>
-
-</div>
-
-<!-- RIGHT SIDE -->
-<div class="col-md-5">
-
-  <div class="glass">
-    <div class="section-title">Recent Claims</div>
-    <table class="table">
-      <tr><th>Name</th><th>Amount</th></tr>
-      {% for claim in claims %}
-      <tr>
-        <td>{{ claim.name }}</td>
-        <td>RM {{ claim.amount }}</td>
-      </tr>
-      {% endfor %}
-    </table>
-  </div>
-
-  <br>
-
-  <div class="glass">
-    <div class="section-title">Leave Trend</div>
-    <canvas id="trendChart"></canvas>
-  </div>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- ================= CHART ================= -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-new Chart(document.getElementById('trendChart'), {
-  type: 'line',
-  data: {
-    labels: {{ trend_labels | tojson }},
-    datasets: [{
-      label: 'Leaves',
-      data: {{ trend_data | tojson }},
-      borderColor: '#ffffff',
-      backgroundColor: 'rgba(255,255,255,0.2)',
-      tension: 0.4
-    }]
-  },
-  options: {
-    plugins: {
-      legend: { labels: { color: '#fff' } }
-    },
-    scales: {
-      x: { ticks: { color: '#fff' } },
-      y: { ticks: { color: '#fff' } }
-    }
-  }
-});
-</script>
 
 {% endblock %}

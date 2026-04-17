@@ -206,64 +206,24 @@ def users():
 # ================= ADMIN DASHBOARD =================
 @app.route("/admin/dashboard")
 def admin_dashboard():
-    if "user_id" not in session or session.get("role") != "admin":
-        return redirect("/")
 
-    conn = get_db()
-    cur = conn.cursor()
+    # example data (replace with DB)
+    total_employees = 25
+    total_departments = 5
+    pending_leaves = 3
+    total_claims = 12
 
-    # CLAIM STATS
-    cur.execute("""
-    SELECT 
-        COUNT(*),
-        COUNT(*) FILTER (WHERE status='Pending'),
-        COUNT(*) FILTER (WHERE status='Approved'),
-        COUNT(*) FILTER (WHERE status='Rejected')
-    FROM claims
-    """)
-    claim_stats = cur.fetchone()
-
-    # LEAVE STATS
-    cur.execute("""
-    SELECT 
-        COUNT(*),
-        COUNT(*) FILTER (WHERE status='Pending'),
-        COUNT(*) FILTER (WHERE status='Approved'),
-        COUNT(*) FILTER (WHERE status='Rejected')
-    FROM leaves
-    """)
-    leave_stats = cur.fetchone()
-    
-    # notice
-    try:
-        cur.execute("SELECT content, file FROM notices ORDER BY created_at DESC LIMIT 1")
-    except:
-        cur.execute("SELECT content FROM notices ORDER BY created_at DESC LIMIT 1")
-
-    notice = cur.fetchone()
-    
-    # policy
-    cur.execute("SELECT filename FROM policies ORDER BY created_at DESC LIMIT 1")
-    policy = cur.fetchone()
-
-    conn.close()
+    users = [
+        {"name": "Ali", "department": "IT", "email": "ali@gmail.com"},
+        {"name": "Siti", "department": "HR", "email": "siti@gmail.com"}
+    ]
 
     return render_template("admin_dashboard.html",
-        total_this_month=leave_stats[0],
-        approved_leave=leave_stats[2],
-        pending_leave=leave_stats[1],
-        rejected_leave=leave_stats[3],
-        claim_total=claim_stats[0],
-        claim_pending=claim_stats[1],
-        claim_approved=claim_stats[2],
-        claim_rejected=claim_stats[3],
-        recent_claims=[],
-        recent_requests=[],
-        on_leave_today=[],
-        trend_labels=["Mon","Tue","Wed","Thu","Fri"],
-        trend_data=[2,4,1,5,3],
-        notice=notice,
-        policy=policy
+        total_employees=total_employees,
+        total_departments=total_departments,
+        pending_leaves=pending_leaves,
+        total_claims=total_claims,
+        users=users
     )
     
 # ================= ADMIN LEAVE DASHBOARD =================
