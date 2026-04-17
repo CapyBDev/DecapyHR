@@ -210,23 +210,47 @@ def delete_user(id):
     return redirect("/admin/users")
 
 # ================= DEPARTMENTS =================
-@app.route("/admin/departments", methods=["GET","POST"])
+@app.route("/admin/departments", methods=["GET", "POST"])
 def manage_departments():
     conn = get_db()
     cur = conn.cursor()
 
+    # ADD DEPARTMENT
     if request.method == "POST":
-        cur.execute("INSERT INTO departments (name) VALUES (%s)",
-                    (request.form["name"],))
+        cur.execute(
+            "INSERT INTO departments (name) VALUES (%s)",
+            (request.form["name"],)
+        )
         conn.commit()
 
-    cur.execute("SELECT * FROM departments")
-    departments = cur.fetchall()
+    # GET ALL DEPARTMENTS
+    cur.execute("SELECT id, name FROM departments")
+
+    columns = [col[0] for col in cur.description]
+    departments = [dict(zip(columns, row)) for row in cur.fetchall()]
 
     conn.close()
 
     return render_template("manage_department.html",
                            departments=departments)
+
+
+# ================= DELETE DEPARTMENT =================
+@app.route("/admin/departments/delete/<int:dept_id>", methods=["POST"])
+def delete_department(dept_id):
+    conn = get_db()
+    cur = conn.cursor()
+
+    try:
+        cur.execute("DELETE FROM departments WHERE id=%s", (dept_id,))
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        return "Cannot delete department (might have employees assigned)"
+
+    conn.close()
+
+    return redirect("/admin/departments")
 
 
 # ================= LEAVES =================
