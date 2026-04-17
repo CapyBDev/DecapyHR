@@ -190,31 +190,41 @@ body {
 <body>
 
 <!-- ===== SIDEBAR ===== -->
-<div class="sidebar" id="sidebar">
+<div class="sidebar d-flex flex-column" id="sidebar">
 
-  <div class="logo">
-    <img src="{{ url_for('static', filename='images/Jetama.jpg') }}">
+  <!-- TOP MENU -->
+  <div>
+    <div class="logo">
+      <img src="{{ url_for('static', filename='images/Jetama.jpg') }}">
+    </div>
+
+    <a href="/admin/dashboard" class="{% if request.path == '/admin/dashboard' %}active{% endif %}">
+      <i class="bi bi-grid"></i> Dashboard
+    </a>
+
+    <a href="/admin/users" class="{% if '/admin/users' in request.path %}active{% endif %}">
+      <i class="bi bi-people"></i> Employee
+    </a>
+
+    <a href="/admin/leaves" class="{% if '/admin/leaves' in request.path %}active{% endif %}">
+      <i class="bi bi-calendar-check"></i> Leave
+    </a>
+
+    <a href="/admin/claims" class="{% if '/admin/claims' in request.path %}active{% endif %}">
+      <i class="bi bi-cash-stack"></i> Claims
+    </a>
+
+    <a href="/admin/departments" class="{% if '/admin/departments' in request.path %}active{% endif %}">
+      <i class="bi bi-building"></i> Departments
+    </a>
   </div>
 
-  <a href="/admin/dashboard" class="{% if request.path == '/admin/dashboard' %}active{% endif %}">
-    <i class="bi bi-grid"></i> Dashboard
-  </a>
-
-  <a href="/admin/users" class="{% if '/admin/users' in request.path %}active{% endif %}">
-    <i class="bi bi-people"></i> Employee
-  </a>
-
-  <a href="/admin/leaves" class="{% if '/admin/leaves' in request.path %}active{% endif %}">
-    <i class="bi bi-calendar-check"></i> Leave
-  </a>
-
-  <a href="/admin/claims" class="{% if '/admin/claims' in request.path %}active{% endif %}">
-    <i class="bi bi-cash-stack"></i> Claims
-  </a>
-
-  <a href="/admin/departments" class="{% if '/admin/departments' in request.path %}active{% endif %}">
-    <i class="bi bi-building"></i> Departments
-  </a>
+  <!-- BOTTOM MENU -->
+  <div class="mt-auto">
+    <a href="/admin/policy" class="{% if '/admin/policy' in request.path %}active{% endif %}">
+      <i class="bi bi-file-earmark-text"></i> Policy
+    </a>
+  </div>
 
 </div>
 

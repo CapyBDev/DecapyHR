@@ -234,7 +234,6 @@ def manage_departments():
     return render_template("manage_department.html",
                            departments=departments)
 
-
 # ================= DELETE DEPARTMENT =================
 @app.route("/admin/departments/delete/<int:dept_id>", methods=["POST"])
 def delete_department(dept_id):
@@ -251,7 +250,6 @@ def delete_department(dept_id):
     conn.close()
 
     return redirect("/admin/departments")
-
 
 # ================= LEAVES =================
 @app.route("/admin/leaves")
@@ -317,6 +315,34 @@ def update_claim(id, status):
 
     return redirect("/admin/claims")
 
+@app.route("/admin/policy")
+def policy():
+    return render_template("policy.html")
+
+# ================= NOTICE =================
+@app.route("/admin/notice", methods=["POST"])
+def update_notice():
+    conn = get_db()
+    cur = conn.cursor()
+
+    content = request.form["content"]
+    file = request.files.get("file")
+
+    filename = None
+
+    if file and file.filename != "":
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+
+    cur.execute("""
+        INSERT INTO notices (content, file)
+        VALUES (%s, %s)
+    """, (content, filename))
+
+    conn.commit()
+    conn.close()
+
+    return redirect("/admin/dashboard")
 
 # ================= LOGOUT =================
 @app.route("/logout")

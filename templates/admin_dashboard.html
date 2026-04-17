@@ -71,6 +71,53 @@ body {
 
 <!-- ===== KPI ROW ===== -->
 <div class="row g-3 mb-4">
+  <div class="dashboard-card mb-4">
+  <div class="d-flex justify-content-between">
+    <h5>📢 Announcement</h5>
+    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#noticeModal">
+      Edit
+    </button>
+  </div>
+
+  <p class="mt-2">
+    {{ notice[0] if notice else "No announcement yet" }}
+  </p>
+
+  {% if notice and notice[1] %}
+  <a href="{{ url_for('static', filename='uploads/' + notice[1]) }}" target="_blank" class="btn btn-dark btn-sm">
+    View Attachment
+  </a>
+  {% endif %}
+</div>
+
+<div class="modal fade" id="noticeModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+<form method="POST" action="/admin/notice" enctype="multipart/form-data">
+
+  <div class="modal-header">
+    <h5>Edit Announcement</h5>
+    <button class="btn-close" data-bs-dismiss="modal"></button>
+  </div>
+
+  <div class="modal-body">
+    <textarea name="content" class="form-control" rows="4">
+{{ notice[0] if notice else "" }}
+    </textarea>
+
+    <input type="file" name="file" class="form-control mt-2">
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-success">Save</button>
+  </div>
+
+</form>
+
+    </div>
+  </div>
+</div>
 
 <div class="col-md-3">
   <div class="kpi-card">
