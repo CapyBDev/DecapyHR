@@ -5,108 +5,144 @@
 
 <style>
 
-/* ===== REMOVE FULL PAGE BREAKING ===== */
-.content-wrapper {
-  padding: 10px 5px;
+/* ===== MAIN CONTAINER ===== */
+.dashboard-box {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
 }
 
-/* ===== CARD ===== */
-.card-box {
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: blur(12px);
-  border-radius: 16px;
-  padding: 20px;
-  color: white;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+/* ===== FILTER BAR ===== */
+.filter-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
-/* ===== STAT ===== */
-.stat {
-  font-size: 28px;
-  font-weight: 700;
+.filter-bar input,
+.filter-bar select {
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    width: 200px;
 }
 
-/* ===== GRID SPACING ===== */
-.row-gap {
-  margin-bottom: 20px;
+.filter-btn {
+    background: #1abc9c;
+    border: none;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 10px;
 }
 
-/* ===== TABLE FIX ===== */
+.add-btn {
+    background: #00a8ff;
+    border: none;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 10px;
+}
+
+/* ===== TABLE ===== */
+.table-box {
+    margin-top: 10px;
+}
+
 .table {
-  color: white;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
 }
 
-.table thead {
-  background: rgba(255,255,255,0.2);
+.table th {
+    background: #f5f6fa;
+    font-weight: 600;
 }
+
+.table td {
+    vertical-align: middle;
+}
+
+/* ===== ACTION BUTTONS ===== */
+.action-btn {
+    border: none;
+    padding: 6px 10px;
+    border-radius: 8px;
+    margin-right: 5px;
+    color: white;
+}
+
+.view { background: #6c5ce7; }
+.edit { background: #00b894; }
+.delete { background: #d63031; }
 
 </style>
 
-<div class="content-wrapper">
+<div class="dashboard-box">
 
-  <!-- HELLO -->
-  <div class="card-box mb-3">
-    👋 Hello Admin
-  </div>
+    <!-- FILTER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
 
-  <!-- STATS -->
-  <div class="row row-gap">
+        <div class="filter-bar">
+            <input type="text" placeholder="Employee Name">
+            <input type="text" placeholder="Employee ID">
+            <select>
+                <option>Employee Designation</option>
+            </select>
 
-    <div class="col-md-3">
-      <div class="card-box">
-        Employees
-        <div class="stat">{{ total_employees }}</div>
-      </div>
+            <button class="filter-btn">Filters</button>
+        </div>
+
+        <button class="add-btn">Add Employee</button>
+
     </div>
 
-    <div class="col-md-3">
-      <div class="card-box">
-        Departments
-        <div class="stat">{{ total_departments }}</div>
-      </div>
+    <!-- TABLE -->
+    <div class="table-box">
+
+        <table class="table table-hover">
+
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Designation</th>
+                    <th>Mobile No</th>
+                    <th>Date Of Joining</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>#{{ user.id }}</td>
+                    <td>
+                        <img src="{{ user.avatar or '/static/images/user.png' }}" 
+                             style="width:30px;height:30px;border-radius:50%;margin-right:8px;">
+                        {{ user.name }}
+                    </td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.department }}</td>
+                    <td>{{ user.designation }}</td>
+                    <td>{{ user.phone }}</td>
+                    <td>{{ user.join_date }}</td>
+
+                    <td>
+                        <button class="action-btn view">👁</button>
+                        <button class="action-btn edit">✏</button>
+                        <button class="action-btn delete">🗑</button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+
+        </table>
+
     </div>
-
-    <div class="col-md-3">
-      <div class="card-box">
-        Pending Leave
-        <div class="stat">{{ pending_leaves }}</div>
-      </div>
-    </div>
-
-    <div class="col-md-3">
-      <div class="card-box">
-        Claims
-        <div class="stat">{{ total_claims }}</div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- EMPLOYEE TABLE -->
-  <div class="card-box">
-    <h5 class="mb-3">Employee List</h5>
-
-    <table class="table table-hover">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Department</th>
-          <th>Email</th>
-        </tr>
-      </thead>
-
-      <tbody>
-      {% for user in users %}
-        <tr>
-          <td>{{ user.name }}</td>
-          <td>{{ user.department }}</td>
-          <td>{{ user.email }}</td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-
-  </div>
 
 </div>
 

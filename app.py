@@ -207,24 +207,20 @@ def users():
 @app.route("/admin/dashboard")
 def admin_dashboard():
 
-    # example data (replace with DB)
-    total_employees = 25
-    total_departments = 5
-    pending_leaves = 3
-    total_claims = 12
-
     users = [
-        {"name": "Ali", "department": "IT", "email": "ali@gmail.com"},
-        {"name": "Siti", "department": "HR", "email": "siti@gmail.com"}
+        {
+            "id": "MZ-001",
+            "name": "Harry Porter",
+            "email": "harry@gmail.com",
+            "department": "Technology",
+            "designation": "System Manager",
+            "phone": "0123456789",
+            "join_date": "1 March 2023",
+            "avatar": "/static/images/user.png"
+        }
     ]
 
-    return render_template("admin_dashboard.html",
-        total_employees=total_employees,
-        total_departments=total_departments,
-        pending_leaves=pending_leaves,
-        total_claims=total_claims,
-        users=users
-    )
+    return render_template("admin_dashboard.html", users=users)
     
 # ================= ADMIN LEAVE DASHBOARD =================
 @app.route("/admin/leaves/dashboard")
