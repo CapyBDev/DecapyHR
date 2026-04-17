@@ -12,7 +12,6 @@
 <style>
 * { font-family: 'Poppins', sans-serif; }
 
-/* ===== BODY ===== */
 body {
   margin: 0;
   background: #f5f6fa;
@@ -23,11 +22,24 @@ body {
   width: 250px;
   height: 100vh;
   position: fixed;
-  background: linear-gradient(180deg, #6b91e2db, #0a3186);
+  background: linear-gradient(180deg, #ccd3ffdb, #0a17abdb);
   color: white;
   padding: 20px;
 }
 
+/* LOGO */
+.logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+.logo img {
+  width: 120px;
+  object-fit: contain;
+}
+
+/* MENU */
 .sidebar a {
   display: block;
   padding: 12px;
@@ -35,15 +47,16 @@ body {
   text-decoration: none;
   border-radius: 10px;
   margin-bottom: 8px;
+  transition: 0.3s;
 }
 
 .sidebar a:hover {
   background: rgba(255,255,255,0.2);
 }
 
-.active {
+.sidebar a.active {
   background: white;
-  color: #0a6c86 !important;
+  color: #0a17ab !important;
   font-weight: 600;
 }
 
@@ -64,7 +77,6 @@ body {
   margin-bottom: 20px;
 }
 
-/* LEFT */
 .topbar-left {
   display: flex;
   align-items: center;
@@ -133,43 +145,64 @@ body {
 
 <body>
 
-<!-- SIDEBAR -->
+<!-- ===== SIDEBAR ===== -->
 
 <div class="sidebar">
 
-<h4>JETAMA</h4>
+  <!-- LOGO -->
 
-<a href="/admin/dashboard" class="{% if request.path == '/admin/dashboard' %}active{% endif %}">
-  Dashboard
-</a>
+  <div class="logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="JETAMA Logo">
+  </div>
 
-<a href="#">Employee</a> <a href="#">Leave</a> <a href="#">Claims</a> <a href="#">Departments</a>
+  <!-- MENU -->
+
+<a href="/admin/dashboard"
+  class="{% if request.path == '/admin/dashboard' %}active{% endif %}"> <i class="bi bi-grid"></i> Dashboard </a>
+
+<a href="/admin/users"
+  class="{% if '/admin/users' in request.path %}active{% endif %}"> <i class="bi bi-people"></i> Employee </a>
+
+<a href="/admin/leaves"
+  class="{% if '/admin/leaves' in request.path %}active{% endif %}"> <i class="bi bi-calendar-check"></i> Leave </a>
+
+<a href="/admin/claims"
+  class="{% if '/admin/claims' in request.path %}active{% endif %}"> <i class="bi bi-cash-stack"></i> Claims </a>
+
+<a href="/admin/departments"
+  class="{% if '/admin/departments' in request.path %}active{% endif %}"> <i class="bi bi-building"></i> Departments </a>
+
+  <a href="/logout">
+     <i class="bi bi-box-arrow-right"></i> Logout
+  </a>
 
 </div>
 
-<!-- MAIN -->
+<!-- ===== MAIN ===== -->
 
 <div class="main">
 
-<!-- TOPBAR -->
+<!-- ===== TOPBAR ===== -->
 
 <div class="topbar">
 
   <div class="topbar-left">
     <i class="bi bi-list"></i>
 
-
+```
 <div>
   <div class="hello-text">Hello {{ session.name }} 👋</div>
-  <div class="breadcrumb">Home > Dashboard</div>
+  <div class="breadcrumb">
+    Home > {{ request.path.split('/')[-1]|capitalize }}
+  </div>
 </div>
-
+```
 
   </div>
 
   <div class="topbar-right">
 
-
+```
 <div class="search-box">
   <input type="text" placeholder="Search Here...">
   <i class="bi bi-search"></i>
@@ -180,7 +213,7 @@ body {
 <div class="icon-btn"><i class="bi bi-bell"></i></div>
 
 <div class="profile-box">
-  <img src="/static/images/user.png">
+  <img src="{{ url_for('static', filename='images/JETAMA SDN BHD LOGO (TRANSPARENT).png') }}">
   <div>
     <div>{{ session.name }}</div>
     <small>online</small>
