@@ -110,42 +110,65 @@ body {
 
 /* ===== LOGIN CARD ===== */
 .login-card {
-    width: 400px;
-    padding: 40px;
+    width: 420px;
+    padding: 45px;
     border-radius: 20px;
-    background: rgba(255,255,255,0.2);
-    backdrop-filter: blur(15px);
-    color: white;
+
+    /* CLEAN WHITE CARD (like your reference) */
+    background: #ffffff;
+    color: #333;
+
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
 }
 
+/* Title */
 .login-card h2 {
-    text-align: center;
-    margin-bottom: 20px;
+    font-size: 28px;
+    margin-bottom: 25px;
+    color: #222;
 }
 
-.input-group {
-    margin: 15px 0;
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #555;
 }
 
 .input-group input {
     width: 100%;
-    padding: 12px;
+    padding: 14px;
     border-radius: 10px;
-    border: none;
+    border: 1px solid #ddd;
     outline: none;
+
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.input-group input:focus {
+    border-color: #1b9aaa;
+    box-shadow: 0 0 0 2px rgba(27,154,170,0.2);
 }
 
 /* BUTTON */
 .btn {
     width: 100%;
-    padding: 12px;
+    padding: 14px;
     border: none;
     border-radius: 10px;
-    background: linear-gradient(to right, #2e86de, #1b4f72);
+
+    background: #1b9aaa;
     color: white;
+
     font-weight: 600;
     margin-top: 20px;
     cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn:hover {
+    background: #168a96;
 }
 
 /* ERROR */
@@ -204,6 +227,12 @@ body {
             <div class="input-group">
                 <label>Password</label>
                 <input type="password" name="password" placeholder="Enter password" required>
+            </div>
+
+            <div style="text-align:right; margin-top:5px;">
+                <a href="#" style="font-size:13px; color:#1b9aaa; text-decoration:none;">
+                    Forgot Your Password?
+                </a>
             </div>
 
             <button type="submit" class="btn">Log In</button>
