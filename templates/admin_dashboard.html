@@ -4,6 +4,51 @@
 {% block content %}
 
 <style>
+body {
+  height: 100vh;
+
+  background: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
+    url('/static/images/DJI_0094.JPG');
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  overflow-x: hidden;
+}
+
+.glass {
+  background: rgba(12, 137, 254, 0.37);
+  backdrop-filter: blur(18px);
+  border-radius: 18px;
+  padding: 20px;
+  color: white;
+}
+/* ===== SECTION SPACING ===== */
+.section {
+    margin-bottom: 25px;
+}
+
+/* ===== NOTICE BOARD ===== */
+.notice-box {
+    background: linear-gradient(135deg,#1b9aaa,#43e97b);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.notice-title {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.notice-text {
+    margin-top: 10px;
+    white-space: pre-line;
+    font-size: 14px;
+}
 
 /* ===== KPI CARDS ===== */
 .card-box {
@@ -11,13 +56,23 @@
     padding: 20px;
     color: white;
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    align-items: center;
+    transition: 0.3s;
 }
 
+.card-box:hover {
+    transform: translateY(-3px);
+}
+
+/* COLORS (SOFTER) */
+.green { background: linear-gradient(135deg,#16a085,#1abc9c); }
+.pink { background: linear-gradient(135deg,#e84393,#ff7675); }
+.orange { background: linear-gradient(135deg,#e67e22,#f39c12); }
+.blue { background: linear-gradient(135deg,#2980b9,#3498db); }
+
 .card-box h5 {
-    font-size: 14px;
+    font-size: 13px;
     opacity: 0.8;
 }
 
@@ -26,108 +81,32 @@
     font-weight: bold;
 }
 
-/* COLORS */
-.green { background: linear-gradient(135deg,#00b894,#55efc4); }
-.pink { background: linear-gradient(135deg,#e84393,#fd79a8); }
-.orange { background: linear-gradient(135deg,#fdcb6e,#e17055); }
-.blue { background: linear-gradient(135deg,#0984e3,#74b9ff); }
-.purple { background: linear-gradient(135deg,#6c5ce7,#a29bfe); }
-.red { background: linear-gradient(135deg,#d63031,#ff7675); }
-
-/* ===== NOTICE ===== */
-.notice-box {
+/* ===== CHART ===== */
+.chart-box {
     background: white;
     border-radius: 15px;
     padding: 20px;
-    margin-top: 20px;
-}
-
-.notice-title {
-    font-weight: 600;
-    margin-bottom: 10px;
-}
-
-.notice-text {
-    white-space: pre-line;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
 }
 
 </style>
 
 <div class="container-fluid">
 
-<!-- ===== KPI CARDS ===== -->
+<!-- ================= NOTICE BOARD ================= -->
 
-<div class="row g-4">
+<div class="notice-box section">
 
-```
-<div class="col-md-4">
-    <div class="card-box green">
-        <div>
-            <h5>Total Employees</h5>
-            <h2>{{ total_employees }}</h2>
-        </div>
-        <i class="bi bi-people-fill fs-2"></i>
-    </div>
-</div>
 
-<div class="col-md-4">
-    <div class="card-box pink">
-        <div>
-            <h5>Departments</h5>
-            <h2>{{ total_departments }}</h2>
-        </div>
-        <i class="bi bi-building fs-2"></i>
-    </div>
-</div>
-
-<div class="col-md-4">
-    <div class="card-box orange">
-        <div>
-            <h5>Pending Leave</h5>
-            <h2>{{ pending_leaves }}</h2>
-        </div>
-        <i class="bi bi-calendar-check fs-2"></i>
-    </div>
-</div>
-
-<div class="col-md-4">
-    <div class="card-box blue">
-        <div>
-            <h5>Total Claims</h5>
-            <h2>{{ total_claims }}</h2>
-        </div>
-        <i class="bi bi-cash-stack fs-2"></i>
-    </div>
-</div>
-```
-
-</div>
-
-<!-- ===== CHART ===== -->
-
-<div class="row mt-4">
-    <div class="col-md-12">
-        <div class="notice-box">
-            <h5>Leave Trend</h5>
-            <canvas id="chart"></canvas>
-        </div>
-    </div>
-</div>
-
-<!-- ===== NOTICE BOARD ===== -->
-
-<div class="notice-box">
-
-```
 <div class="d-flex justify-content-between align-items-center">
     <div class="notice-title">📢 Notice Board</div>
 
-    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#noticeModal">
+    <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#noticeModal">
         Edit
     </button>
 </div>
 
-<div class="notice-text mt-2">
+<div class="notice-text">
     {% if notice %}
         {{ notice[0] }}
     {% else %}
@@ -137,21 +116,78 @@
 
 {% if notice and notice|length > 1 and notice[1] %}
 <a href="{{ url_for('static', filename='uploads/' + notice[1]) }}" 
-   target="_blank" class="btn btn-dark btn-sm mt-2">
+   target="_blank"
+   class="btn btn-dark btn-sm mt-2">
    📎 View Attachment
 </a>
 {% endif %}
-```
+
 
 </div>
 
-<!-- ===== MODAL ===== -->
+<!-- ================= KPI CARDS ================= -->
+
+<div class="row g-4 section">
+
+
+<div class="col-md-6">
+    <div class="card-box green">
+        <div>
+            <h5>Total Employees</h5>
+            <h2>{{ total_employees }}</h2>
+        </div>
+        <i class="bi bi-people-fill fs-2"></i>
+    </div>
+</div>
+
+<div class="col-md-6">
+    <div class="card-box pink">
+        <div>
+            <h5>Departments</h5>
+            <h2>{{ total_departments }}</h2>
+        </div>
+        <i class="bi bi-building fs-2"></i>
+    </div>
+</div>
+
+<div class="col-md-6">
+    <div class="card-box orange">
+        <div>
+            <h5>Pending Leave</h5>
+            <h2>{{ pending_leaves }}</h2>
+        </div>
+        <i class="bi bi-calendar-check fs-2"></i>
+    </div>
+</div>
+
+<div class="col-md-6">
+    <div class="card-box blue">
+        <div>
+            <h5>Total Claims</h5>
+            <h2>{{ total_claims }}</h2>
+        </div>
+        <i class="bi bi-cash-stack fs-2"></i>
+    </div>
+</div>
+
+
+</div>
+
+<!-- ================= CHART ================= -->
+
+<div class="chart-box section">
+    <h5>Leave Trend</h5>
+    <canvas id="chart"></canvas>
+</div>
+
+</div>
+
+<!-- ================= MODAL ================= -->
 
 <div class="modal fade" id="noticeModal">
   <div class="modal-dialog">
     <div class="modal-content">
 
-```
   <form method="POST" action="/admin/notice" enctype="multipart/form-data">
 
     <div class="modal-header">
@@ -160,13 +196,13 @@
     </div>
 
     <div class="modal-body">
+
       <textarea name="content" class="form-control" rows="4">
-```
 
 {{ notice[0] if notice else "" }} </textarea>
 
-```
       <input type="file" name="file" class="form-control mt-2">
+
     </div>
 
     <div class="modal-footer">
@@ -176,14 +212,11 @@
   </form>
 
 </div>
-```
 
   </div>
 </div>
 
-</div>
-
-<!-- ===== CHART JS ===== -->
+<!-- ================= CHART ================= -->
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -195,7 +228,8 @@ new Chart(document.getElementById('chart'), {
         datasets: [{
             label: 'Leaves',
             data: {{ trend_data | tojson }},
-            borderWidth: 3
+            borderWidth: 3,
+            tension: 0.4
         }]
     }
 });
