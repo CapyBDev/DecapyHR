@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -13,8 +12,25 @@
 * { font-family: 'Poppins', sans-serif; }
 
 body {
-  margin: 0;
-  background: #f5f6fa;
+  height: 100vh;
+
+  background: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
+    url('/static/images/DJI_0094.JPG');
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  overflow-x: hidden;
+}
+
+.glass {
+  background: rgba(12, 137, 254, 0.37);
+  backdrop-filter: blur(18px);
+  border-radius: 18px;
+  padding: 20px;
+  color: white;
 }
 
 /* ===== SIDEBAR ===== */
@@ -27,7 +43,6 @@ body {
   padding: 20px;
 }
 
-/* LOGO */
 .logo {
   display: flex;
   justify-content: center;
@@ -39,7 +54,6 @@ body {
   object-fit: contain;
 }
 
-/* MENU */
 .sidebar a {
   display: block;
   padding: 12px;
@@ -124,7 +138,11 @@ body {
   justify-content: center;
 }
 
-/* PROFILE */
+/* ===== PROFILE DROPDOWN ===== */
+.profile-dropdown {
+  position: relative;
+}
+
 .profile-box {
   display: flex;
   align-items: center;
@@ -132,12 +150,42 @@ body {
   background: #f1f2f6;
   padding: 5px 10px;
   border-radius: 10px;
+  cursor: pointer;
 }
 
 .profile-box img {
   width: 35px;
   height: 35px;
   border-radius: 50%;
+}
+
+.dropdown-menu-custom {
+  position: absolute;
+  top: 55px;
+  right: 0;
+  background: white;
+  width: 180px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+  display: none;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.dropdown-menu-custom a {
+  display: block;
+  padding: 12px;
+  text-decoration: none;
+  color: #333;
+  transition: 0.3s;
+}
+
+.dropdown-menu-custom a:hover {
+  background: #f1f2f6;
+}
+
+.show {
+  display: block;
 }
 </style>
 
@@ -146,80 +194,80 @@ body {
 <body>
 
 <!-- ===== SIDEBAR ===== -->
-
 <div class="sidebar">
 
-  <!-- LOGO -->
-
   <div class="logo">
-    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="JETAMA Logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}">
   </div>
 
-  <!-- MENU -->
+  <a href="/admin/dashboard" class="{% if request.path == '/admin/dashboard' %}active{% endif %}">
+    <i class="bi bi-grid"></i> Dashboard
+  </a>
 
-<a href="/admin/dashboard"
-  class="{% if request.path == '/admin/dashboard' %}active{% endif %}"> <i class="bi bi-grid"></i> Dashboard </a>
+  <a href="/admin/users" class="{% if '/admin/users' in request.path %}active{% endif %}">
+    <i class="bi bi-people"></i> Employee
+  </a>
 
-<a href="/admin/users"
-  class="{% if '/admin/users' in request.path %}active{% endif %}"> <i class="bi bi-people"></i> Employee </a>
+  <a href="/admin/leaves" class="{% if '/admin/leaves' in request.path %}active{% endif %}">
+    <i class="bi bi-calendar-check"></i> Leave
+  </a>
 
-<a href="/admin/leaves"
-  class="{% if '/admin/leaves' in request.path %}active{% endif %}"> <i class="bi bi-calendar-check"></i> Leave </a>
+  <a href="/admin/claims" class="{% if '/admin/claims' in request.path %}active{% endif %}">
+    <i class="bi bi-cash-stack"></i> Claims
+  </a>
 
-<a href="/admin/claims"
-  class="{% if '/admin/claims' in request.path %}active{% endif %}"> <i class="bi bi-cash-stack"></i> Claims </a>
-
-<a href="/admin/departments"
-  class="{% if '/admin/departments' in request.path %}active{% endif %}"> <i class="bi bi-building"></i> Departments </a>
-
-  <a href="/logout">
-     <i class="bi bi-box-arrow-right"></i> Logout
+  <a href="/admin/departments" class="{% if '/admin/departments' in request.path %}active{% endif %}">
+    <i class="bi bi-building"></i> Departments
   </a>
 
 </div>
 
 <!-- ===== MAIN ===== -->
-
 <div class="main">
 
 <!-- ===== TOPBAR ===== -->
-
 <div class="topbar">
 
   <div class="topbar-left">
     <i class="bi bi-list"></i>
 
-```
-<div>
-  <div class="hello-text">Hello {{ session.name }} 👋</div>
-  <div class="breadcrumb">
-    Home > {{ request.path.split('/')[-1]|capitalize }}
-  </div>
-</div>
-```
-
+    <div>
+      <div class="hello-text">Hello {{ session.name }} 👋</div>
+      <div class="breadcrumb">
+        Home > {{ request.path.split('/')[-1]|capitalize }}
+      </div>
+    </div>
   </div>
 
   <div class="topbar-right">
 
-```
-<div class="search-box">
-  <input type="text" placeholder="Search Here...">
-  <i class="bi bi-search"></i>
-</div>
+    <div class="search-box">
+      <input type="text" placeholder="Search Here...">
+      <i class="bi bi-search"></i>
+    </div>
 
-<div class="icon-btn"><i class="bi bi-globe"></i></div>
-<div class="icon-btn"><i class="bi bi-envelope"></i></div>
-<div class="icon-btn"><i class="bi bi-bell"></i></div>
+    <div class="icon-btn"><i class="bi bi-globe"></i></div>
+    <div class="icon-btn"><i class="bi bi-envelope"></i></div>
+    <div class="icon-btn"><i class="bi bi-bell"></i></div>
 
-<div class="profile-box">
-  <img src="{{ url_for('static', filename='images/JETAMA SDN BHD LOGO (TRANSPARENT).png') }}">
-  <div>
-    <div>{{ session.name }}</div>
-    <small>online</small>
-  </div>
-</div>
+    <!-- PROFILE DROPDOWN -->
+    <div class="profile-dropdown">
 
+      <div class="profile-box" onclick="toggleDropdown()">
+        <img src="{{ url_for('static', filename='images/JETAMA SDN BHD LOGO (TRANSPARENT).png') }}">
+        <div>
+          <div>{{ session.name }}</div>
+          <small>online</small>
+        </div>
+        <i class="bi bi-chevron-down"></i>
+      </div>
+
+      <div id="dropdownMenu" class="dropdown-menu-custom">
+        <a href="/profile"><i class="bi bi-person"></i> View Profile</a>
+        <a href="/logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+      </div>
+
+    </div>
 
   </div>
 
@@ -228,6 +276,19 @@ body {
 {% block content %}{% endblock %}
 
 </div>
+
+<!-- ===== SCRIPT ===== -->
+<script>
+function toggleDropdown() {
+  document.getElementById("dropdownMenu").classList.toggle("show");
+}
+
+window.onclick = function(e) {
+  if (!e.target.closest('.profile-dropdown')) {
+    document.getElementById("dropdownMenu").classList.remove("show");
+  }
+}
+</script>
 
 </body>
 </html>
