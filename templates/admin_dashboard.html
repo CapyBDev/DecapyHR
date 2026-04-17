@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% block page_title %}Dashboard{% endblock %}
-
 {% block content %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js">
 
 <style>
 body {
@@ -26,209 +26,210 @@ body {
   color: white;
 }
 
-/* ===== SECTION SPACING ===== */
-.section {
-    margin-bottom: 25px;
-}
-
-/* ===== NOTICE BOARD ===== */
-.notice-box {
-    background: linear-gradient(135deg,#1b9aaa,#43e97b);
-    color: white;
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-}
-
-.notice-title {
-    font-weight: 600;
-    font-size: 16px;
-}
-
-.notice-text {
-    margin-top: 10px;
-    white-space: pre-line;
-    font-size: 14px;
-}
-
 /* ===== KPI CARDS ===== */
-.card-box {
-    border-radius: 15px;
-    padding: 20px;
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: 0.3s;
+.kpi-card {
+  background: white;
+  border-radius: 15px;
+  padding: 18px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.card-box:hover {
-    transform: translateY(-3px);
+.kpi-title {
+  font-size: 13px;
+  color: gray;
 }
 
-/* COLORS (SOFTER) */
-.green { background: linear-gradient(135deg,#16a085,#1abc9c); }
-.pink { background: linear-gradient(135deg,#e84393,#ff7675); }
-.orange { background: linear-gradient(135deg,#e67e22,#f39c12); }
-.blue { background: linear-gradient(135deg,#2980b9,#3498db); }
-
-.card-box h5 {
-    font-size: 13px;
-    opacity: 0.8;
+.kpi-value {
+  font-size: 22px;
+  font-weight: bold;
 }
 
-.card-box h2 {
-    margin: 0;
-    font-weight: bold;
+.kpi-icon {
+  font-size: 30px;
+  color: #6c8cff;
 }
 
-/* ===== CHART ===== */
-.chart-box {
-    background: white;
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+/* ===== CARDS ===== */
+.dashboard-card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
 
+/* ===== SMALL TEXT ===== */
+.small-text {
+  font-size: 12px;
+  color: gray;
+}
 </style>
 
 <div class="container-fluid">
 
-<!-- ================= NOTICE BOARD ================= -->
+<!-- ===== KPI ROW ===== -->
+<div class="row g-3 mb-4">
 
-<div class="notice-box section">
-
-<div class="d-flex justify-content-between align-items-center">
-    <div class="notice-title">📢 Notice Board</div>
-
-    <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#noticeModal">
-        Edit
-    </button>
-</div>
-
-<div class="notice-text">
-    {% if notice %}
-        {{ notice[0] }}
-    {% else %}
-        No announcement available
-    {% endif %}
-</div>
-
-{% if notice and notice|length > 1 and notice[1] %}
-<a href="{{ url_for('static', filename='uploads/' + notice[1]) }}" 
-   target="_blank"
-   class="btn btn-dark btn-sm mt-2">
-   📎 View Attachment
-</a>
-{% endif %}
-
-</div>
-
-<!-- ================= KPI CARDS ================= -->
-
-<div class="row g-4 section">
-
-<div class="col-md-6">
-    <div class="card-box green">
-        <div>
-            <h5>Total Employees</h5>
-            <h2>{{ total_employees }}</h2>
-        </div>
-        <i class="bi bi-people-fill fs-2"></i>
+<div class="col-md-3">
+  <div class="kpi-card">
+    <div>
+      <div class="kpi-title">Total Employees</div>
+      <div class="kpi-value">{{ total_employees }}</div>
     </div>
-</div>
-
-<div class="col-md-6">
-    <div class="card-box pink">
-        <div>
-            <h5>Departments</h5>
-            <h2>{{ total_departments }}</h2>
-        </div>
-        <i class="bi bi-building fs-2"></i>
-    </div>
-</div>
-
-<div class="col-md-6">
-    <div class="card-box orange">
-        <div>
-            <h5>Pending Leave</h5>
-            <h2>{{ pending_leaves }}</h2>
-        </div>
-        <i class="bi bi-calendar-check fs-2"></i>
-    </div>
-</div>
-
-<div class="col-md-6">
-    <div class="card-box blue">
-        <div>
-            <h5>Total Claims</h5>
-            <h2>{{ total_claims }}</h2>
-        </div>
-        <i class="bi bi-cash-stack fs-2"></i>
-    </div>
-</div>
-
-</div>
-
-<!-- ================= CHART ================= -->
-
-<div class="chart-box section">
-    <h5>Leave Trend</h5>
-    <canvas id="chart"></canvas>
-</div>
-
-</div>
-
-<!-- ================= MODAL ================= -->
-
-<div class="modal fade" id="noticeModal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-
-  <form method="POST" action="/admin/notice" enctype="multipart/form-data">
-
-    <div class="modal-header">
-      <h5>Edit Notice</h5>
-      <button class="btn-close" data-bs-dismiss="modal"></button>
-    </div>
-
-    <div class="modal-body">
-
-      <textarea name="content" class="form-control" rows="4">
-
-{{ notice[0] if notice else "" }} </textarea>
-
-      <input type="file" name="file" class="form-control mt-2">
-
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn btn-success">Save</button>
-    </div>
-
-  </form>
-
-</div>
-
+    <i class="bi bi-people kpi-icon"></i>
   </div>
 </div>
 
-<!-- ================= CHART ================= -->
+<div class="col-md-3">
+  <div class="kpi-card">
+    <div>
+      <div class="kpi-title">Number of Leave</div>
+      <div class="kpi-value">{{ pending_leaves }}</div>
+    </div>
+    <i class="bi bi-calendar-check kpi-icon"></i>
+  </div>
+</div>
 
+<div class="col-md-3">
+  <div class="kpi-card">
+    <div>
+      <div class="kpi-title">New Employees</div>
+      <div class="kpi-value">{{ new_employees }}</div>
+    </div>
+    <i class="bi bi-person-plus kpi-icon"></i>
+  </div>
+</div>
+
+<div class="col-md-3">
+  <div class="kpi-card">
+    <div>
+      <div class="kpi-title">Happiness Rate</div>
+      <div class="kpi-value">{{ happiness_rate }}%</div>
+    </div>
+    <i class="bi bi-heart kpi-icon"></i>
+  </div>
+</div>
+
+</div>
+
+<!-- ===== CHART ROW ===== -->
+<div class="row g-4 mb-4">
+
+<!-- DONUT -->
+<div class="col-md-6">
+  <div class="dashboard-card">
+    <h6>Working Format</h6>
+    <canvas id="donutChart"></canvas>
+  </div>
+</div>
+
+<!-- BAR -->
+<div class="col-md-6">
+  <div class="dashboard-card">
+    <h6>Project Employment</h6>
+    <canvas id="barChart"></canvas>
+  </div>
+</div>
+
+</div>
+
+<!-- ===== SECOND ROW ===== -->
+<div class="row g-4">
+
+<!-- APPLICATIONS -->
+<div class="col-md-6">
+  <div class="dashboard-card">
+    <h6>Total Applications</h6>
+
+    <div class="mt-3">
+      <div class="d-flex justify-content-between">
+        <span>Applications</span>
+        <span>58%</span>
+      </div>
+      <div class="progress mb-2">
+        <div class="progress-bar bg-primary" style="width:58%"></div>
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <span>Shortlisted</span>
+        <span>22%</span>
+      </div>
+      <div class="progress mb-2">
+        <div class="progress-bar bg-success" style="width:22%"></div>
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <span>On Hold</span>
+        <span>12%</span>
+      </div>
+      <div class="progress mb-2">
+        <div class="progress-bar bg-warning" style="width:12%"></div>
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <span>Rejected</span>
+        <span>8%</span>
+      </div>
+      <div class="progress">
+        <div class="progress-bar bg-danger" style="width:8%"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ATTENDANCE -->
+<div class="col-md-6">
+  <div class="dashboard-card">
+    <h6>Attendance Overview</h6>
+    <canvas id="attendanceChart"></canvas>
+  </div>
+</div>
+
+</div>
+
+</div>
+
+<!-- ===== CHART JS ===== -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-new Chart(document.getElementById('chart'), {
-    type: 'line',
-    data: {
-        labels: {{ trend_labels | tojson }},
-        datasets: [{
-            label: 'Leaves',
-            data: {{ trend_data | tojson }},
-            borderWidth: 3,
-            tension: 0.4
-        }]
-    }
+// DONUT
+new Chart(document.getElementById('donutChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Hybrid','Onsite','Remote'],
+    datasets: [{
+      data: [50,20,30],
+      backgroundColor: ['#4e73df','#ff6384','#f6c23e']
+    }]
+  }
+});
+
+// BAR
+new Chart(document.getElementById('barChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+    datasets: [{
+      label: 'Project',
+      data: [80,100,150,200,140,220,300]
+    }]
+  }
+});
+
+// ATTENDANCE
+new Chart(document.getElementById('attendanceChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+    datasets: [
+      { label:'On Time', data:[30,20,15,25,28,35] },
+      { label:'Late', data:[20,15,10,20,18,25] },
+      { label:'Absent', data:[10,8,5,15,12,18] }
+    ]
+  }
 });
 </script>
 

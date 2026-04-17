@@ -55,6 +55,29 @@ def admin_dashboard():
 
     cur.execute("SELECT COUNT(*) FROM claims")
     total_claims = cur.fetchone()[0]
+    
+    # NEW EMPLOYEES (example: last 30 days)
+    cur.execute("""
+        SELECT COUNT(*) FROM users
+        WHERE created_at >= NOW() - INTERVAL '30 days'
+    """)
+    new_employees = cur.fetchone()[0]
+
+    # SIMPLE HAPPINESS RATE (dummy logic)
+    happiness_rate = 82
+
+    # WORKING FORMAT (example static for now)
+    work_format = [50, 20, 30]
+
+    # PROJECT DATA
+    project_data = [80,100,150,200,140,220,300]
+
+    # ATTENDANCE DATA
+    attendance_data = {
+        "ontime": [30,20,15,25,28,35],
+        "late": [20,15,10,20,18,25],
+        "absent": [10,8,5,15,12,18]
+    }
 
     # NOTICE
     cur.execute("SELECT content, file FROM notices ORDER BY created_at DESC LIMIT 1")
@@ -68,12 +91,18 @@ def admin_dashboard():
 
     return render_template("admin_dashboard.html",
         total_employees=total_employees,
-        total_departments=total_departments,
         pending_leaves=pending_leaves,
+        total_departments=total_departments,
         total_claims=total_claims,
         notice=notice,
         trend_labels=trend_labels,
-        trend_data=trend_data
+        trend_data=trend_data,
+
+        new_employees=new_employees,
+        happiness_rate=happiness_rate,
+        work_format=work_format,
+        project_data=project_data,
+        attendance_data=attendance_data
     )
 # ================= EMPLOYEES =================
 @app.route("/admin/users")
