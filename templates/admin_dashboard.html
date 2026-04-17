@@ -5,198 +5,200 @@
 
 <style>
 
-/* ===== MAIN CONTAINER ===== */
-body {
-  height: 100vh;
-
-  background: 
-    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
-    url('/static/images/DJI_0094.JPG');
-
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-
-  overflow-x: hidden;
-}
-.glass {
-  background: rgba(131, 199, 255, 0.79);
-  backdrop-filter: blur(18px);
-  border-radius: 18px;
-  padding: 20px;
-  color: white;
-}
-.dashboard-box {
-    background: #ffffff;
+/* ===== KPI CARDS ===== */
+.card-box {
     border-radius: 15px;
     padding: 20px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-}
-
-/* ===== FILTER BAR ===== */
-.filter-bar {
+    color: white;
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
 }
 
-.filter-bar input,
-.filter-bar select {
-    padding: 10px;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    width: 180px;
+.card-box h5 {
+    font-size: 14px;
+    opacity: 0.8;
 }
 
-.filter-btn {
-    background: #1abc9c;
-    border: none;
-    color: white;
-    padding: 10px 18px;
-    border-radius: 10px;
-    cursor: pointer;
+.card-box h2 {
+    margin: 0;
+    font-weight: bold;
 }
 
-.add-btn {
-    background: #00a8ff;
-    border: none;
-    color: white;
-    padding: 10px 18px;
-    border-radius: 10px;
-    text-decoration: none;
-}
+/* COLORS */
+.green { background: linear-gradient(135deg,#00b894,#55efc4); }
+.pink { background: linear-gradient(135deg,#e84393,#fd79a8); }
+.orange { background: linear-gradient(135deg,#fdcb6e,#e17055); }
+.blue { background: linear-gradient(135deg,#0984e3,#74b9ff); }
+.purple { background: linear-gradient(135deg,#6c5ce7,#a29bfe); }
+.red { background: linear-gradient(135deg,#d63031,#ff7675); }
 
-/* ===== TABLE ===== */
-.table-box {
-    margin-top: 10px;
-}
-
-.table {
+/* ===== NOTICE ===== */
+.notice-box {
     background: white;
-    border-radius: 10px;
-    overflow: hidden;
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 20px;
 }
 
-.table th {
-    background: #f5f6fa;
+.notice-title {
     font-weight: 600;
+    margin-bottom: 10px;
 }
 
-.table td {
-    vertical-align: middle;
-}
-
-/* ===== ACTION BUTTONS ===== */
-.action-btn {
-    border: none;
-    padding: 6px 10px;
-    border-radius: 8px;
-    margin-right: 5px;
-    color: white;
-    cursor: pointer;
-}
-
-.view { background: #6c5ce7; }
-.edit { background: #00b894; }
-.delete { background: #d63031; }
-
-.avatar {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    margin-right: 8px;
+.notice-text {
+    white-space: pre-line;
 }
 
 </style>
 
-<div class="dashboard-box">
+<div class="container-fluid">
+
+<!-- ===== KPI CARDS ===== -->
+
+<div class="row g-4">
 
 ```
-<!-- ===== FILTER + ADD ===== -->
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="col-md-4">
+    <div class="card-box green">
+        <div>
+            <h5>Total Employees</h5>
+            <h2>{{ total_employees }}</h2>
+        </div>
+        <i class="bi bi-people-fill fs-2"></i>
+    </div>
+</div>
 
-    <div class="filter-bar">
-        <input type="text" placeholder="Employee Name">
-        <input type="text" placeholder="Employee ID">
-        <select>
-            <option>Employee Designation</option>
-        </select>
+<div class="col-md-4">
+    <div class="card-box pink">
+        <div>
+            <h5>Departments</h5>
+            <h2>{{ total_departments }}</h2>
+        </div>
+        <i class="bi bi-building fs-2"></i>
+    </div>
+</div>
 
-        <button class="filter-btn">Filters</button>
+<div class="col-md-4">
+    <div class="card-box orange">
+        <div>
+            <h5>Pending Leave</h5>
+            <h2>{{ pending_leaves }}</h2>
+        </div>
+        <i class="bi bi-calendar-check fs-2"></i>
+    </div>
+</div>
+
+<div class="col-md-4">
+    <div class="card-box blue">
+        <div>
+            <h5>Total Claims</h5>
+            <h2>{{ total_claims }}</h2>
+        </div>
+        <i class="bi bi-cash-stack fs-2"></i>
+    </div>
+</div>
+```
+
+</div>
+
+<!-- ===== CHART ===== -->
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="notice-box">
+            <h5>Leave Trend</h5>
+            <canvas id="chart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ===== NOTICE BOARD ===== -->
+
+<div class="notice-box">
+
+```
+<div class="d-flex justify-content-between align-items-center">
+    <div class="notice-title">📢 Notice Board</div>
+
+    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#noticeModal">
+        Edit
+    </button>
+</div>
+
+<div class="notice-text mt-2">
+    {% if notice %}
+        {{ notice[0] }}
+    {% else %}
+        No announcement available
+    {% endif %}
+</div>
+
+{% if notice and notice|length > 1 and notice[1] %}
+<a href="{{ url_for('static', filename='uploads/' + notice[1]) }}" 
+   target="_blank" class="btn btn-dark btn-sm mt-2">
+   📎 View Attachment
+</a>
+{% endif %}
+```
+
+</div>
+
+<!-- ===== MODAL ===== -->
+
+<div class="modal fade" id="noticeModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+```
+  <form method="POST" action="/admin/notice" enctype="multipart/form-data">
+
+    <div class="modal-header">
+      <h5>Edit Notice</h5>
+      <button class="btn-close" data-bs-dismiss="modal"></button>
     </div>
 
-    <!-- LINK TO FULL EMPLOYEE PAGE -->
-    <a href="/admin/users" class="add-btn">+ Add Employee</a>
+    <div class="modal-body">
+      <textarea name="content" class="form-control" rows="4">
+```
 
-</div>
+{{ notice[0] if notice else "" }} </textarea>
 
-<!-- ===== TABLE ===== -->
-<div class="table-box">
+```
+      <input type="file" name="file" class="form-control mt-2">
+    </div>
 
-    <table class="table table-hover">
+    <div class="modal-footer">
+      <button class="btn btn-success">Save</button>
+    </div>
 
-        <thead>
-            <tr>
-                <th>Employee ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Department</th>
-                <th>Designation</th>
-                <th>Mobile No</th>
-                <th>Date Of Joining</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-
-        <tbody>
-
-        {% if users %}
-            {% for user in users %}
-            <tr>
-                <td>#{{ user.id }}</td>
-
-                <td>
-                    <img src="/static/images/user.png" class="avatar">
-                    {{ user.name }}
-                </td>
-
-                <td>{{ user.email or '-' }}</td>
-                <td>{{ user.department or '-' }}</td>
-                <td>{{ user.designation or '-' }}</td>
-                <td>{{ user.phone or '-' }}</td>
-                <td>{{ user.join_date or '-' }}</td>
-
-                <td>
-
-                    <!-- VIEW (future use) -->
-                    <button class="action-btn view">👁</button>
-
-                    <!-- EDIT (next step) -->
-                    <button class="action-btn edit">✏</button>
-
-                    <!-- DELETE (WORKING) -->
-                    <form action="/admin/users/delete/{{ user.id }}" 
-                          method="POST" 
-                          style="display:inline;">
-                        <button class="action-btn delete">🗑</button>
-                    </form>
-
-                </td>
-            </tr>
-            {% endfor %}
-        {% else %}
-            <tr>
-                <td colspan="8" class="text-center">No employees found</td>
-            </tr>
-        {% endif %}
-
-        </tbody>
-
-    </table>
+  </form>
 
 </div>
 ```
 
+  </div>
 </div>
+
+</div>
+
+<!-- ===== CHART JS ===== -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+new Chart(document.getElementById('chart'), {
+    type: 'line',
+    data: {
+        labels: {{ trend_labels | tojson }},
+        datasets: [{
+            label: 'Leaves',
+            data: {{ trend_data | tojson }},
+            borderWidth: 3
+        }]
+    }
+});
+</script>
 
 {% endblock %}

@@ -41,46 +41,40 @@ def login():
 # ================= DASHBOARD =================
 @app.route("/admin/dashboard")
 def admin_dashboard():
-    if session.get("role") != "admin":
-        return redirect("/")
-
     conn = get_db()
     cur = conn.cursor()
 
-    # ===== GET USERS (FULL DATA) =====
-    cur.execute("""
-        SELECT 
-            u.id,
-            u.full_name,
-            u.email,
-            u.phone,
-            u.position,
-            u.enrollment_date,
-            d.name AS department
-        FROM users u
-        LEFT JOIN departments d ON u.dept_id = d.id
-        ORDER BY u.id DESC
-    """)
+    cur.execute("SELECT COUNT(*) FROM users")
+    total_employees = cur.fetchone()[0]
 
-    rows = cur.fetchall()
+    cur.execute("SELECT COUNT(*) FROM departments")
+    total_departments = cur.fetchone()[0]
 
-    # convert to dict (IMPORTANT)
-    users = []
-    for r in rows:
-        users.append({
-            "id": r[0],
-            "name": r[1],
-            "email": r[2],
-            "phone": r[3],
-            "designation": r[4],
-            "join_date": r[5],
-            "department": r[6] or "-"
-        })
+    cur.execute("SELECT COUNT(*) FROM leaves WHERE status='Pending'")
+    pending_leaves = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM claims")
+    total_claims = cur.fetchone()[0]
+
+    # NOTICE
+    cur.execute("SELECT content, file FROM notices ORDER BY created_at DESC LIMIT 1")
+    notice = cur.fetchone()
+
+    # CHART (example)
+    trend_labels = ["Jan","Feb","Mar","Apr"]
+    trend_data = [5,10,7,12]
 
     conn.close()
 
-    return render_template("admin_dashboard.html", users=users)
-
+    return render_template("admin_dashboard.html",
+        total_employees=total_employees,
+        total_departments=total_departments,
+        pending_leaves=pending_leaves,
+        total_claims=total_claims,
+        notice=notice,
+        trend_labels=trend_labels,
+        trend_data=trend_data
+    )
 # ================= EMPLOYEES =================
 @app.route("/admin/users")
 def admin_users():
