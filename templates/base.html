@@ -12,25 +12,8 @@
 * { font-family: 'Poppins', sans-serif; }
 
 body {
-  height: 100vh;
-
-  background: 
-    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
-    url('/static/images/DJI_0094.JPG');
-
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-
-  overflow-x: hidden;
-}
-
-.glass {
-  background: rgba(12, 137, 254, 0.37);
-  backdrop-filter: blur(18px);
-  border-radius: 18px;
-  padding: 20px;
-  color: white;
+  margin: 0;
+  background: #f5f6fa;
 }
 
 /* ===== SIDEBAR ===== */
@@ -41,6 +24,11 @@ body {
   background: linear-gradient(180deg, #ccd3ffdb, #0a17abdb);
   color: white;
   padding: 20px;
+  transition: 0.3s;
+}
+
+.sidebar.hide {
+  transform: translateX(-100%);
 }
 
 .logo {
@@ -51,9 +39,9 @@ body {
 
 .logo img {
   width: 120px;
-  object-fit: contain;
 }
 
+/* MENU */
 .sidebar a {
   display: block;
   padding: 12px;
@@ -61,7 +49,6 @@ body {
   text-decoration: none;
   border-radius: 10px;
   margin-bottom: 8px;
-  transition: 0.3s;
 }
 
 .sidebar a:hover {
@@ -78,6 +65,11 @@ body {
 .main {
   margin-left: 250px;
   padding: 20px;
+  transition: 0.3s;
+}
+
+.main.full {
+  margin-left: 0;
 }
 
 /* ===== TOPBAR ===== */
@@ -89,6 +81,11 @@ body {
   padding: 15px 25px;
   border-radius: 12px;
   margin-bottom: 20px;
+  transition: 0.3s;
+}
+
+.topbar.full {
+  width: 100%;
 }
 
 .topbar-left {
@@ -177,7 +174,6 @@ body {
   padding: 12px;
   text-decoration: none;
   color: #333;
-  transition: 0.3s;
 }
 
 .dropdown-menu-custom a:hover {
@@ -194,7 +190,7 @@ body {
 <body>
 
 <!-- ===== SIDEBAR ===== -->
-<div class="sidebar">
+<div class="sidebar" id="sidebar">
 
   <div class="logo">
     <img src="{{ url_for('static', filename='images/logo.png') }}">
@@ -223,16 +219,17 @@ body {
 </div>
 
 <!-- ===== MAIN ===== -->
-<div class="main">
+<div class="main" id="mainContent">
 
 <!-- ===== TOPBAR ===== -->
-<div class="topbar">
+<div class="topbar" id="topbar">
 
   <div class="topbar-left">
-    <i class="bi bi-list"></i>
+    <i class="bi bi-list" id="toggleSidebar" style="cursor:pointer; font-size:20px;"></i>
 
     <div>
       <div class="hello-text">Hello {{ session.name }} 👋</div>
+
       <div class="breadcrumb">
         Home > 
         {% if '/admin/users' in request.path %}
@@ -263,7 +260,7 @@ body {
     <div class="icon-btn"><i class="bi bi-envelope"></i></div>
     <div class="icon-btn"><i class="bi bi-bell"></i></div>
 
-    <!-- PROFILE DROPDOWN -->
+    <!-- PROFILE -->
     <div class="profile-dropdown">
 
       <div class="profile-box" onclick="toggleDropdown()">
@@ -292,15 +289,29 @@ body {
 
 <!-- ===== SCRIPT ===== -->
 <script>
+// PROFILE DROPDOWN
 function toggleDropdown() {
   document.getElementById("dropdownMenu").classList.toggle("show");
 }
 
+// CLOSE DROPDOWN
 window.onclick = function(e) {
   if (!e.target.closest('.profile-dropdown')) {
     document.getElementById("dropdownMenu").classList.remove("show");
   }
 }
+
+// SIDEBAR TOGGLE
+const toggleBtn = document.getElementById("toggleSidebar");
+const sidebar = document.getElementById("sidebar");
+const main = document.getElementById("mainContent");
+const topbar = document.getElementById("topbar");
+
+toggleBtn.addEventListener("click", function() {
+  sidebar.classList.toggle("hide");
+  main.classList.toggle("full");
+  topbar.classList.toggle("full");
+});
 </script>
 
 </body>
