@@ -317,7 +317,41 @@ def update_claim(id, status):
 
 @app.route("/admin/policy")
 def policy():
-    return render_template("policy.html")
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT file FROM policies
+        ORDER BY id DESC LIMIT 1
+    """)
+
+    result = cur.fetchone()
+    policy_file = result[0] if result else None
+
+    conn.close()
+
+    return render_template("policy.html", policy_file=policy_file)
+
+@app.route("/admin/policy/upload", methods=["POST"])
+def upload_policy():
+    file = request.files.get("file")
+
+    if file and file.filename != "":
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+
+        conn = get_db()
+        cur = conn.cursor()
+
+        cur.execute("""
+            INSERT INTO policies (file)
+            VALUES (%s)
+        """, (filename,))
+
+        conn.commit()
+        conn.close()
+
+    return redirect("/admin/policy")
 
 # ================= NOTICE =================
 @app.route("/admin/notice", methods=["POST"])
