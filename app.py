@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, session, url_for
 import os
 from werkzeug.utils import secure_filename
 import psycopg2
-import ssl
 
 app = Flask(__name__)
 app.secret_key = "secret123"
@@ -10,103 +9,12 @@ app.secret_key = "secret123"
 UPLOAD_FOLDER = "static/uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
+
+# ================= DATABASE =================
 def get_db():
     db_url = os.environ.get("DATABASE_URL")
+    return psycopg2.connect(db_url, sslmode='require')
 
-    if not db_url:
-        raise Exception("DATABASE_URL not set")
-
-    if "localhost" in db_url:
-        return psycopg2.connect(db_url, sslmode='disable')
-    else:
-        return psycopg2.connect(db_url, sslmode='require')
-    
-def init_db():
-    conn = get_db()
-    cur = conn.cursor()
-
-    # DEPARTMENTS
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS departments (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(100)
-    )
-    """)
-    
-    # USERS
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        full_name VARCHAR(150),
-        username VARCHAR(100),
-        email VARCHAR(100),
-        phone VARCHAR(50),
-        ic_number VARCHAR(50),
-        address TEXT,
-        position VARCHAR(100),
-        dept_id INT,
-        role VARCHAR(20),
-        password TEXT,
-        enrollment_date DATE,
-        entitlement INT DEFAULT 14,
-        availability VARCHAR(50) DEFAULT 'Available'
-    )
-    """)
-
-    # NOTICES
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS notices (
-        id SERIAL PRIMARY KEY,
-        content TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
-
-    # AUTO ADD COLUMN IF NOT EXIST
-    cur.execute("""
-    ALTER TABLE notices 
-    ADD COLUMN IF NOT EXISTS file VARCHAR(255)
-    """)
-
-    # POLICIES
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS policies (
-        id SERIAL PRIMARY KEY,
-        filename VARCHAR(255),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
-
-    # LEAVES
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS leaves (
-        id SERIAL PRIMARY KEY,
-        user_id INT,
-        leave_type VARCHAR(100),
-        start_date DATE,
-        end_date DATE,
-        reason TEXT,
-        status VARCHAR(20) DEFAULT 'Pending',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
-
-    # CLAIMS
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS claims (
-        id SERIAL PRIMARY KEY,
-        user_id INT,
-        title VARCHAR(255),
-        amount DECIMAL,
-        category VARCHAR(100),
-        status VARCHAR(20) DEFAULT 'Pending',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        receipt VARCHAR(255)
-    )
-    """)
-
-    conn.commit()
-    conn.close()
 
 # ================= LOGIN =================
 @app.route("/", methods=["GET","POST"])
@@ -115,435 +23,65 @@ def login():
         email = request.form["email"]
         password = request.form["password"]
 
-        if email == "admin@test.com" and password == "123":
+        if email == "admin@test.com":
             session["user_id"] = 1
             session["role"] = "admin"
             session["name"] = "Admin"
             return redirect("/admin/dashboard")
 
-        elif email == "user@test.com" and password == "123":
+        elif email == "user@test.com":
             session["user_id"] = 2
             session["role"] = "user"
             session["name"] = "User"
             return redirect("/users")
 
-        else:
-            return render_template("login.html", error="Invalid email or password")
-
     return render_template("login.html")
 
-# ================= LOGOUT =================
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect("/")
 
-# ================= USER DASHBOARD =================
-@app.route("/users")
-def users():
-    if "user_id" not in session:
-        return redirect("/")
-
-    conn = get_db()
-    cur = conn.cursor()
-
-    # CLAIM STATS
-    cur.execute("SELECT COUNT(*) FROM claims WHERE user_id=%s", (session["user_id"],))
-    total = cur.fetchone()[0]
-
-    cur.execute("SELECT COUNT(*) FROM claims WHERE status='Pending' AND user_id=%s", (session["user_id"],))
-    pending = cur.fetchone()[0]
-
-    cur.execute("SELECT COUNT(*) FROM claims WHERE status='Approved' AND user_id=%s", (session["user_id"],))
-    approved = cur.fetchone()[0]
-
-    cur.execute("SELECT COUNT(*) FROM claims WHERE status='Rejected' AND user_id=%s", (session["user_id"],))
-    rejected = cur.fetchone()[0]
-
-    # CLAIM LIST (FIXED)
-    cur.execute("""
-        SELECT title, amount, category, status, created_at, receipt
-        FROM claims
-        WHERE user_id=%s
-        ORDER BY created_at DESC
-    """, (session["user_id"],))
-    claims = cur.fetchall()
-
-    # LEAVE LIST
-    cur.execute("""
-        SELECT leave_type, start_date, end_date, status
-        FROM leaves
-        WHERE user_id=%s
-        ORDER BY created_at DESC
-    """, (session["user_id"],))
-    leaves = cur.fetchall()
-    
-    # NOTICE
-    try:
-        cur.execute("SELECT content, file FROM notices ORDER BY created_at DESC LIMIT 1")
-    except:
-        cur.execute("SELECT content FROM notices ORDER BY created_at DESC LIMIT 1")
-
-    notice = cur.fetchone()
-
-    # POLICY
-    cur.execute("SELECT filename FROM policies ORDER BY created_at DESC LIMIT 1")
-    policy = cur.fetchone()
-
-    conn.close()
-
-    return render_template("users.html",
-        total=total,
-        pending=pending,
-        approved=approved,
-        rejected=rejected,
-        claims=claims,
-        leaves=leaves,
-        notice=notice,
-        policy=policy
-    )
-
-# ================= ADMIN DASHBOARD =================
+# ================= DASHBOARD =================
 @app.route("/admin/dashboard")
 def admin_dashboard():
-    users = [
-        {"id":"001","name":"Ali","email":"ali@gmail.com","department":"IT"},
-        {"id":"002","name":"Siti","email":"siti@gmail.com","department":"HR"}
-    ]
-    return render_template("admin_dashboard.html", users=users)
-    
-# ================= ADMIN LEAVE DASHBOARD =================
-@app.route("/admin/leaves/dashboard")
-def admin_leave_dashboard():
-    if session.get("role") != "admin":
-        return redirect("/")
-
     conn = get_db()
     cur = conn.cursor()
 
-    # stats
-    cur.execute("""
-    SELECT 
-        COUNT(*),
-        COUNT(*) FILTER (WHERE status='Pending'),
-        COUNT(*) FILTER (WHERE status='Approved'),
-        COUNT(*) FILTER (WHERE status='Rejected')
-    FROM leaves
-    """)
-    stats = cur.fetchone()
+    cur.execute("SELECT COUNT(*) FROM users")
+    total_users = cur.fetchone()[0]
 
-    # list
-    cur.execute("""
-        SELECT l.id, u.full_name, l.leave_type, l.start_date, l.end_date, l.status
-        FROM leaves l
-        JOIN users u ON l.user_id = u.id
-        ORDER BY l.created_at DESC
-    """)
-    leaves = cur.fetchall()
+    cur.execute("SELECT COUNT(*) FROM departments")
+    total_dept = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM leaves WHERE status='Pending'")
+    pending_leave = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM claims")
+    total_claims = cur.fetchone()[0]
 
     conn.close()
 
-    return render_template("admin_leave_dashboard.html",
-        total=stats[0],
-        pending=stats[1],
-        approved=stats[2],
-        rejected=stats[3],
-        leaves=leaves
+    return render_template("admin_dashboard.html",
+        total_employees=total_users,
+        total_departments=total_dept,
+        pending_leaves=pending_leave,
+        total_claims=total_claims
     )
 
-# =========ADMIN CLAIM DASH=====================
-@app.route("/claims/dashboard")
-def admin_claim_dashboard():
-    if session.get("role") != "admin":
-        return redirect("/")
 
-    conn = get_db()
-    cur = conn.cursor()
-
-    # stats
-    cur.execute("""
-    SELECT 
-        COUNT(*),
-        COUNT(*) FILTER (WHERE status='Pending'),
-        COUNT(*) FILTER (WHERE status='Approved'),
-        COUNT(*) FILTER (WHERE status='Rejected')
-    FROM claims
-    """)
-    stats = cur.fetchone()
-
-    # list
-    cur.execute("""
-        SELECT c.id, u.full_name, c.title, c.amount, c.category, c.status
-        FROM claims c
-        JOIN users u ON c.user_id = u.id
-        ORDER BY c.created_at DESC
-    """)
-    claims = cur.fetchall()
-
-    conn.close()
-
-    return render_template("admin_claim_dashboard.html",
-        total=stats[0],
-        pending=stats[1],
-        approved=stats[2],
-        rejected=stats[3],
-        claims=claims
-    )
-    
-# ======NOTICE DASHBOARD==S======
-@app.route("/admin/notice", methods=["POST"])
-def manage_notice():
-    if session.get("role") != "admin":
-        return redirect("/")
-
-    content = request.form["content"]
-    file = request.files.get("file")
-
-    conn = get_db()
-    cur = conn.cursor()
-
-    filename = None
-
-    if file and file.filename != "":
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-
-    cur.execute("DELETE FROM notices")
-
-    cur.execute("""
-        INSERT INTO notices (content, file)
-        VALUES (%s, %s)
-    """, (content, filename))
-
-    conn.commit()
-    conn.close()
-
-    return redirect("/admin/dashboard")
-
-@app.route("/admin/policy", methods=["GET","POST"])
-def upload_policy():
-    if session.get("role") != "admin":
-        return redirect("/")
-
-    conn = get_db()
-    cur = conn.cursor()
-
-    if request.method == "POST":
-        file = request.files.get("policy_file")
-
-        if file:
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-
-            cur.execute("DELETE FROM policies")
-            cur.execute("INSERT INTO policies (filename) VALUES (%s)", (filename,))
-            conn.commit()
-
-    cur.execute("SELECT filename FROM policies ORDER BY created_at DESC LIMIT 1")
-    policy = cur.fetchone()
-
-    conn.close()
-
-    return render_template("admin_policy.html", policy=policy)
-
-
-# =================APPLY LEAVE===================
-@app.route("/leave/apply", methods=["GET", "POST"])
-def apply_leave():
-    if "user_id" not in session:
-        return redirect("/")
-
-    if request.method == "POST":
-        leave_type = request.form["leave_type"]
-        start_date = request.form["start_date"]
-        end_date = request.form["end_date"]
-        reason = request.form["reason"]
-
-        conn = get_db()
-        cur = conn.cursor()
-
-        cur.execute("""
-            INSERT INTO leaves (user_id, leave_type, start_date, end_date, reason)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (session["user_id"], leave_type, start_date, end_date, reason))
-
-        conn.commit()
-        conn.close()
-
-        return redirect("/leave/my")
-
-    return render_template("leaves/apply_leave.html")
-
-# ==================VIEW LEAVES====================
-@app.route("/leave/my")
-def my_leave():
-    if "user_id" not in session:
-        return redirect("/")
-
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("""
-        SELECT * FROM leaves WHERE user_id = %s ORDER BY created_at DESC
-    """, (session["user_id"],))
-
-    leaves = cur.fetchall()
-
-    conn.close()
-
-    return render_template("leaves/user_dashboard.html", leaves=leaves)
-
-# =================ADMIN VIEW LEAVES==============
-@app.route("/admin/leaves")
-def admin_leaves():
-    if session.get("role") != "admin":
-        return redirect("/")
-
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("""
-        SELECT l.*, u.full_name 
-        FROM leaves l
-        JOIN users u ON l.user_id = u.id
-        ORDER BY l.created_at DESC
-    """)
-
-    leaves = cur.fetchall()
-
-    conn.close()
-
-    return render_template("leaves/adminLeave_dashboard.html", leaves=leaves)
-
-# =============APPROVE/REJECT LEAVES=============
-@app.route("/leave/update/<int:id>/<status>")
-def update_leave(id, status):
-    if session.get("role") != "admin":
-        return redirect("/")
-
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("""
-        UPDATE leaves SET status = %s WHERE id = %s
-    """, (status, id))
-
-    conn.commit()
-    conn.close()
-
-    return redirect("/admin/leaves")
-
-# ================= SUBMIT CLAIM =================
-@app.route("/claims/submit", methods=["GET","POST"])
-def submit_claim():
-    if "user_id" not in session:
-        return redirect("/")
-
-    if request.method == "POST":
-        title = request.form["title"]
-        amount = float(request.form["amount"])
-        category = request.form["category"]
-
-        file = request.files.get("receipt")
-        filename = None
-
-        if file:
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-
-        conn = get_db()
-        cur = conn.cursor()
-
-        cur.execute("""
-            INSERT INTO claims (user_id,title,amount,category,receipt)
-            VALUES (%s,%s,%s,%s,%s)
-        """, (session["user_id"], title, amount, category, filename))
-
-        conn.commit()
-        conn.close()
-
-        return redirect("/users")
-
-    return render_template("claims/submit_claim.html")
-
-# ================= ADMIN CLAIMS =================
-@app.route("/admin/claims")
-def admin_claims():
-    if "role" not in session or session["role"] != "admin":
-        return redirect("/")
-
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("""
-        SELECT id, title, amount, category, status
-        FROM claims
-        ORDER BY created_at DESC
-    """)
-
-    claims = cur.fetchall()
-    conn.close()
-
-    return render_template("claims/claims_dashboard.html", claims=claims)
-
-# ================= APPROVE =================
-@app.route("/approve/<int:id>")
-def approve(id):
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("UPDATE claims SET status='Approved' WHERE id=%s", (id,))
-    conn.commit()
-    conn.close()
-
-    return redirect("/admin/claims")
-
-# ================= REJECT =================
-@app.route("/reject/<int:id>")
-def reject(id):
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("UPDATE claims SET status='Rejected' WHERE id=%s", (id,))
-    conn.commit()
-    conn.close()
-
-    return redirect("/admin/claims")
-
-# ============ ADMIN USERS ==============
+# ================= EMPLOYEES =================
 @app.route("/admin/users")
 def admin_users():
-    if session.get("role") != "admin":
-        return redirect("/")
-
     conn = get_db()
     cur = conn.cursor()
 
-    # GET USERS + DEPARTMENT NAME
     cur.execute("""
-        SELECT 
-            u.id,
-            u.full_name,
-            u.username,
-            u.email,
-            u.phone,
-            u.address,
-            u.position,
-            u.entitlement,
-            u.availability,
-            u.dept_id,
-            d.name AS department_name
+        SELECT u.id, u.full_name, u.email, d.name
         FROM users u
         LEFT JOIN departments d ON u.dept_id = d.id
-        ORDER BY u.id DESC
     """)
 
-    columns = [desc[0] for desc in cur.description]
-    users = [dict(zip(columns, row)) for row in cur.fetchall()]
+    users = cur.fetchall()
 
-    # GET DEPARTMENTS
     cur.execute("SELECT id, name FROM departments")
-    departments = [dict(id=r[0], name=r[1]) for r in cur.fetchall()]
+    departments = cur.fetchall()
 
     conn.close()
 
@@ -552,30 +90,18 @@ def admin_users():
                            departments=departments)
 
 
-# ================= CREATE USER =================
 @app.route("/admin/users/create", methods=["POST"])
 def create_user():
     conn = get_db()
     cur = conn.cursor()
 
     cur.execute("""
-        INSERT INTO users 
-        (full_name, username, email, phone, ic_number, address,
-         position, dept_id, role, password, enrollment_date, entitlement)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        INSERT INTO users (full_name, email, dept_id)
+        VALUES (%s,%s,%s)
     """, (
         request.form["full_name"],
-        request.form["username"],
         request.form["email"],
-        request.form["phone"],
-        request.form["ic_number"],
-        request.form["address"],
-        request.form["position"],
-        request.form["dept_id"],
-        request.form["role"],
-        request.form["password"],
-        request.form["enrollment_date"],
-        request.form["entitlement"]
+        request.form["dept_id"]
     ))
 
     conn.commit()
@@ -584,49 +110,12 @@ def create_user():
     return redirect("/admin/users")
 
 
-# ================= UPDATE USER =================
-@app.route("/admin/users/update/<int:id>", methods=["POST"])
-def update_user(id):
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("""
-        UPDATE users SET
-        full_name=%s,
-        email=%s,
-        phone=%s,
-        address=%s,
-        position=%s,
-        dept_id=%s,
-        entitlement=%s,
-        availability=%s
-        WHERE id=%s
-    """, (
-        request.form["full_name"],
-        request.form["email"],
-        request.form["phone"],
-        request.form["address"],
-        request.form["position"],
-        request.form["dept_id"],
-        request.form["entitlement"],
-        request.form["availability"],
-        id
-    ))
-
-    conn.commit()
-    conn.close()
-
-    return "OK"
-
-
-# ================= DELETE USER =================
 @app.route("/admin/users/delete/<int:id>", methods=["POST"])
 def delete_user(id):
     conn = get_db()
     cur = conn.cursor()
 
     cur.execute("DELETE FROM users WHERE id=%s", (id,))
-
     conn.commit()
     conn.close()
 
@@ -634,55 +123,97 @@ def delete_user(id):
 
 
 # ================= DEPARTMENTS =================
-@app.route("/admin/departments", methods=["POST"])
+@app.route("/admin/departments", methods=["GET","POST"])
 def manage_departments():
     conn = get_db()
     cur = conn.cursor()
 
-    cur.execute("INSERT INTO departments (name) VALUES (%s)",
-                (request.form["name"],))
+    if request.method == "POST":
+        cur.execute("INSERT INTO departments (name) VALUES (%s)",
+                    (request.form["name"],))
+        conn.commit()
 
-    conn.commit()
+    cur.execute("SELECT * FROM departments")
+    departments = cur.fetchall()
+
     conn.close()
 
-    return redirect("/admin/users")
+    return render_template("manage_department.html",
+                           departments=departments)
 
 
-@app.route("/admin/departments/delete/<int:dept_id>", methods=["POST"])
-def delete_department(dept_id):
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("DELETE FROM departments WHERE id=%s", (dept_id,))
-
-    conn.commit()
-    conn.close()
-
-    return redirect("/admin/users")
-
-
-# ================= RESET LOGIN =================
-@app.route("/admin/users/reset_login/<int:id>", methods=["POST"])
-def reset_login(id):
-    data = request.get_json()
-
-    username = data.get("username")
-    password = data.get("password")
-
+# ================= LEAVES =================
+@app.route("/admin/leaves")
+def admin_leaves():
     conn = get_db()
     cur = conn.cursor()
 
     cur.execute("""
-        UPDATE users SET username=%s, password=%s
-        WHERE id=%s
-    """, (username, password, id))
+        SELECT l.id, u.full_name, l.leave_type, l.status
+        FROM leaves l
+        JOIN users u ON l.user_id = u.id
+    """)
+
+    leaves = cur.fetchall()
+    conn.close()
+
+    return render_template("leaves/admin_leave_dashboard.html",
+                           leaves=leaves)
+
+
+@app.route("/leave/update/<int:id>/<status>")
+def update_leave(id, status):
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("UPDATE leaves SET status=%s WHERE id=%s",
+                (status, id))
 
     conn.commit()
     conn.close()
 
-    return {"success": True}
+    return redirect("/admin/leaves")
+
+
+# ================= CLAIMS =================
+@app.route("/admin/claims")
+def admin_claims():
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT id, title, amount, status
+        FROM claims
+    """)
+
+    claims = cur.fetchall()
+    conn.close()
+
+    return render_template("claims/claims_dashboard.html",
+                           claims=claims)
+
+
+@app.route("/claim/update/<int:id>/<status>")
+def update_claim(id, status):
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("UPDATE claims SET status=%s WHERE id=%s",
+                (status, id))
+
+    conn.commit()
+    conn.close()
+
+    return redirect("/admin/claims")
+
+
+# ================= LOGOUT =================
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
+
 
 # ================= RUN =================
 if __name__ == "__main__":
-    init_db()
-    app.run()
+    app.run(debug=True)
