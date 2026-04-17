@@ -1,175 +1,110 @@
 {% extends "base.html" %}
+{% block page_title %}Dashboard{% endblock %}
+
 {% block content %}
 
 <style>
-/* ===== BACKGROUND (KEEP YOUR STYLE) ===== */
-body {
-  background:
-    linear-gradient(rgba(0,0,0,0.6), rgba(41,87,157,0.9)),
-    url('/static/images/DJI_0094.JPG');
-  background-size: cover;
-  background-attachment: fixed;
-}
 
-/* ===== LAYOUT ===== */
-.main-layout {
-  display: flex;
-  height: 100vh;
-}
-
-/* ===== SIDEBAR ===== */
-.sidebar {
-  width: 250px;
-  background: linear-gradient(180deg, #0f9bba, #0a6c86);
-  color: white;
-  padding: 20px;
-}
-
-.sidebar h2 {
-  margin-bottom: 30px;
-}
-
-.sidebar a {
-  display: block;
-  padding: 12px;
-  color: white;
-  text-decoration: none;
-  border-radius: 10px;
-  margin-bottom: 5px;
-  transition: 0.3s;
-}
-
-.sidebar a:hover {
-  background: rgba(255,255,255,0.2);
-}
-
-/* ===== MAIN ===== */
-.main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* ===== TOPBAR ===== */
-.topbar {
-  height: 70px;
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(10px);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 30px;
-  color: white;
-}
-
-/* ===== CONTENT ===== */
-.content {
-  padding: 30px;
-  overflow-y: auto;
+/* ===== REMOVE FULL PAGE BREAKING ===== */
+.content-wrapper {
+  padding: 10px 5px;
 }
 
 /* ===== CARD ===== */
 .card-box {
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(15px);
-  border-radius: 15px;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
   padding: 20px;
   color: white;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
-/* ===== STATS ===== */
+/* ===== STAT ===== */
 .stat {
-  font-size: 25px;
-  font-weight: bold;
+  font-size: 28px;
+  font-weight: 700;
 }
 
-/* ===== TABLE ===== */
+/* ===== GRID SPACING ===== */
+.row-gap {
+  margin-bottom: 20px;
+}
+
+/* ===== TABLE FIX ===== */
 .table {
   color: white;
 }
+
+.table thead {
+  background: rgba(255,255,255,0.2);
+}
+
 </style>
 
-<div class="main-layout">
+<div class="content-wrapper">
 
-  <!-- ===== SIDEBAR ===== -->
-  <div class="sidebar">
-    <h2>JETAMA</h2>
-
-    <a href="#">🏠 Dashboard</a>
-    <a href="#">👥 Employees</a>
-    <a href="#">📄 Leave</a>
-    <a href="#">💰 Claims</a>
-    <a href="#">🏢 Departments</a>
-    <a href="#">⚙️ Settings</a>
+  <!-- HELLO -->
+  <div class="card-box mb-3">
+    👋 Hello Admin
   </div>
 
-  <!-- ===== MAIN ===== -->
-  <div class="main">
+  <!-- STATS -->
+  <div class="row row-gap">
 
-    <!-- TOPBAR -->
-    <div class="topbar">
-      <div>👋 Hello Admin</div>
-      <div>🔔 Notifications | 👤 Profile</div>
-    </div>
-
-    <!-- CONTENT -->
-    <div class="content">
-
-      <!-- STATS -->
-      <div class="row mb-4">
-
-        <div class="col-md-3">
-          <div class="card-box">
-            Employees
-            <div class="stat">{{ total_employees }}</div>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <div class="card-box">
-            Departments
-            <div class="stat">{{ total_departments }}</div>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <div class="card-box">
-            Pending Leave
-            <div class="stat">{{ pending_leaves }}</div>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <div class="card-box">
-            Claims
-            <div class="stat">{{ total_claims }}</div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- TABLE -->
+    <div class="col-md-3">
       <div class="card-box">
-        <h5>Employee List</h5>
-
-        <table class="table">
-          <tr>
-            <th>Name</th>
-            <th>Department</th>
-            <th>Email</th>
-          </tr>
-
-          {% for user in users %}
-          <tr>
-            <td>{{ user.name }}</td>
-            <td>{{ user.department }}</td>
-            <td>{{ user.email }}</td>
-          </tr>
-          {% endfor %}
-        </table>
+        Employees
+        <div class="stat">{{ total_employees }}</div>
       </div>
-
     </div>
+
+    <div class="col-md-3">
+      <div class="card-box">
+        Departments
+        <div class="stat">{{ total_departments }}</div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card-box">
+        Pending Leave
+        <div class="stat">{{ pending_leaves }}</div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card-box">
+        Claims
+        <div class="stat">{{ total_claims }}</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- EMPLOYEE TABLE -->
+  <div class="card-box">
+    <h5 class="mb-3">Employee List</h5>
+
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Department</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+
+      <tbody>
+      {% for user in users %}
+        <tr>
+          <td>{{ user.name }}</td>
+          <td>{{ user.department }}</td>
+          <td>{{ user.email }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
 
   </div>
 
