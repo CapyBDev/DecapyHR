@@ -41,30 +41,45 @@ def login():
 # ================= DASHBOARD =================
 @app.route("/admin/dashboard")
 def admin_dashboard():
+    if session.get("role") != "admin":
+        return redirect("/")
+
     conn = get_db()
     cur = conn.cursor()
 
-    cur.execute("SELECT COUNT(*) FROM users")
-    total_users = cur.fetchone()[0]
+    # ===== GET USERS (FULL DATA) =====
+    cur.execute("""
+        SELECT 
+            u.id,
+            u.full_name,
+            u.email,
+            u.phone,
+            u.position,
+            u.enrollment_date,
+            d.name AS department
+        FROM users u
+        LEFT JOIN departments d ON u.dept_id = d.id
+        ORDER BY u.id DESC
+    """)
 
-    cur.execute("SELECT COUNT(*) FROM departments")
-    total_dept = cur.fetchone()[0]
+    rows = cur.fetchall()
 
-    cur.execute("SELECT COUNT(*) FROM leaves WHERE status='Pending'")
-    pending_leave = cur.fetchone()[0]
-
-    cur.execute("SELECT COUNT(*) FROM claims")
-    total_claims = cur.fetchone()[0]
+    # convert to dict (IMPORTANT)
+    users = []
+    for r in rows:
+        users.append({
+            "id": r[0],
+            "name": r[1],
+            "email": r[2],
+            "phone": r[3],
+            "designation": r[4],
+            "join_date": r[5],
+            "department": r[6] or "-"
+        })
 
     conn.close()
 
-    return render_template("admin_dashboard.html",
-        total_employees=total_users,
-        total_departments=total_dept,
-        pending_leaves=pending_leave,
-        total_claims=total_claims
-    )
-
+    return render_template("admin_dashboard.html", users=users)
 
 # ================= EMPLOYEES =================
 @app.route("/admin/users")

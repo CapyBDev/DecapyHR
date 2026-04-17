@@ -6,6 +6,26 @@
 <style>
 
 /* ===== MAIN CONTAINER ===== */
+body {
+  height: 100vh;
+
+  background: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
+    url('/static/images/DJI_0094.JPG');
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  overflow-x: hidden;
+}
+.glass {
+  background: rgba(131, 199, 255, 0.79);
+  backdrop-filter: blur(18px);
+  border-radius: 18px;
+  padding: 20px;
+  color: white;
+}
 .dashboard-box {
     background: #ffffff;
     border-radius: 15px;
@@ -25,7 +45,7 @@
     padding: 10px;
     border-radius: 10px;
     border: 1px solid #ddd;
-    width: 200px;
+    width: 180px;
 }
 
 .filter-btn {
@@ -34,6 +54,7 @@
     color: white;
     padding: 10px 18px;
     border-radius: 10px;
+    cursor: pointer;
 }
 
 .add-btn {
@@ -42,6 +63,7 @@
     color: white;
     padding: 10px 18px;
     border-radius: 10px;
+    text-decoration: none;
 }
 
 /* ===== TABLE ===== */
@@ -71,78 +93,109 @@
     border-radius: 8px;
     margin-right: 5px;
     color: white;
+    cursor: pointer;
 }
 
 .view { background: #6c5ce7; }
 .edit { background: #00b894; }
 .delete { background: #d63031; }
 
+.avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
 </style>
 
 <div class="dashboard-box">
 
-    <!-- FILTER -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
+```
+<!-- ===== FILTER + ADD ===== -->
+<div class="d-flex justify-content-between align-items-center mb-3">
 
-        <div class="filter-bar">
-            <input type="text" placeholder="Employee Name">
-            <input type="text" placeholder="Employee ID">
-            <select>
-                <option>Employee Designation</option>
-            </select>
+    <div class="filter-bar">
+        <input type="text" placeholder="Employee Name">
+        <input type="text" placeholder="Employee ID">
+        <select>
+            <option>Employee Designation</option>
+        </select>
 
-            <button class="filter-btn">Filters</button>
-        </div>
-
-        <button class="add-btn">Add Employee</button>
-
+        <button class="filter-btn">Filters</button>
     </div>
 
-    <!-- TABLE -->
-    <div class="table-box">
+    <!-- LINK TO FULL EMPLOYEE PAGE -->
+    <a href="/admin/users" class="add-btn">+ Add Employee</a>
 
-        <table class="table table-hover">
+</div>
 
-            <thead>
-                <tr>
-                    <th>Employee ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Department</th>
-                    <th>Designation</th>
-                    <th>Mobile No</th>
-                    <th>Date Of Joining</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
+<!-- ===== TABLE ===== -->
+<div class="table-box">
 
-            <tbody>
+    <table class="table table-hover">
+
+        <thead>
+            <tr>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Department</th>
+                <th>Designation</th>
+                <th>Mobile No</th>
+                <th>Date Of Joining</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        {% if users %}
             {% for user in users %}
-                <tr>
-                    <td>#{{ user.id }}</td>
-                    <td>
-                        <img src="{{ user.avatar or '/static/images/user.png' }}" 
-                             style="width:30px;height:30px;border-radius:50%;margin-right:8px;">
-                        {{ user.name }}
-                    </td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.department }}</td>
-                    <td>{{ user.designation }}</td>
-                    <td>{{ user.phone }}</td>
-                    <td>{{ user.join_date }}</td>
+            <tr>
+                <td>#{{ user.id }}</td>
 
-                    <td>
-                        <button class="action-btn view">👁</button>
-                        <button class="action-btn edit">✏</button>
+                <td>
+                    <img src="/static/images/user.png" class="avatar">
+                    {{ user.name }}
+                </td>
+
+                <td>{{ user.email or '-' }}</td>
+                <td>{{ user.department or '-' }}</td>
+                <td>{{ user.designation or '-' }}</td>
+                <td>{{ user.phone or '-' }}</td>
+                <td>{{ user.join_date or '-' }}</td>
+
+                <td>
+
+                    <!-- VIEW (future use) -->
+                    <button class="action-btn view">👁</button>
+
+                    <!-- EDIT (next step) -->
+                    <button class="action-btn edit">✏</button>
+
+                    <!-- DELETE (WORKING) -->
+                    <form action="/admin/users/delete/{{ user.id }}" 
+                          method="POST" 
+                          style="display:inline;">
                         <button class="action-btn delete">🗑</button>
-                    </td>
-                </tr>
+                    </form>
+
+                </td>
+            </tr>
             {% endfor %}
-            </tbody>
+        {% else %}
+            <tr>
+                <td colspan="8" class="text-center">No employees found</td>
+            </tr>
+        {% endif %}
 
-        </table>
+        </tbody>
 
-    </div>
+    </table>
+
+</div>
+```
 
 </div>
 
