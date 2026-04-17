@@ -57,10 +57,7 @@ def admin_dashboard():
     total_claims = cur.fetchone()[0]
     
     # NEW EMPLOYEES (example: last 30 days)
-    cur.execute("""
-        SELECT COUNT(*) FROM users
-        WHERE created_at >= NOW() - INTERVAL '30 days'
-    """)
+    cur.execute("SELECT COUNT(*) FROM users")
     new_employees = cur.fetchone()[0]
 
     # SIMPLE HAPPINESS RATE (dummy logic)
