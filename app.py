@@ -206,20 +206,10 @@ def users():
 # ================= ADMIN DASHBOARD =================
 @app.route("/admin/dashboard")
 def admin_dashboard():
-
     users = [
-        {
-            "id": "MZ-001",
-            "name": "Harry Porter",
-            "email": "harry@gmail.com",
-            "department": "Technology",
-            "designation": "System Manager",
-            "phone": "0123456789",
-            "join_date": "1 March 2023",
-            "avatar": "/static/images/user.png"
-        }
+        {"id":"001","name":"Ali","email":"ali@gmail.com","department":"IT"},
+        {"id":"002","name":"Siti","email":"siti@gmail.com","department":"HR"}
     ]
-
     return render_template("admin_dashboard.html", users=users)
     
 # ================= ADMIN LEAVE DASHBOARD =================
