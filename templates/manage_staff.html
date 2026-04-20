@@ -4,40 +4,29 @@
 <style>
 body {
   height: 100vh;
-
-  background: 
-    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
-    url('/static/images/DJI_0094.JPG');
-
+  background: linear-gradient(rgba(0,0,0,0.6), rgba(41,87,157,0.9)),
+              url('/static/images/DJI_0094.JPG');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-
   overflow-x: hidden;
 }
-.glass {
-  background: rgba(131, 199, 255, 0.79);
-  backdrop-filter: blur(18px);
-  border-radius: 18px;
-  padding: 20px;
-  color: white;
-}
 
+/* CARD */
 .card {
-  border-radius: 14px;
-  background: rgba(255,255,255,0.95);
+  border-radius: 16px;
+  background: linear-gradient(rgba(245, 245, 255, 0.4), rgba(97, 134, 228, 0.72));
   padding: 20px;
 }
 
+/* FILTER */
 .filter-row {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
 }
 
-.filter-row input { flex: 2; }
-.filter-row select { flex: 1; }
-
+/* MODAL */
 .modal-header-custom {
   background: #2c7be5;
   color: white;
@@ -53,32 +42,28 @@ body {
 }
 
 .modal-footer-custom {
-  display: flex;
-  justify-content: space-between;
   padding: 15px;
+  text-align: right;
 }
+
+/* BADGE */
+.badge { border-radius: 10px; padding:6px 12px; }
 </style>
 
 <div class="container mt-4">
 
-  <!-- HEADER -->
+<!-- HEADER -->
+<div class="d-flex justify-content-between mb-3">
+  <h4 class="text-white">Staff Management</h4>
 
-  <div class="d-flex justify-content-between mb-3">
-    <h4 class="text-white">Staff Management</h4>
-
-<div class="d-flex gap-2">
-  <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#manageDepartmentModal">
-    + Departments
-  </button>
-
-  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
-    + Add Staff
-  </button>
+  <div class="d-flex gap-2">
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+      + Add Staff
+    </button>
+  </div>
 </div>
 
-  </div>
-
-  <div class="card">
+<div class="card">
 
 <!-- FILTER -->
 <div class="filter-row">
@@ -91,127 +76,176 @@ body {
     {% endfor %}
   </select>
 
-  <select id="filterAvail" class="form-select">
-    <option value="">All Status</option>
-    <option value="Available">Available</option>
-    <option value="Out">Out</option>
-    <option value="WFH">WFH</option>
-    <option value="MC">MC</option>
-  </select>
-
-  <button id="applyFilter" class="btn btn-primary">
-    <i class="bi bi-search"></i> Filter
-  </button>
+  <button onclick="applyFilter()" class="btn btn-primary">Filter</button>
 </div>
 
 <!-- TABLE -->
 <table class="table">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Department</th>
-      <th>Position</th>
-      <th>Status</th>
-    </tr>
-  </thead>
+<thead>
+<tr>
+  <th>Name</th>
+  <th>Department</th>
+  <th>Position</th>
+  <th>Status</th>
+</tr>
+</thead>
 
-  <tbody>
-    {% for u in users %}
-    <tr data-id="{{ u.id }}"
-        data-name="{{ u.full_name }}"
-        data-email="{{ u.email }}"
-        data-phone="{{ u.phone }}"
-        data-address="{{ u.address }}"
-        data-position="{{ u.position }}"
-        data-deptid="{{ u.dept_id }}"
-        data-entitlement="{{ u.entitlement }}"
-        data-availability="{{ u.availability }}">
+<tbody id="staffTable">
+{% for u in users %}
+<tr 
+  data-name="{{u.full_name}}"
+  data-dept="{{u.department_name}}"
+  data-id="{{u.id}}"
+  data-email="{{u.email}}"
+  data-phone="{{u.phone}}"
+  data-address="{{u.address}}"
+  data-position="{{u.position}}"
+  data-deptid="{{u.dept_id}}"
+  data-entitlement="{{u.entitlement}}"
+  data-availability="{{u.availability}}"
+>
 
-      <td>
-        <strong style="cursor:pointer; color:#2c7be5;"
-          onclick="openEditModal(this.closest('tr'))">
-          {{ u.full_name }}
-        </strong>
-      </td>
+<td>
+  <strong style="cursor:pointer;color:#2c7be5"
+    onclick="openEditModal(this.closest('tr'))">
+    {{u.full_name}}
+  </strong>
+</td>
 
-      <td>{{ u.department_name }}</td>
-      <td>{{ u.position }}</td>
-      <td><span class="badge bg-success">{{ u.availability }}</span></td>
+<td>{{u.department_name}}</td>
+<td>{{u.position}}</td>
 
-    </tr>
-    {% endfor %}
-  </tbody>
+<td>
+<span class="badge 
+{% if u.availability=='Available' %}bg-success
+{% elif u.availability=='WFH' %}bg-primary
+{% elif u.availability=='MC' %}bg-warning
+{% else %}bg-danger
+{% endif %}
+">
+{{u.availability}}
+</span>
+</td>
+
+</tr>
+{% endfor %}
+</tbody>
 </table>
 
-  </div>
+</div>
 </div>
 
-<!-- EDIT MODAL -->
+<!-- ================= ADD MODAL ================= -->
+<div class="modal fade" id="addEmployeeModal">
+<div class="modal-dialog modal-xl modal-dialog-centered">
+<div class="modal-content">
 
+<div class="modal-header-custom">Add Employee</div>
+
+<form method="POST" action="/admin/users/create">
+<div class="form-grid">
+
+<input name="full_name" placeholder="Full Name" class="form-control" required>
+<input name="email" placeholder="Email" class="form-control" required>
+<input name="phone" placeholder="Phone" class="form-control">
+<input name="address" placeholder="Address" class="form-control">
+
+<select name="dept_id" class="form-select" required>
+<option value="">Department</option>
+{% for d in departments %}
+<option value="{{d.id}}">{{d.name}}</option>
+{% endfor %}
+</select>
+
+<input name="position" placeholder="Position" class="form-control">
+<input name="entitlement" type="number" placeholder="Leave Days" class="form-control">
+
+<select name="availability" class="form-select">
+<option>Available</option>
+<option>WFH</option>
+<option>MC</option>
+<option>Out</option>
+</select>
+
+</div>
+
+<div class="modal-footer-custom">
+<button class="btn btn-primary">Add</button>
+</div>
+</form>
+
+</div>
+</div>
+</div>
+
+<!-- ================= EDIT MODAL ================= -->
 <div class="modal fade" id="editEmployeeModal">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content">
+<div class="modal-dialog modal-xl modal-dialog-centered">
+<div class="modal-content">
 
-  <div class="modal-header-custom">
-    Edit Employee
-  </div>
+<div class="modal-header-custom">Edit Employee</div>
 
-  <!--  CORRECT UPDATE ROUTE -->
-  <form method="POST" id="updateForm">
+<form method="POST" id="updateForm">
+<input type="hidden" id="empId">
 
-    <input type="hidden" name="id" id="empId">
+<div class="form-grid">
 
-    <div class="form-grid">
-      <input type="text" id="empName" name="full_name" class="form-control">
-      <input type="email" id="empEmail" name="email" class="form-control">
-      <input type="text" id="empPhone" name="phone" class="form-control">
-      <input type="text" id="empAddress" name="address" class="form-control">
+<input id="empName" name="full_name" class="form-control">
+<input id="empEmail" name="email" class="form-control">
+<input id="empPhone" name="phone" class="form-control">
+<input id="empAddress" name="address" class="form-control">
 
-      <select id="empDept" name="dept_id" class="form-select">
-        {% for d in departments %}
-        <option value="{{ d.id }}">{{ d.name }}</option>
-        {% endfor %}
-      </select>
+<select id="empDept" name="dept_id" class="form-select">
+{% for d in departments %}
+<option value="{{d.id}}">{{d.name}}</option>
+{% endfor %}
+</select>
 
-      <input type="text" id="empPosition" name="position" class="form-control">
-      <input type="number" id="empEntitlement" name="entitlement" class="form-control">
+<input id="empPosition" name="position" class="form-control">
+<input id="empEntitlement" name="entitlement" class="form-control">
 
-      <select id="empAvailability" name="availability" class="form-select">
-        <option>Available</option>
-        <option>Out</option>
-        <option>WFH</option>
-        <option>MC</option>
-        <option>Resign</option>
-      </select>
-    </div>
-
-    <div class="modal-footer-custom">
-
-      <!-- DELETE -->
-      <button type="button" id="deleteBtn" class="btn btn-outline-danger">
-        <i class="bi bi-trash"></i>
-      </button>
-
-      <button type="submit" class="btn btn-success">
-        Save
-      </button>
-
-    </div>
-
-  </form>
-
-  <!-- DELETE FORM -->
-  <form id="deleteForm" method="POST"></form>
+<select id="empAvailability" name="availability" class="form-select">
+<option>Available</option>
+<option>WFH</option>
+<option>MC</option>
+<option>Out</option>
+<option>Resign</option>
+</select>
 
 </div>
 
-  </div>
+<div class="modal-footer-custom d-flex justify-content-between">
+
+<button type="button" id="deleteBtn" class="btn btn-danger">Delete</button>
+
+<button class="btn btn-success">Save</button>
+
 </div>
 
-{% include "components/modals/add_employee.html" %}
-{% include "components/modals/manage_department.html" %}
+</form>
+
+<form id="deleteForm" method="POST"></form>
+
+</div>
+</div>
+</div>
 
 <script>
+
+// FILTER
+function applyFilter(){
+  let name = document.getElementById("searchName").value.toLowerCase();
+  let dept = document.getElementById("filterDept").value;
+
+  document.querySelectorAll("#staffTable tr").forEach(row=>{
+    let match = row.dataset.name.toLowerCase().includes(name) &&
+                (dept=="" || row.dataset.dept==dept);
+
+    row.style.display = match ? "" : "none";
+  });
+}
+
+// OPEN EDIT
 function openEditModal(row){
   let id = row.dataset.id;
 
@@ -225,21 +259,19 @@ function openEditModal(row){
   empEntitlement.value = row.dataset.entitlement;
   empAvailability.value = row.dataset.availability;
 
-  // FIX UPDATE ROUTE
   document.getElementById("updateForm").action = "/admin/users/update/" + id;
-
-  // FIX DELETE ROUTE
   document.getElementById("deleteForm").action = "/admin/users/delete/" + id;
 
-  new bootstrap.Modal(document.getElementById('editEmployeeModal')).show();
+  new bootstrap.Modal(document.getElementById("editEmployeeModal")).show();
 }
 
-// DELETE CLICK
+// DELETE
 document.getElementById("deleteBtn").onclick = function(){
   if(confirm("Delete this user?")){
     document.getElementById("deleteForm").submit();
   }
 };
+
 </script>
 
 {% endblock %}
