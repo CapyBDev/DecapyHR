@@ -346,7 +346,7 @@ def policy():
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT file FROM policies
+        SELECT filename FROM policies
         ORDER BY id DESC LIMIT 1
     """)
 
@@ -369,7 +369,7 @@ def upload_policy():
         cur = conn.cursor()
 
         cur.execute("""
-            INSERT INTO policies (file)
+            INSERT INTO policies (filename)
             VALUES (%s)
         """, (filename,))
 
