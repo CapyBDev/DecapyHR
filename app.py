@@ -287,7 +287,7 @@ def admin_leaves():
     conn.close()
 
     return render_template(
-        "leaves/admin_leave_dashboard.html",
+        "admin_leave_dashboard.html",
         leaves=leaves,
         total=total,
         pending=pending,
