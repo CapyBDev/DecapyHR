@@ -140,30 +140,27 @@ def admin_users():
                            departments=departments)
 
 
+
 @app.route("/admin/users/create", methods=["POST"])
 def create_user():
     conn = get_db()
     cur = conn.cursor()
 
     cur.execute("""
-        INSERT INTO users 
-        (full_name, email, phone, address, position, dept_id, entitlement, availability)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+        INSERT INTO users (full_name, email, phone, dept_id)
+        VALUES (%s,%s,%s,%s)
     """, (
         request.form["full_name"],
         request.form["email"],
-        request.form.get("phone"),
-        request.form.get("address"),
-        request.form.get("position"),
-        request.form.get("dept_id"),
-        request.form.get("entitlement"),
-        request.form.get("availability")
+        request.form["phone"],
+        request.form["dept_id"]
     ))
 
     conn.commit()
     conn.close()
 
     return redirect("/admin/users")
+
 
 @app.route("/admin/users/update/<int:id>", methods=["POST"])
 def update_user(id):
@@ -171,25 +168,13 @@ def update_user(id):
     cur = conn.cursor()
 
     cur.execute("""
-        UPDATE users SET
-            full_name=%s,
-            email=%s,
-            phone=%s,
-            address=%s,
-            position=%s,
-            dept_id=%s,
-            entitlement=%s,
-            availability=%s
+        UPDATE users
+        SET full_name=%s, email=%s, phone=%s
         WHERE id=%s
     """, (
         request.form["full_name"],
         request.form["email"],
-        request.form.get("phone"),
-        request.form.get("address"),
-        request.form.get("position"),
-        request.form.get("dept_id"),
-        request.form.get("entitlement"),
-        request.form.get("availability"),
+        request.form["phone"],
         id
     ))
 
@@ -197,6 +182,7 @@ def update_user(id):
     conn.close()
 
     return redirect("/admin/users")
+
 
 @app.route("/admin/users/delete/<int:id>", methods=["POST"])
 def delete_user(id):

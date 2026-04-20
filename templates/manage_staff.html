@@ -4,29 +4,40 @@
 <style>
 body {
   height: 100vh;
-  background: linear-gradient(rgba(0,0,0,0.6), rgba(41,87,157,0.9)),
-              url('/static/images/DJI_0094.JPG');
+
+  background: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
+    url('/static/images/DJI_0094.JPG');
+
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
+
   overflow-x: hidden;
 }
+.glass {
+  background: rgba(131, 199, 255, 0.79);
+  backdrop-filter: blur(18px);
+  border-radius: 18px;
+  padding: 20px;
+  color: white;
+}
 
-/* CARD */
 .card {
-  border-radius: 16px;
-  background: linear-gradient(rgba(245, 245, 255, 0.4), rgba(97, 134, 228, 0.72));
+  border-radius: 14px;
+  background: rgba(255,255,255,0.95);
   padding: 20px;
 }
 
-/* FILTER */
 .filter-row {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
 }
 
-/* MODAL */
+.filter-row input { flex: 2; }
+.filter-row select { flex: 1; }
+
 .modal-header-custom {
   background: #2c7be5;
   color: white;
@@ -42,31 +53,29 @@ body {
 }
 
 .modal-footer-custom {
+  display: flex;
+  justify-content: space-between;
   padding: 15px;
-  text-align: right;
 }
-
-/* BADGE */
-.badge { border-radius: 10px; padding:6px 12px; }
 </style>
 
 <div class="container mt-4">
 
 <!-- HEADER -->
+
 <div class="d-flex justify-content-between mb-3">
   <h4 class="text-white">Staff Management</h4>
 
-  <div class="d-flex gap-2">
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
-      + Add Staff
-    </button>
-  </div>
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+    + Add Staff
+  </button>
 </div>
 
-<div class="card">
+<div class="card p-3">
 
 <!-- FILTER -->
-<div class="filter-row">
+
+<div class="d-flex gap-2 mb-3">
   <input type="text" id="searchName" class="form-control" placeholder="Search staff">
 
   <select id="filterDept" class="form-select">
@@ -76,11 +85,13 @@ body {
     {% endfor %}
   </select>
 
-  <button onclick="applyFilter()" class="btn btn-primary">Filter</button>
+<button onclick="applyFilter()" class="btn btn-primary">Filter</button>
+
 </div>
 
 <!-- TABLE -->
-<table class="table">
+
+<table class="table table-hover">
 <thead>
 <tr>
   <th>Name</th>
@@ -92,15 +103,15 @@ body {
 
 <tbody id="staffTable">
 {% for u in users %}
-<tr 
-  data-name="{{u.full_name}}"
-  data-dept="{{u.department_name}}"
+<tr
   data-id="{{u.id}}"
+  data-name="{{u.full_name}}"
   data-email="{{u.email}}"
   data-phone="{{u.phone}}"
   data-address="{{u.address}}"
   data-position="{{u.position}}"
   data-deptid="{{u.dept_id}}"
+  data-dept="{{u.department_name}}"
   data-entitlement="{{u.entitlement}}"
   data-availability="{{u.availability}}"
 >
@@ -112,8 +123,8 @@ body {
   </strong>
 </td>
 
-<td>{{u.department_name}}</td>
-<td>{{u.position}}</td>
+<td>{{u.department_name or "-"}}</td>
+<td>{{u.position or "-"}}</td>
 
 <td>
 <span class="badge 
@@ -121,9 +132,8 @@ body {
 {% elif u.availability=='WFH' %}bg-primary
 {% elif u.availability=='MC' %}bg-warning
 {% else %}bg-danger
-{% endif %}
-">
-{{u.availability}}
+{% endif %}">
+{{u.availability or "Available"}}
 </span>
 </td>
 
@@ -136,31 +146,35 @@ body {
 </div>
 
 <!-- ================= ADD MODAL ================= -->
+
 <div class="modal fade" id="addEmployeeModal">
-<div class="modal-dialog modal-xl modal-dialog-centered">
+<div class="modal-dialog modal-lg">
 <div class="modal-content">
 
-<div class="modal-header-custom">Add Employee</div>
-
 <form method="POST" action="/admin/users/create">
-<div class="form-grid">
 
-<input name="full_name" placeholder="Full Name" class="form-control" required>
-<input name="email" placeholder="Email" class="form-control" required>
-<input name="phone" placeholder="Phone" class="form-control">
-<input name="address" placeholder="Address" class="form-control">
+<div class="modal-header bg-primary text-white">
+  <h5>Add Employee</h5>
+</div>
 
-<select name="dept_id" class="form-select" required>
+<div class="modal-body">
+
+<input name="full_name" class="form-control mb-2" placeholder="Full Name" required>
+<input name="email" class="form-control mb-2" placeholder="Email">
+<input name="phone" class="form-control mb-2" placeholder="Phone">
+<input name="address" class="form-control mb-2" placeholder="Address">
+
+<select name="dept_id" class="form-control mb-2" required>
 <option value="">Department</option>
 {% for d in departments %}
 <option value="{{d.id}}">{{d.name}}</option>
 {% endfor %}
 </select>
 
-<input name="position" placeholder="Position" class="form-control">
-<input name="entitlement" type="number" placeholder="Leave Days" class="form-control">
+<input name="position" class="form-control mb-2" placeholder="Position">
+<input name="entitlement" type="number" class="form-control mb-2" placeholder="Leave Days">
 
-<select name="availability" class="form-select">
+<select name="availability" class="form-control">
 <option>Available</option>
 <option>WFH</option>
 <option>MC</option>
@@ -169,9 +183,10 @@ body {
 
 </div>
 
-<div class="modal-footer-custom">
-<button class="btn btn-primary">Add</button>
+<div class="modal-footer">
+<button class="btn btn-success w-100">Add Employee</button>
 </div>
+
 </form>
 
 </div>
@@ -179,32 +194,35 @@ body {
 </div>
 
 <!-- ================= EDIT MODAL ================= -->
-<div class="modal fade" id="editEmployeeModal">
-<div class="modal-dialog modal-xl modal-dialog-centered">
-<div class="modal-content">
 
-<div class="modal-header-custom">Edit Employee</div>
+<div class="modal fade" id="editEmployeeModal">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
 
 <form method="POST" id="updateForm">
 <input type="hidden" id="empId">
 
-<div class="form-grid">
+<div class="modal-header bg-warning text-dark">
+  <h5>Edit Employee</h5>
+</div>
 
-<input id="empName" name="full_name" class="form-control">
-<input id="empEmail" name="email" class="form-control">
-<input id="empPhone" name="phone" class="form-control">
-<input id="empAddress" name="address" class="form-control">
+<div class="modal-body">
 
-<select id="empDept" name="dept_id" class="form-select">
+<input id="empName" name="full_name" class="form-control mb-2">
+<input id="empEmail" name="email" class="form-control mb-2">
+<input id="empPhone" name="phone" class="form-control mb-2">
+<input id="empAddress" name="address" class="form-control mb-2">
+
+<select id="empDept" name="dept_id" class="form-control mb-2">
 {% for d in departments %}
 <option value="{{d.id}}">{{d.name}}</option>
 {% endfor %}
 </select>
 
-<input id="empPosition" name="position" class="form-control">
-<input id="empEntitlement" name="entitlement" class="form-control">
+<input id="empPosition" name="position" class="form-control mb-2">
+<input id="empEntitlement" name="entitlement" class="form-control mb-2">
 
-<select id="empAvailability" name="availability" class="form-select">
+<select id="empAvailability" name="availability" class="form-control">
 <option>Available</option>
 <option>WFH</option>
 <option>MC</option>
@@ -214,11 +232,9 @@ body {
 
 </div>
 
-<div class="modal-footer-custom d-flex justify-content-between">
+<div class="modal-footer d-flex justify-content-between">
 
-<button type="button" id="deleteBtn" class="btn btn-danger">Delete</button>
-
-<button class="btn btn-success">Save</button>
+<button type="button" id="deleteBtn" class="btn btn-danger">Delete</button> <button class="btn btn-success">Save</button>
 
 </div>
 
@@ -234,8 +250,8 @@ body {
 
 // FILTER
 function applyFilter(){
-  let name = document.getElementById("searchName").value.toLowerCase();
-  let dept = document.getElementById("filterDept").value;
+  let name = searchName.value.toLowerCase();
+  let dept = filterDept.value;
 
   document.querySelectorAll("#staffTable tr").forEach(row=>{
     let match = row.dataset.name.toLowerCase().includes(name) &&
@@ -247,17 +263,18 @@ function applyFilter(){
 
 // OPEN EDIT
 function openEditModal(row){
+
   let id = row.dataset.id;
 
-  empId.value = id;
-  empName.value = row.dataset.name;
-  empEmail.value = row.dataset.email;
-  empPhone.value = row.dataset.phone;
-  empAddress.value = row.dataset.address;
-  empPosition.value = row.dataset.position;
-  empDept.value = row.dataset.deptid;
-  empEntitlement.value = row.dataset.entitlement;
-  empAvailability.value = row.dataset.availability;
+  document.getElementById("empId").value = id;
+  document.getElementById("empName").value = row.dataset.name;
+  document.getElementById("empEmail").value = row.dataset.email;
+  document.getElementById("empPhone").value = row.dataset.phone;
+  document.getElementById("empAddress").value = row.dataset.address;
+  document.getElementById("empPosition").value = row.dataset.position;
+  document.getElementById("empDept").value = row.dataset.deptid;
+  document.getElementById("empEntitlement").value = row.dataset.entitlement;
+  document.getElementById("empAvailability").value = row.dataset.availability;
 
   document.getElementById("updateForm").action = "/admin/users/update/" + id;
   document.getElementById("deleteForm").action = "/admin/users/delete/" + id;
