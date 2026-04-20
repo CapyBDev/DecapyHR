@@ -2,7 +2,7 @@
 {% block content %}
 
 <style>
-  body {
+body {
   height: 100vh;
 
   background: 
@@ -14,6 +14,7 @@
   background-attachment: fixed;
 
   overflow-x: hidden;
+}
 .table-card {
   background: white;
   border-radius: 14px;
@@ -53,7 +54,50 @@
   background: #f9fafb;
   cursor: pointer;
 }
+.details-panel {
+  position: fixed;
+  top: 120px;
+  right: 30px;
 
+  width: 380px;
+  max-width: 90%;
+
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+
+  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+
+  z-index: 1050;
+  display: none;
+
+  animation: slideIn 0.3s ease;
+}
+
+.details-panel.active {
+  display: block;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(40px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.details-panel label {
+  font-weight: 500;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #555;
+}
+
+.details-panel input,
+.details-panel select {
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.details-panel .btn {
+  border-radius: 8px;
+}
 .hidden {
   display: none;
 }
@@ -112,74 +156,81 @@
 
       <!-- USER TABLE -->
       <div class="table-card">
-  <table class="table align-middle mb-0">
-    <thead>
-      <tr>
-        <th>Employee</th>
-        <th>Department</th>
-        <th>Position</th>
-        <th>Status</th>
-        <th class="text-end">Action</th>
-      </tr>
-    </thead>
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Employee</th>
+            <th>Department</th>
+            <th>Position</th>
+            <th>Status</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
 
-    <tbody>
-      {% for u in users %}
-      {% set avail = u.availability or 'Available' %}
-      <tr class="user-row"
-          data-name="{{ u.full_name }}"
-          data-dept="{{ u.department_name }}"
-          data-avail="{{ avail }}"
-          onclick='showDetails({{ u|tojson }})'>
+        <tbody>
+          {% for u in users %}
+          {% set avail = u.availability or 'Available' %}
+          <tr class="user-row"
+              data-name="{{ u.full_name }}"
+              data-dept="{{ u.department_name }}"
+              data-avail="{{ avail }}"
+              onclick='showDetails({{ u|tojson }})'>
 
-        <!-- AVATAR + NAME -->
-        <td class="d-flex align-items-center gap-3">
-          <div class="avatar">
-            {{ u.full_name[0] }}
-          </div>
-          <div>
-            <div class="fw-semibold">{{ u.full_name }}</div>
-            <small class="text-muted">{{ u.email or "-" }}</small>
-          </div>
-        </td>
+            <!-- AVATAR + NAME -->
+            <td class="d-flex align-items-center gap-3">
+              <div class="avatar">
+                {{ u.full_name[0] }}
+              </div>
+              <div>
+                <div class="fw-semibold">{{ u.full_name }}</div>
+                <small class="text-muted">{{ u.email or "-" }}</small>
+              </div>
+            </td>
 
-        <td>{{ u.department_name or "-" }}</td>
-        <td>{{ u.position or "-" }}</td>
+            <td>{{ u.department_name or "-" }}</td>
+            <td>{{ u.position or "-" }}</td>
 
-        <!-- STATUS -->
-        <td>
-          <span class="status-badge
-            {% if avail == 'Available' %} status-green
-            {% elif avail == 'Out' %} status-blue
-            {% elif avail == 'MC' %} status-yellow
-            {% elif avail == 'WFH' %} status-cyan
-            {% else %} status-gray
-            {% endif %}">
-            {{ avail }}
-          </span>
-        </td>
+            <!-- STATUS -->
+            <td>
+              <span class="status-badge
+                {% if avail == 'Available' %} status-green
+                {% elif avail == 'Out' %} status-blue
+                {% elif avail == 'MC' %} status-yellow
+                {% elif avail == 'WFH' %} status-cyan
+                {% else %} status-gray
+                {% endif %}">
+                {{ avail }}
+              </span>
+            </td>
 
-        <!-- ACTION -->
-        <td class="text-end">
-          <button class="btn btn-sm btn-light" onclick="event.stopPropagation(); showDetails({{ u|tojson }})">
-            ✏️
-          </button>
-          <button class="btn btn-sm btn-light text-danger"
-            onclick="event.stopPropagation(); deleteUser({{ u.id }})">
-            🗑️
-          </button>
-        </td>
+            <!-- ACTION -->
+            <td class="text-end">
+              <button class="btn btn-sm btn-light" onclick="event.stopPropagation(); showDetails({{ u|tojson }})">
+                ✏️
+              </button>
+              <button class="btn btn-sm btn-light text-danger"
+                onclick="event.stopPropagation(); deleteUser({{ u.id }})">
+                🗑️
+              </button>
+            </td>
 
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
 <!-- RIGHT PANEL -->
 <div id="detailsPanel" class="col-4 details-panel hidden">
 
-<h5><i class="bi bi-person-lines-fill"></i> Employee Details</h5>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="mb-0">Employee Details</h5>
+
+  <button class="btn btn-sm btn-outline-secondary" onclick="closePanel()">
+    ← Back
+  </button>
+</div>
+<hr>
         <hr>
 
         <!-- UPDATE FORM -->
@@ -391,7 +442,7 @@ document.getElementById("applyFilter").addEventListener("click", () => {
 
 function showDetails(user){
 
-  document.getElementById("detailsPanel").classList.remove("hidden");
+  document.getElementById("detailsPanel").classList.add("active");
 
   empId.value = user.id;
   empName.value = user.full_name;
@@ -432,7 +483,9 @@ deleteForm.onsubmit = function(e){
     .then(()=>location.reload());
   }
 };
-
+function closePanel(){
+  document.getElementById("detailsPanel").classList.remove("active");
+}
 </script>
 
 {% endblock %}

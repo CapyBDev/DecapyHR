@@ -146,17 +146,20 @@ def create_user():
 
     cur.execute("""
         INSERT INTO users 
-        (full_name, email, phone, address, position, dept_id, entitlement, availability)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+        (full_name, email, phone, address, position, dept_id, entitlement, availability, username, password, role)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
     """, (
         request.form["full_name"],
-        request.form["email"],
-        request.form["phone"],
-        request.form["address"],
-        request.form["position"],
-        request.form["dept_id"],
+        request.form.get("email"),
+        request.form.get("phone"),
+        request.form.get("address"),
+        request.form.get("position"),
+        request.form.get("dept_id"),
         request.form.get("entitlement", 14),
-        request.form.get("availability", "Available")
+        "Available",
+        request.form.get("username"),
+        request.form.get("password"),
+        request.form.get("role", "user")
     ))
 
     conn.commit()
