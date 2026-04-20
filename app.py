@@ -101,7 +101,7 @@ def admin_dashboard():
         project_data=project_data,
         attendance_data=attendance_data
     )
-# ================= EMPLOYEES =================
+
 # ================= EMPLOYEES =================
 @app.route("/admin/users")
 def admin_users():
