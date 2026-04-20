@@ -107,7 +107,7 @@ def admin_users():
     conn = get_db()
     cur = conn.cursor()
 
-    # ✅ FIXED QUERY (ALL REQUIRED FIELDS)
+    #  FIXED QUERY (ALL REQUIRED FIELDS)
     cur.execute("""
         SELECT 
             u.id,
@@ -124,11 +124,11 @@ def admin_users():
         LEFT JOIN departments d ON u.dept_id = d.id
     """)
 
-    # ✅ CONVERT TO DICTIONARY (IMPORTANT FIX)
+    #  CONVERT TO DICTIONARY (IMPORTANT FIX)
     columns = [col[0] for col in cur.description]
     users = [dict(zip(columns, row)) for row in cur.fetchall()]
 
-    # ✅ GET DEPARTMENTS
+    #  GET DEPARTMENTS
     cur.execute("SELECT id, name FROM departments")
     dept_columns = [col[0] for col in cur.description]
     departments = [dict(zip(dept_columns, row)) for row in cur.fetchall()]
@@ -258,17 +258,42 @@ def admin_leaves():
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT l.id, u.full_name, l.leave_type, l.status
+        SELECT 
+            l.id,
+            u.full_name,
+            l.leave_type,
+            l.start_date,
+            l.end_date,
+            l.status
         FROM leaves l
         JOIN users u ON l.user_id = u.id
     """)
 
     leaves = cur.fetchall()
+
+    # STATS
+    cur.execute("SELECT COUNT(*) FROM leaves")
+    total = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM leaves WHERE status='Pending'")
+    pending = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM leaves WHERE status='Approved'")
+    approved = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM leaves WHERE status='Rejected'")
+    rejected = cur.fetchone()[0]
+
     conn.close()
 
-    return render_template("leaves/admin_leave_dashboard.html",
-                           leaves=leaves)
-
+    return render_template(
+        "leaves/admin_leave_dashboard.html",
+        leaves=leaves,
+        total=total,
+        pending=pending,
+        approved=approved,
+        rejected=rejected
+    )
 
 @app.route("/leave/update/<int:id>/<status>")
 def update_leave(id, status):

@@ -1,108 +1,180 @@
 {% extends "base.html" %}
-{% block page_title %}LEAVE RECORDS{% endblock %}
+{% block page_title %}Admin Leave Dashboard{% endblock %}
+
 {% block content %}
 
 <style>
 body {
   height: 100vh;
-
   background: 
-    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.9)), 
     url('/static/images/DJI_0094.JPG');
-
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-
   overflow-x: hidden;
 }
 
+/* GLASS EFFECT */
 .glass {
-  background: rgba(12, 137, 254, 0.37);
-  backdrop-filter: blur(18px);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
   border-radius: 18px;
   padding: 20px;
   color: white;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 }
 
+/* STAT CARDS */
 .stat-card {
   padding: 20px;
   border-radius: 18px;
   color: white;
-  background: rgba(72, 190, 249, 0.63);
+  font-weight: 500;
+  transition: 0.3s;
 }
 
-.blue { border-left: 5px solid #00f2fe; }
-.green { border-left: 5px solid #43e97b; }
-.orange { border-left: 5px solid #ffd200; }
-.red { border-left: 5px solid #ff4b2b; }
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+/* COLORS */
+.blue {
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+}
+.green {
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+}
+.orange {
+  background: linear-gradient(135deg, #f7971e, #ffd200);
+}
+.red {
+  background: linear-gradient(135deg, #ff4b2b, #ff416c);
+}
+
+/* TABLE */
 .table {
   color: white;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
+.table th {
+  background: rgba(255,255,255,0.1);
+  border: none;
+}
+
+.table td {
+  border: none;
+  vertical-align: middle;
+}
+
+/* BUTTON */
+.btn-sm {
+  border-radius: 10px;
+}
+
+/* BADGE */
+.badge {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 10px;
+}
 </style>
 
 <div class="container-fluid mt-4">
 
-<!-- STATS -->
-<div class="row g-3 mb-4">
+<!-- 🔥 STATS -->
+<div class="row g-4 mb-4">
 
-<div class="col-md-3">
-<div class="stat-card blue">
-<div>Total</div>
-<h3>{{total}}</h3>
-</div>
+  <div class="col-md-3">
+    <div class="stat-card blue">
+      <h6>Total Leaves</h6>
+      <h2>{{total}}</h2>
+      <small>All records</small>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="stat-card orange">
+      <h6>Pending</h6>
+      <h2>{{pending}}</h2>
+      <small>Action needed</small>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="stat-card green">
+      <h6>Approved</h6>
+      <h2>{{approved}}</h2>
+      <small>Completed</small>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="stat-card red">
+      <h6>Rejected</h6>
+      <h2>{{rejected}}</h2>
+      <small>Review required</small>
+    </div>
+  </div>
+
 </div>
 
-<div class="col-md-3">
-<div class="stat-card orange">
-<div>Pending</div>
-<h3>{{pending}}</h3>
-</div>
-</div>
-
-<div class="col-md-3">
-<div class="stat-card green">
-<div>Approved</div>
-<h3>{{approved}}</h3>
-</div>
-</div>
-
-<div class="col-md-3">
-<div class="stat-card red">
-<div>Rejected</div>
-<h3>{{rejected}}</h3>
-</div>
-</div>
-
-</div>
-
-<!-- TABLE -->
+<!-- 📋 TABLE -->
 <div class="glass">
 
-<table class="table">
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Start</th>
-<th>End</th>
-<th>Status</th>
-<th>Action</th>
-</tr>
+<h5 class="mb-3">Latest Leave Requests</h5>
 
-{% for l in leaves %}
-<tr>
-<td>{{l[1]}}</td>
-<td>{{l[2]}}</td>
-<td>{{l[3]}}</td>
-<td>{{l[4]}}</td>
-<td>{{l[5]}}</td>
-<td>
-<a href="/leave/update/{{l[0]}}/Approved" class="btn btn-success btn-sm">Approve</a>
-<a href="/leave/update/{{l[0]}}/Rejected" class="btn btn-danger btn-sm">Reject</a>
-</td>
-</tr>
-{% endfor %}
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Start</th>
+      <th>End</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+
+  <tbody>
+  {% for l in leaves %}
+    <tr>
+      <td>{{l[1]}}</td>
+      <td>{{l[2]}}</td>
+      <td>{{l[3]}}</td>
+      <td>{{l[4]}}</td>
+
+      <!-- STATUS BADGE -->
+      <td>
+        <span class="badge
+          {% if l[5]=='Approved' %}bg-success
+          {% elif l[5]=='Pending' %}bg-warning
+          {% else %}bg-danger
+          {% endif %}
+        ">
+          {{l[5]}}
+        </span>
+      </td>
+
+      <!-- ACTION BUTTON -->
+      <td>
+        {% if l[5] == 'Pending' %}
+        <form action="/leave/update/{{l[0]}}/Approved" method="POST" style="display:inline;">
+          <button class="btn btn-success btn-sm">Approve</button>
+        </form>
+
+        <form action="/leave/update/{{l[0]}}/Rejected" method="POST" style="display:inline;">
+          <button class="btn btn-danger btn-sm">Reject</button>
+        </form>
+        {% else %}
+        <span class="text-muted">No action</span>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
 
 </table>
 
