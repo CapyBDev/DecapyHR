@@ -46,101 +46,312 @@
   <h4 class="text-white">Staff Management</h4>
 
   <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
-    + Add Staff
+    + Add New Employee
   </button>
 </div>
 
-<div class="row">
+<!-- FILTER BAR -->
+    <div class="d-flex gap-2 align-items-end search-bar mb-3">
+      <div>
+        <label class="form-label fw-semibold">Search Name</label>
+        <input type="text" id="searchName" class="form-control" placeholder="Type a name...">
+      </div>
 
-<!-- LEFT TABLE -->
+      <div>
+        <label class="form-label fw-semibold">Department</label>
+        <select id="filterDept" class="form-select">
+          <option value="">All</option>
+          {% for d in departments %}
+            <option value="{{ d.name }}">{{ d.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
 
-<div class="col-8">
+      <div>
+        <label class="form-label fw-semibold">Availability</label>
+        <select id="filterAvail" class="form-select">
+          <option value="">All</option>
+          <option value="Available">Available</option>
+          <option value="Out">Out</option>
+          <option value="WFH">WFH</option>
+          <option value="MC">MC</option>
+        </select>
+      </div>
 
-<div class="card p-3">
+      <div>
+        <label class="form-label fw-semibold">Sort</label>
+        <select id="sortBy" class="form-select">
+          <option value="az">Alphabetical A-Z</option>
+          <option value="za">Alphabetical Z-A</option>
+        </select>
+      </div>
 
-<table class="table table-hover">
-<thead>
-<tr>
-<th>Name</th>
-<th>Department</th>
-<th>Position</th>
-<th>Status</th>
-</tr>
-</thead>
+      <button id="applyFilter" class="btn btn-primary"><i class="bi bi-funnel"></i> Filter</button>
+    </div>
 
-<tbody>
-{% for u in users %}
-<tr class="user-row" onclick='showDetails({{ u|tojson }})'>
-<td>{{u.full_name}}</td>
-<td>{{u.department_name}}</td>
-<td>{{u.position}}</td>
-<td>{{u.availability}}</td>
-</tr>
-{% endfor %}
-</tbody>
+    <div class="row">
 
-</table>
-
-</div>
-</div>
+      <!-- USER TABLE -->
+      <div class="col-8">
+        <div class="table-responsive mt-3">
+          <table id="userTable" class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Position</th>
+                <th>Availability</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in users %}
+              {% set avail = u.availability or 'Available' %}
+              <tr class="user-row"
+                  data-name="{{ u.full_name }}"
+                  data-dept="{{ u.department_name }}"
+                  data-avail="{{ avail }}"
+                  onclick='showDetails({{ u|tojson }})'>
+                <td>{{ u.full_name }}</td>
+                <td>{{ u.department_name or "-" }}</td>
+                <td>{{ u.position or "-" }}</td>
+                <td>
+                  <span class="badge
+                  {% if avail == 'Available' %} bg-success
+                  {% elif avail == 'On Leave' %}bg-danger 
+                  {% elif avail == 'Out' %} bg-primary
+                  {% elif avail == 'MC' %} bg-warning text-dark
+                  {% elif avail == 'WFH' %} bg-info text-dark
+                  {% else %} bg-secondary
+                  {% endif %} ">
+                    {{ avail }}
+                  </span>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
 <!-- RIGHT PANEL -->
 
 <div id="detailsPanel" class="col-4 details-panel hidden">
 
-<h5>Employee Details</h5>
+<h5><i class="bi bi-person-lines-fill"></i> Employee Details</h5>
+        <hr>
 
-<form id="updateForm" method="POST">
+        <!-- UPDATE FORM -->
+        <form id="updateUserForm" method="post">
 
-<input type="hidden" id="empId">
+          <input type="hidden" name="id" id="empId">
 
-<label>Name</label> <input id="empName" name="full_name" class="form-control mb-2">
+          <label>Full Name</label>
+          <input type="text" name="full_name" id="empName" class="form-control mb-2">
 
-<label>Email</label> <input id="empEmail" name="email" class="form-control mb-2">
+          <label>Email</label>
+          <input type="email" name="email" id="empEmail" class="form-control mb-2">
 
-<label>Phone</label> <input id="empPhone" name="phone" class="form-control mb-2">
+          <label>Phone</label>
+          <input type="text" name="phone" id="empPhone" class="form-control mb-2">
 
-<label>Address</label> <input id="empAddress" name="address" class="form-control mb-2">
+          <label>Address</label>
+          <input type="text" name="address" id="empAddress" class="form-control mb-2">
 
-<label>Position</label> <input id="empPosition" name="position" class="form-control mb-2">
+          <label>Department</label>
+          <select name="dept_id" id="empDept" class="form-select mb-2">
+            <option value="">- Select Department -</option>
+            {% for d in departments %}
+              <option value="{{ d.id }}">{{ d.name }}</option>
+            {% endfor %}
+          </select>
 
-<label>Department</label> <select id="empDept" name="dept_id" class="form-control mb-2">
-{% for d in departments %}
+          <label>Position</label>
+          <input type="text" name="position" id="empPosition" class="form-control mb-2">
 
-<option value="{{d.id}}">{{d.name}}</option>
-{% endfor %}
-</select>
+          <label>Entitlement</label>
+          <input type="number" name="entitlement" id="empEntitlement" class="form-control mb-2">
 
-<label>Entitlement</label> <input id="empEntitlement" name="entitlement" class="form-control mb-2">
+          <label>Availability</label>
+          <select id="empAvailability" name="availability" class="form-select mb-2">
+            <option value="Available">Available</option>
+            <option value="Out">Out</option>
+            <option value="WFH">WFH</option>
+            <option value="MC">MC</option>
+            <option value="Resign">Resign</option>
+          </select>
 
-<label>Status</label> <select id="empAvailability" name="availability" class="form-control mb-2">
+          <button type="submit" class="btn btn-success w-100 mt-3">
+            <i class="bi bi-save"></i> Save
+          </button>
 
-<option>Available</option>
-<option>WFH</option>
-<option>MC</option>
-<option>Out</option>
-</select>
+          <button type="button" class="btn btn-warning w-100 mt-2" onclick="toggleResetLogin()">
+            <i class="bi bi-key"></i> New Username / Password
+          </button>
 
-<button class="btn btn-success w-100 mt-2">Save</button>
+          <!-- Hidden reset login form -->
+          <div id="resetLoginBox" style="display:none;" class="mt-3 p-2 border rounded bg-light">
 
-</form>
+            <label>New Username</label>
+            <input type="text" id="newUsername" class="form-control mb-2">
 
-<form id="deleteForm" method="POST">
-<button class="btn btn-danger w-100 mt-2">Delete</button>
-</form>
+            <label>New Password</label>
+            <input type="password" id="newPassword" class="form-control mb-2">
 
+            <button type="button" class="btn btn-primary w-100" onclick="submitNewLogin()">
+              <i class="bi bi-check-circle"></i> Update Login
+            </button>
+          </div>
+        </form>
+
+        <!-- DELETE FORM (SEPARATE) -->
+        <form id="deleteUserForm" method="post" class="mt-2">
+          <button type="submit" class="btn btn-outline-danger w-100">
+            <i class="bi bi-trash"></i> Delete
+          </button>
+        </form>
+
+
+      </div>
+
+    </div>
+  </div>
 </div>
 
-</div>
-</div>
 
 <!-- ADD MODAL -->
+ <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <form method="post" action="{{ url_for('create_user') }}">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="bi bi-person-plus"></i> Add New Employee</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row g-4">
+            <div class="col-md-3 text-center d-flex flex-column align-items-center justify-content-start">
+
+          <!-- 📌 User Default Icon -->
+          <div class="rounded-circle shadow mb-3 d-flex align-items-center justify-content-center"
+              style="width:200px; height:200px; background:#e0d8cf;">
+              <i class="bi bi-person fs-1" style="font-size:90px; color:#8b7d6f;"></i>
+          </div>
+
+          <!-- ❌ Remove upload from admin -->
+          <small class="text-muted" style="font-size:13px;">
+              Profile photo can be uploaded by the employee in their account.
+          </small>
+
+        </div>
+
+            <div class="col-md-9">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Full Name</label>
+                  <input type="text" class="form-control" name="full_name" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Username</label>
+                  <input type="text" class="form-control" name="username" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Email</label>
+                  <input type="email" class="form-control" name="email">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Phone</label>
+                  <input type="text" class="form-control" name="phone">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">IC Number</label>
+                  <input type="text" class="form-control" name="ic_number">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Address</label>
+                  <input type="text" class="form-control" name="address">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Position</label>
+                  <input type="text" class="form-control" name="position" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Department</label>
+                  <select class="form-select" name="dept_id" required>
+                    <option value="">Select Department</option>
+                    {% for d in departments %}
+                      <option value="{{ d.id }}">{{ d.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Role</label>
+                  <select class="form-select" name="role">
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Enrollment Date</label>
+                  <input type="date" class="form-control" name="enrollment_date">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Entitlement (Days)</label>
+                  <input type="number" class="form-control" name="entitlement" value="14">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Password</label>
+                  <input type="password" class="form-control" name="password" required>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success">Save Employee</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
 
 {% include "/components/modals/add_employee.html" %}
 
 <script>
 
 // SHOW PANEL
+document.getElementById("applyFilter").addEventListener("click", () => {
+
+  let name = searchName.value.toLowerCase();
+  let dept = filterDept.value.toLowerCase();
+  let avail = filterAvail.value.toLowerCase();
+  let sort = sortBy.value;
+
+  let rows = [...document.querySelectorAll("#userTable tbody tr")];
+
+  rows.forEach(row => {
+
+    row.style.display =
+      row.dataset.name.toLowerCase().includes(name) &&
+      (dept === "" || row.dataset.dept.toLowerCase() === dept) &&
+      (avail === "" || row.dataset.avail.toLowerCase() === avail)
+      ? "" : "none";
+  });
+
+  rows.sort((a, b) =>
+    sort === "az"
+      ? a.dataset.name.localeCompare(b.dataset.name)
+      : b.dataset.name.localeCompare(a.dataset.name)
+  ).forEach(row =>
+    userTable.querySelector("tbody").appendChild(row)
+  );
+});
+
 function showDetails(user){
 
   document.getElementById("detailsPanel").classList.remove("hidden");
