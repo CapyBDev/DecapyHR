@@ -133,18 +133,13 @@
         </div>
       </div>
 
-<!-- EMPLOYEE DETAILS MODAL -->
-<div class="modal fade" id="employeeDetailsModal" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
+<!-- RIGHT PANEL -->
+<div id="detailsPanel" class="col-4 details-panel hidden">
 
-      <div class="modal-header bg-info text-white">
-        <h5><i class="bi bi-person-lines-fill"></i> Employee Details</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+<h5><i class="bi bi-person-lines-fill"></i> Employee Details</h5>
+        <hr>
 
-      <div class="modal-body">
-
+        <!-- UPDATE FORM -->
         <form id="updateUserForm" method="post">
 
           <input type="hidden" name="id" id="empId">
@@ -163,6 +158,7 @@
 
           <label>Department</label>
           <select name="dept_id" id="empDept" class="form-select mb-2">
+            <option value="">- Select Department -</option>
             {% for d in departments %}
               <option value="{{ d.id }}">{{ d.name }}</option>
             {% endfor %}
@@ -180,20 +176,38 @@
             <option value="Out">Out</option>
             <option value="WFH">WFH</option>
             <option value="MC">MC</option>
+            <option value="Resign">Resign</option>
           </select>
 
           <button type="submit" class="btn btn-success w-100 mt-3">
-            Save Changes
+            <i class="bi bi-save"></i> Save
           </button>
 
+          <button type="button" class="btn btn-warning w-100 mt-2" onclick="toggleResetLogin()">
+            <i class="bi bi-key"></i> New Username / Password
+          </button>
+
+          <!-- Hidden reset login form -->
+          <div id="resetLoginBox" style="display:none;" class="mt-3 p-2 border rounded bg-light">
+
+            <label>New Username</label>
+            <input type="text" id="newUsername" class="form-control mb-2">
+
+            <label>New Password</label>
+            <input type="password" id="newPassword" class="form-control mb-2">
+
+            <button type="button" class="btn btn-primary w-100" onclick="submitNewLogin()">
+              <i class="bi bi-check-circle"></i> Update Login
+            </button>
+          </div>
         </form>
 
+        <!-- DELETE FORM (SEPARATE) -->
         <form id="deleteUserForm" method="post" class="mt-2">
-          <button type="submit" class="btn btn-danger w-100">
-            Delete Employee
+          <button type="submit" class="btn btn-outline-danger w-100">
+            <i class="bi bi-trash"></i> Delete
           </button>
         </form>
-
       </div>
 
     </div>
@@ -224,7 +238,6 @@
           <small class="text-muted" style="font-size:13px;">
               Profile photo can be uploaded by the employee in their account.
           </small>
-
         </div>
 
             <div class="col-md-9">
@@ -301,8 +314,7 @@
   </div>
 </div>
 
-
-{% include "/components/modals/add_employee.html" %}
+{% include "components/modals/add_employee.html" %}
 
 <script>
 
@@ -336,7 +348,8 @@ document.getElementById("applyFilter").addEventListener("click", () => {
 
 function showDetails(user){
 
-  // Fill data
+  document.getElementById("detailsPanel").classList.remove("hidden");
+
   empId.value = user.id;
   empName.value = user.full_name;
   empEmail.value = user.email;
@@ -347,12 +360,8 @@ function showDetails(user){
   empEntitlement.value = user.entitlement;
   empAvailability.value = user.availability;
 
-  updateUserForm.action = "/admin/users/update/" + user.id;
-  deleteUserForm.action = "/admin/users/delete/" + user.id;
-
-  // SHOW MODAL CENTER
-  let modal = new bootstrap.Modal(document.getElementById('employeeDetailsModal'));
-  modal.show();
+  updateForm.action = "/admin/users/update/" + user.id;
+  deleteForm.action = "/admin/users/delete/" + user.id;
 }
 
 // UPDATE (AJAX)
