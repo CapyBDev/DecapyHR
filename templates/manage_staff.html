@@ -14,25 +14,44 @@
   background-attachment: fixed;
 
   overflow-x: hidden;
+.table-card {
+  background: white;
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
-.glass {
-  background: rgba(12, 137, 254, 0.37);
-  backdrop-filter: blur(18px);
-  border-radius: 18px;
-  padding: 20px;
+/* avatar */
+.avatar {
+  width: 40px;
+  height: 40px;
+  background: #6c63ff;
   color: white;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.user-row { cursor:pointer; }
+/* status badges */
+.status-badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
 
-.details-panel {
-  background: linear-gradient(135deg,#b3e6ff,#a2ffe8);
-  border-left: 3px solid #54ffc9;
-  min-height: 600px;
-  padding: 20px;
-  border-radius: 12px;
-  transition: 0.3s;
+.status-green { background:#e6f9f0; color:#0bb783; }
+.status-blue { background:#e6f0ff; color:#3b82f6; }
+.status-yellow { background:#fff4e6; color:#f59e0b; }
+.status-cyan { background:#e6ffff; color:#06b6d4; }
+.status-gray { background:#f1f5f9; color:#6b7280; }
+
+/* hover */
+.table tbody tr:hover {
+  background: #f9fafb;
+  cursor: pointer;
 }
 
 .hidden {
@@ -92,46 +111,70 @@
     <div class="row">
 
       <!-- USER TABLE -->
-      <div class="col-8">
-        <div class="table-responsive mt-3">
-          <table id="userTable" class="table table-hover align-middle">
-            <thead class="table-light">
-              <tr>
-                <th>Name</th>
-                <th>Department</th>
-                <th>Position</th>
-                <th>Availability</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for u in users %}
-              {% set avail = u.availability or 'Available' %}
-              <tr class="user-row"
-                  data-name="{{ u.full_name }}"
-                  data-dept="{{ u.department_name }}"
-                  data-avail="{{ avail }}"
-                  onclick='showDetails({{ u|tojson }})'>
-                <td>{{ u.full_name }}</td>
-                <td>{{ u.department_name or "-" }}</td>
-                <td>{{ u.position or "-" }}</td>
-                <td>
-                  <span class="badge
-                  {% if avail == 'Available' %} bg-success
-                  {% elif avail == 'On Leave' %}bg-danger 
-                  {% elif avail == 'Out' %} bg-primary
-                  {% elif avail == 'MC' %} bg-warning text-dark
-                  {% elif avail == 'WFH' %} bg-info text-dark
-                  {% else %} bg-secondary
-                  {% endif %} ">
-                    {{ avail }}
-                  </span>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <div class="table-card">
+  <table class="table align-middle mb-0">
+    <thead>
+      <tr>
+        <th>Employee</th>
+        <th>Department</th>
+        <th>Position</th>
+        <th>Status</th>
+        <th class="text-end">Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for u in users %}
+      {% set avail = u.availability or 'Available' %}
+      <tr class="user-row"
+          data-name="{{ u.full_name }}"
+          data-dept="{{ u.department_name }}"
+          data-avail="{{ avail }}"
+          onclick='showDetails({{ u|tojson }})'>
+
+        <!-- AVATAR + NAME -->
+        <td class="d-flex align-items-center gap-3">
+          <div class="avatar">
+            {{ u.full_name[0] }}
+          </div>
+          <div>
+            <div class="fw-semibold">{{ u.full_name }}</div>
+            <small class="text-muted">{{ u.email or "-" }}</small>
+          </div>
+        </td>
+
+        <td>{{ u.department_name or "-" }}</td>
+        <td>{{ u.position or "-" }}</td>
+
+        <!-- STATUS -->
+        <td>
+          <span class="status-badge
+            {% if avail == 'Available' %} status-green
+            {% elif avail == 'Out' %} status-blue
+            {% elif avail == 'MC' %} status-yellow
+            {% elif avail == 'WFH' %} status-cyan
+            {% else %} status-gray
+            {% endif %}">
+            {{ avail }}
+          </span>
+        </td>
+
+        <!-- ACTION -->
+        <td class="text-end">
+          <button class="btn btn-sm btn-light" onclick="event.stopPropagation(); showDetails({{ u|tojson }})">
+            ✏️
+          </button>
+          <button class="btn btn-sm btn-light text-danger"
+            onclick="event.stopPropagation(); deleteUser({{ u.id }})">
+            🗑️
+          </button>
+        </td>
+
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
 <!-- RIGHT PANEL -->
 <div id="detailsPanel" class="col-4 details-panel hidden">
@@ -362,6 +405,12 @@ function showDetails(user){
 
   updateForm.action = "/admin/users/update/" + user.id;
   deleteForm.action = "/admin/users/delete/" + user.id;
+}
+function deleteUser(id){
+  if(confirm("Delete this user?")){
+    fetch("/admin/users/delete/" + id, {method:"POST"})
+    .then(()=>location.reload());
+  }
 }
 
 // UPDATE (AJAX)
