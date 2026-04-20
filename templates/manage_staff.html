@@ -93,9 +93,9 @@
 
       <!-- USER TABLE -->
       <div class="col-8">
-        <div class="table-responsive mt-3">
-          <table id="userTable" class="table table-hover align-middle">
-            <thead class="table-light">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle bg-white rounded">
+            <thead>
               <tr>
                 <th>Name</th>
                 <th>Department</th>
@@ -133,12 +133,18 @@
         </div>
       </div>
 
-<!-- RIGHT PANEL -->
+<!-- ========================= -->
+<!-- EMPLOYEE DETAILS POPUP -->
+<!-- ========================= -->
 
-<div id="detailsPanel" class="col-4 details-panel hidden">
+<div class="modal fade" id="detailsModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
 
-<h5><i class="bi bi-person-lines-fill"></i> Employee Details</h5>
-        <hr>
+      <div class="modal-header bg-dark text-white">
+        <h5>Employee Details</h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
 
         <!-- UPDATE FORM -->
         <form id="updateUserForm" method="post">
@@ -179,6 +185,11 @@
             <option value="MC">MC</option>
             <option value="Resign">Resign</option>
           </select>
+
+          <!-- BACK BUTTON -->
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            ← Back
+          </button>
 
           <button type="submit" class="btn btn-success w-100 mt-3">
             <i class="bi bi-save"></i> Save
@@ -232,13 +243,13 @@
           <div class="row g-4">
             <div class="col-md-3 text-center d-flex flex-column align-items-center justify-content-start">
 
-          <!-- 📌 User Default Icon -->
+          <!-- User Default Icon -->
           <div class="rounded-circle shadow mb-3 d-flex align-items-center justify-content-center"
               style="width:200px; height:200px; background:#e0d8cf;">
               <i class="bi bi-person fs-1" style="font-size:90px; color:#8b7d6f;"></i>
           </div>
 
-          <!-- ❌ Remove upload from admin -->
+          <!-- Remove upload from admin -->
           <small class="text-muted" style="font-size:13px;">
               Profile photo can be uploaded by the employee in their account.
           </small>
