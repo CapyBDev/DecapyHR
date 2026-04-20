@@ -61,150 +61,62 @@ body {
 
 <div class="container mt-4">
 
-<!-- HEADER -->
+<h4 class="text-white">Staff Management</h4>
 
-<div class="d-flex justify-content-between mb-3">
-  <h4 class="text-white">Staff Management</h4>
-
-  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
-    + Add Staff
-  </button>
-</div>
+<button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
++ Add Staff
+</button>
 
 <div class="card p-3">
-
-<!-- FILTER -->
-
-<div class="d-flex gap-2 mb-3">
-  <input type="text" id="searchName" class="form-control" placeholder="Search staff">
-
-  <select id="filterDept" class="form-select">
-    <option value="">All Departments</option>
-    {% for d in departments %}
-    <option value="{{ d.name }}">{{ d.name }}</option>
-    {% endfor %}
-  </select>
-
-<button onclick="applyFilter()" class="btn btn-primary">Filter</button>
-
-</div>
-
-<!-- TABLE -->
 
 <table class="table table-hover">
 <thead>
 <tr>
-  <th>Name</th>
-  <th>Department</th>
-  <th>Position</th>
-  <th>Status</th>
+<th>Name</th>
+<th>Department</th>
+<th>Position</th>
+<th>Status</th>
 </tr>
 </thead>
 
-<tbody id="staffTable">
+<tbody>
 {% for u in users %}
-<tr
-  data-id="{{u.id}}"
-  data-name="{{u.full_name}}"
-  data-email="{{u.email}}"
-  data-phone="{{u.phone}}"
-  data-address="{{u.address}}"
-  data-position="{{u.position}}"
-  data-deptid="{{u.dept_id}}"
-  data-dept="{{u.department_name}}"
-  data-entitlement="{{u.entitlement}}"
-  data-availability="{{u.availability}}"
->
+<tr onclick="openEditModal(this)"
+data-id="{{u.id}}"
+data-name="{{u.full_name}}"
+data-email="{{u.email}}"
+data-phone="{{u.phone}}"
+data-address="{{u.address}}"
+data-position="{{u.position}}"
+data-deptid="{{u.dept_id}}"
+data-entitlement="{{u.entitlement}}"
+data-availability="{{u.availability}}">
 
-<td>
-  <strong style="cursor:pointer;color:#2c7be5"
-    onclick="openEditModal(this.closest('tr'))">
-    {{u.full_name}}
-  </strong>
-</td>
-
-<td>{{u.department_name or "-"}}</td>
-<td>{{u.position or "-"}}</td>
-
-<td>
-<span class="badge 
-{% if u.availability=='Available' %}bg-success
-{% elif u.availability=='WFH' %}bg-primary
-{% elif u.availability=='MC' %}bg-warning
-{% else %}bg-danger
-{% endif %}">
-{{u.availability or "Available"}}
-</span>
-</td>
+<td><strong style="cursor:pointer">{{u.full_name}}</strong></td>
+<td>{{u.department_name}}</td>
+<td>{{u.position}}</td>
+<td>{{u.availability}}</td>
 
 </tr>
 {% endfor %}
 </tbody>
+
 </table>
 
 </div>
 </div>
 
-<!-- ================= ADD MODAL ================= -->
+<!-- ADD MODAL -->
 
-<div class="modal fade" id="addEmployeeModal">
-<div class="modal-dialog modal-lg">
-<div class="modal-content">
+{% include "add_employee.html" %}
 
-<form method="POST" action="/admin/users/create">
-
-<div class="modal-header bg-primary text-white">
-  <h5>Add Employee</h5>
-</div>
-
-<div class="modal-body">
-
-<input name="full_name" class="form-control mb-2" placeholder="Full Name" required>
-<input name="email" class="form-control mb-2" placeholder="Email">
-<input name="phone" class="form-control mb-2" placeholder="Phone">
-<input name="address" class="form-control mb-2" placeholder="Address">
-
-<select name="dept_id" class="form-control mb-2" required>
-<option value="">Department</option>
-{% for d in departments %}
-<option value="{{d.id}}">{{d.name}}</option>
-{% endfor %}
-</select>
-
-<input name="position" class="form-control mb-2" placeholder="Position">
-<input name="entitlement" type="number" class="form-control mb-2" placeholder="Leave Days">
-
-<select name="availability" class="form-control">
-<option>Available</option>
-<option>WFH</option>
-<option>MC</option>
-<option>Out</option>
-</select>
-
-</div>
-
-<div class="modal-footer">
-<button class="btn btn-success w-100">Add Employee</button>
-</div>
-
-</form>
-
-</div>
-</div>
-</div>
-
-<!-- ================= EDIT MODAL ================= -->
+<!-- EDIT MODAL -->
 
 <div class="modal fade" id="editEmployeeModal">
-<div class="modal-dialog modal-lg">
+<div class="modal-dialog">
 <div class="modal-content">
 
 <form method="POST" id="updateForm">
-<input type="hidden" id="empId">
-
-<div class="modal-header bg-warning text-dark">
-  <h5>Edit Employee</h5>
-</div>
 
 <div class="modal-body">
 
@@ -212,6 +124,7 @@ body {
 <input id="empEmail" name="email" class="form-control mb-2">
 <input id="empPhone" name="phone" class="form-control mb-2">
 <input id="empAddress" name="address" class="form-control mb-2">
+<input id="empPosition" name="position" class="form-control mb-2">
 
 <select id="empDept" name="dept_id" class="form-control mb-2">
 {% for d in departments %}
@@ -219,7 +132,6 @@ body {
 {% endfor %}
 </select>
 
-<input id="empPosition" name="position" class="form-control mb-2">
 <input id="empEntitlement" name="entitlement" class="form-control mb-2">
 
 <select id="empAvailability" name="availability" class="form-control">
@@ -227,68 +139,41 @@ body {
 <option>WFH</option>
 <option>MC</option>
 <option>Out</option>
-<option>Resign</option>
 </select>
 
-</div>
-
-<div class="modal-footer d-flex justify-content-between">
-
-<button type="button" id="deleteBtn" class="btn btn-danger">Delete</button> <button class="btn btn-success">Save</button>
+<button class="btn btn-success w-100 mt-2">Save</button>
 
 </div>
 
 </form>
 
-<form id="deleteForm" method="POST"></form>
+<form id="deleteForm" method="POST">
+<button class="btn btn-danger w-100">Delete</button>
+</form>
 
 </div>
 </div>
 </div>
 
 <script>
-
-// FILTER
-function applyFilter(){
-  let name = searchName.value.toLowerCase();
-  let dept = filterDept.value;
-
-  document.querySelectorAll("#staffTable tr").forEach(row=>{
-    let match = row.dataset.name.toLowerCase().includes(name) &&
-                (dept=="" || row.dataset.dept==dept);
-
-    row.style.display = match ? "" : "none";
-  });
-}
-
-// OPEN EDIT
 function openEditModal(row){
 
-  let id = row.dataset.id;
+let id = row.dataset.id;
 
-  document.getElementById("empId").value = id;
-  document.getElementById("empName").value = row.dataset.name;
-  document.getElementById("empEmail").value = row.dataset.email;
-  document.getElementById("empPhone").value = row.dataset.phone;
-  document.getElementById("empAddress").value = row.dataset.address;
-  document.getElementById("empPosition").value = row.dataset.position;
-  document.getElementById("empDept").value = row.dataset.deptid;
-  document.getElementById("empEntitlement").value = row.dataset.entitlement;
-  document.getElementById("empAvailability").value = row.dataset.availability;
+empName.value = row.dataset.name;
+empEmail.value = row.dataset.email;
+empPhone.value = row.dataset.phone;
+empAddress.value = row.dataset.address;
+empPosition.value = row.dataset.position;
+empDept.value = row.dataset.deptid;
+empEntitlement.value = row.dataset.entitlement;
+empAvailability.value = row.dataset.availability;
 
-  document.getElementById("updateForm").action = "/admin/users/update/" + id;
-  document.getElementById("deleteForm").action = "/admin/users/delete/" + id;
+updateForm.action = "/admin/users/update/" + id;
+deleteForm.action = "/admin/users/delete/" + id;
 
-  new bootstrap.Modal(document.getElementById("editEmployeeModal")).show();
+new bootstrap.Modal(document.getElementById("editEmployeeModal")).show();
 }
-
-// DELETE
-document.getElementById("deleteBtn").onclick = function(){
-  if(confirm("Delete this user?")){
-    document.getElementById("deleteForm").submit();
-  }
-};
-
 </script>
 
 {% endblock %}

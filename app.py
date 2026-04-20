@@ -102,12 +102,12 @@ def admin_dashboard():
         attendance_data=attendance_data
     )
 # ================= EMPLOYEES =================
+# ================= EMPLOYEES =================
 @app.route("/admin/users")
 def admin_users():
     conn = get_db()
     cur = conn.cursor()
 
-    #  FIXED QUERY (ALL REQUIRED FIELDS)
     cur.execute("""
         SELECT 
             u.id,
@@ -124,11 +124,9 @@ def admin_users():
         LEFT JOIN departments d ON u.dept_id = d.id
     """)
 
-    #  CONVERT TO DICTIONARY (IMPORTANT FIX)
     columns = [col[0] for col in cur.description]
     users = [dict(zip(columns, row)) for row in cur.fetchall()]
 
-    #  GET DEPARTMENTS
     cur.execute("SELECT id, name FROM departments")
     dept_columns = [col[0] for col in cur.description]
     departments = [dict(zip(dept_columns, row)) for row in cur.fetchall()]
@@ -140,20 +138,25 @@ def admin_users():
                            departments=departments)
 
 
-
+# ===== CREATE USER (FIXED) =====
 @app.route("/admin/users/create", methods=["POST"])
 def create_user():
     conn = get_db()
     cur = conn.cursor()
 
     cur.execute("""
-        INSERT INTO users (full_name, email, phone, dept_id)
-        VALUES (%s,%s,%s,%s)
+        INSERT INTO users 
+        (full_name, email, phone, address, position, dept_id, entitlement, availability)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
     """, (
         request.form["full_name"],
         request.form["email"],
         request.form["phone"],
-        request.form["dept_id"]
+        request.form["address"],
+        request.form["position"],
+        request.form["dept_id"],
+        request.form.get("entitlement", 14),
+        request.form.get("availability", "Available")
     ))
 
     conn.commit()
@@ -162,6 +165,7 @@ def create_user():
     return redirect("/admin/users")
 
 
+# ===== UPDATE USER (FIXED) =====
 @app.route("/admin/users/update/<int:id>", methods=["POST"])
 def update_user(id):
     conn = get_db()
@@ -169,12 +173,25 @@ def update_user(id):
 
     cur.execute("""
         UPDATE users
-        SET full_name=%s, email=%s, phone=%s
+        SET 
+            full_name=%s,
+            email=%s,
+            phone=%s,
+            address=%s,
+            position=%s,
+            dept_id=%s,
+            entitlement=%s,
+            availability=%s
         WHERE id=%s
     """, (
         request.form["full_name"],
         request.form["email"],
         request.form["phone"],
+        request.form["address"],
+        request.form["position"],
+        request.form["dept_id"],
+        request.form["entitlement"],
+        request.form["availability"],
         id
     ))
 
@@ -184,6 +201,7 @@ def update_user(id):
     return redirect("/admin/users")
 
 
+# ===== DELETE USER =====
 @app.route("/admin/users/delete/<int:id>", methods=["POST"])
 def delete_user(id):
     conn = get_db()
@@ -194,7 +212,6 @@ def delete_user(id):
     conn.close()
 
     return redirect("/admin/users")
-
 # ================= DEPARTMENTS =================
 @app.route("/admin/departments", methods=["GET", "POST"])
 def manage_departments():
