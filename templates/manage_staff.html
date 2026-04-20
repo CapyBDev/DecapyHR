@@ -2,7 +2,7 @@
 {% block content %}
 
 <style>
-body {
+  body {
   height: 100vh;
 
   background: 
@@ -15,57 +15,46 @@ body {
 
   overflow-x: hidden;
 }
+
 .glass {
-  background: rgba(131, 199, 255, 0.79);
+  background: rgba(12, 137, 254, 0.37);
   backdrop-filter: blur(18px);
   border-radius: 18px;
   padding: 20px;
   color: white;
 }
 
-.card {
-  border-radius: 14px;
-  background: rgba(255,255,255,0.95);
+.user-row { cursor:pointer; }
+
+.details-panel {
+  background: linear-gradient(135deg,#b3e6ff,#a2ffe8);
+  border-left: 3px solid #54ffc9;
+  min-height: 600px;
   padding: 20px;
+  border-radius: 12px;
+  transition: 0.3s;
 }
 
-.filter-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.filter-row input { flex: 2; }
-.filter-row select { flex: 1; }
-
-.modal-header-custom {
-  background: #2c7be5;
-  color: white;
-  padding: 15px;
-  font-weight: 600;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  padding: 20px;
-}
-
-.modal-footer-custom {
-  display: flex;
-  justify-content: space-between;
-  padding: 15px;
+.hidden {
+  display: none;
 }
 </style>
 
 <div class="container mt-4">
 
-<h4 class="text-white">Staff Management</h4>
+<div class="d-flex justify-content-between mb-3">
+  <h4 class="text-white">Staff Management</h4>
 
-<button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
-+ Add Staff
-</button>
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+    + Add Staff
+  </button>
+</div>
+
+<div class="row">
+
+<!-- LEFT TABLE -->
+
+<div class="col-8">
 
 <div class="card p-3">
 
@@ -81,22 +70,11 @@ body {
 
 <tbody>
 {% for u in users %}
-<tr onclick="openEditModal(this)"
-data-id="{{u.id}}"
-data-name="{{u.full_name}}"
-data-email="{{u.email}}"
-data-phone="{{u.phone}}"
-data-address="{{u.address}}"
-data-position="{{u.position}}"
-data-deptid="{{u.dept_id}}"
-data-entitlement="{{u.entitlement}}"
-data-availability="{{u.availability}}">
-
-<td><strong style="cursor:pointer">{{u.full_name}}</strong></td>
+<tr class="user-row" onclick='showDetails({{ u|tojson }})'>
+<td>{{u.full_name}}</td>
 <td>{{u.department_name}}</td>
 <td>{{u.position}}</td>
 <td>{{u.availability}}</td>
-
 </tr>
 {% endfor %}
 </tbody>
@@ -106,35 +84,37 @@ data-availability="{{u.availability}}">
 </div>
 </div>
 
-<!-- ADD MODAL -->
+<!-- RIGHT PANEL -->
 
-{% include "/components/modals/add_employee.html" %}
+<div id="detailsPanel" class="col-4 details-panel hidden">
 
-<!-- EDIT MODAL -->
+<h5>Employee Details</h5>
 
-<div class="modal fade" id="editEmployeeModal">
-<div class="modal-dialog">
-<div class="modal-content">
+<form id="updateForm" method="POST">
 
-<form method="POST" id="updateForm">
+<input type="hidden" id="empId">
 
-<div class="modal-body">
+<label>Name</label> <input id="empName" name="full_name" class="form-control mb-2">
 
-<input id="empName" name="full_name" class="form-control mb-2">
-<input id="empEmail" name="email" class="form-control mb-2">
-<input id="empPhone" name="phone" class="form-control mb-2">
-<input id="empAddress" name="address" class="form-control mb-2">
-<input id="empPosition" name="position" class="form-control mb-2">
+<label>Email</label> <input id="empEmail" name="email" class="form-control mb-2">
 
-<select id="empDept" name="dept_id" class="form-control mb-2">
+<label>Phone</label> <input id="empPhone" name="phone" class="form-control mb-2">
+
+<label>Address</label> <input id="empAddress" name="address" class="form-control mb-2">
+
+<label>Position</label> <input id="empPosition" name="position" class="form-control mb-2">
+
+<label>Department</label> <select id="empDept" name="dept_id" class="form-control mb-2">
 {% for d in departments %}
+
 <option value="{{d.id}}">{{d.name}}</option>
 {% endfor %}
 </select>
 
-<input id="empEntitlement" name="entitlement" class="form-control mb-2">
+<label>Entitlement</label> <input id="empEntitlement" name="entitlement" class="form-control mb-2">
 
-<select id="empAvailability" name="availability" class="form-control">
+<label>Status</label> <select id="empAvailability" name="availability" class="form-control mb-2">
+
 <option>Available</option>
 <option>WFH</option>
 <option>MC</option>
@@ -143,37 +123,62 @@ data-availability="{{u.availability}}">
 
 <button class="btn btn-success w-100 mt-2">Save</button>
 
-</div>
-
 </form>
 
 <form id="deleteForm" method="POST">
-<button class="btn btn-danger w-100">Delete</button>
+<button class="btn btn-danger w-100 mt-2">Delete</button>
 </form>
 
 </div>
+
 </div>
 </div>
+
+<!-- ADD MODAL -->
+
+{% include "/components/modals/add_employee.html" %}
 
 <script>
-function openEditModal(row){
 
-let id = row.dataset.id;
+// SHOW PANEL
+function showDetails(user){
 
-empName.value = row.dataset.name;
-empEmail.value = row.dataset.email;
-empPhone.value = row.dataset.phone;
-empAddress.value = row.dataset.address;
-empPosition.value = row.dataset.position;
-empDept.value = row.dataset.deptid;
-empEntitlement.value = row.dataset.entitlement;
-empAvailability.value = row.dataset.availability;
+  document.getElementById("detailsPanel").classList.remove("hidden");
 
-updateForm.action = "/admin/users/update/" + id;
-deleteForm.action = "/admin/users/delete/" + id;
+  empId.value = user.id;
+  empName.value = user.full_name;
+  empEmail.value = user.email;
+  empPhone.value = user.phone;
+  empAddress.value = user.address;
+  empPosition.value = user.position;
+  empDept.value = user.dept_id;
+  empEntitlement.value = user.entitlement;
+  empAvailability.value = user.availability;
 
-new bootstrap.Modal(document.getElementById("editEmployeeModal")).show();
+  updateForm.action = "/admin/users/update/" + user.id;
+  deleteForm.action = "/admin/users/delete/" + user.id;
 }
+
+// UPDATE (AJAX)
+updateForm.onsubmit = function(e){
+  e.preventDefault();
+
+  fetch(updateForm.action,{
+    method:"POST",
+    body:new FormData(updateForm)
+  }).then(()=>location.reload());
+};
+
+// DELETE
+deleteForm.onsubmit = function(e){
+  e.preventDefault();
+
+  if(confirm("Delete this user?")){
+    fetch(deleteForm.action,{method:"POST"})
+    .then(()=>location.reload());
+  }
+};
+
 </script>
 
 {% endblock %}
