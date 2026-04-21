@@ -238,16 +238,6 @@ let calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
   eventResize:function(info){
     updateEvent(info.event);
   }
-
-  eventDidMount: function(info) {
-    if(info.event.backgroundColor === "green"){
-      info.el.style.border = "2px solid #28a745";
-    }
-    if(info.event.backgroundColor === "red"){
-      info.el.style.border = "2px solid #dc3545";
-    }
-  }
-  
 });
 
 calendar.render();
