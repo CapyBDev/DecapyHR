@@ -99,8 +99,25 @@ canvas {
 
 <!-- 🔥 CALENDAR -->
 <div class="card-custom mt-3">
-<h6>Schedule (Drag & Drop)</h6>
+<h6>MySchedule (Drag & Drop)</h6>
 <div id="calendar"></div>
+</div>
+
+<div class="modal fade" id="taskModal">
+  <div class="modal-dialog">
+    <div class="modal-content p-3">
+
+      <h5>Edit Task</h5>
+
+      <input id="taskTitle" class="form-control mb-2">
+
+      <div class="d-flex gap-2">
+        <button class="btn btn-success" onclick="markDone()">✔ Done</button>
+        <button class="btn btn-danger" onclick="markMissed()">✖ Missed</button>
+      </div>
+
+    </div>
+  </div>
 </div>
 
 <!-- 🔥 CLAIMS -->
@@ -165,9 +182,38 @@ let calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
   editable:true,
   events:'/calendar-events',
 
+  dateClick:function(info){
+    let title = prompt("Enter task:");
+    if(title){
+      fetch("/tasks", {
+        method:"POST",
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:`title=${title}&date=${info.dateStr}&color=blue`
+      }).then(()=>location.reload());
+    }
+  },
+
+  eventClick:function(info){
+    let action = prompt("Edit task OR type DONE / MISSED / DELETE", info.event.title);
+
+    if(action === "DELETE"){
+      fetch("/tasks/delete/"+info.event.id).then(()=>location.reload());
+    }
+    else if(action === "DONE"){
+      info.event.setProp("color","green");
+    }
+    else if(action === "MISSED"){
+      info.event.setProp("color","red");
+    }
+    else if(action){
+      info.event.setProp("title", action);
+    }
+  },
+
   eventDrop:function(info){
     updateEvent(info.event);
   },
+
   eventResize:function(info){
     updateEvent(info.event);
   }
@@ -186,6 +232,26 @@ function updateEvent(e){
     })
   });
 }
+
+let selectedEvent;
+
+function openTaskModal(event){
+  selectedEvent = event;
+  document.getElementById("taskTitle").value = event.title;
+  new bootstrap.Modal(document.getElementById("taskModal")).show();
+}
+
+function markDone(){
+  selectedEvent.setProp("color","green");
+}
+
+function markMissed(){
+  selectedEvent.setProp("color","red");
+}
+eventClick:function(info){
+  openTaskModal(info.event);
+}
+
 </script>
 
 {% endblock %}

@@ -13,17 +13,18 @@
 
 body {
   margin: 0;
-  background: #f5f6fa;
+  background: #f5f7fb;
 }
 
-/* ===== SIDEBAR ===== */
+/* ===== SIDEBAR (UPDATED STYLE) ===== */
 .sidebar {
-  width: 250px;
+  width: 260px;
   height: 100vh;
   position: fixed;
-  background: linear-gradient(180deg, #ccd3ffdb, #0a17abdb);
+  background: #1c2555;
   color: white;
-  padding: 20px;
+  padding: 20px 10px;
+  overflow-y: auto;
   transition: 0.3s;
 }
 
@@ -32,38 +33,48 @@ body {
 }
 
 .logo {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 25px;
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 .logo img {
-  width: 120px;
+  width: 110px;
 }
 
-/* MENU */
+/* MENU TITLE */
+.menu-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #9aa4d1;
+  margin: 15px 10px 8px;
+}
+
+/* MENU LINK */
 .sidebar a {
-  display: block;
-  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  border-radius: 8px;
   color: white;
   text-decoration: none;
-  border-radius: 10px;
-  margin-bottom: 8px;
+  margin: 3px 5px;
+  transition: 0.2s;
 }
 
 .sidebar a:hover {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.1);
 }
 
 .sidebar a.active {
   background: white;
-  color: #0a17ab !important;
+  color: #1c2555 !important;
   font-weight: 600;
 }
 
 /* ===== MAIN ===== */
 .main {
-  margin-left: 250px;
+  margin-left: 260px;
   padding: 20px;
   transition: 0.3s;
 }
@@ -72,20 +83,16 @@ body {
   margin-left: 0;
 }
 
-/* ===== TOPBAR ===== */
+/* ===== TOPBAR (UPDATED) ===== */
 .topbar {
+  background: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(180deg, #fefeffec, #6f76fcc9);
-  padding: 15px 25px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  transition: 0.3s;
-}
-
-.topbar.full {
-  width: 100%;
 }
 
 .topbar-left {
@@ -108,8 +115,8 @@ body {
   display: flex;
   align-items: center;
   background: #f1f2f6;
-  padding: 8px 12px;
-  border-radius: 10px;
+  padding: 6px 10px;
+  border-radius: 8px;
 }
 
 .search-box input {
@@ -126,16 +133,16 @@ body {
 }
 
 .icon-btn {
-  width: 38px;
-  height: 38px;
+  width: 35px;
+  height: 35px;
   background: #f1f2f6;
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* ===== PROFILE DROPDOWN ===== */
+/* PROFILE */
 .profile-dropdown {
   position: relative;
 }
@@ -146,19 +153,19 @@ body {
   gap: 10px;
   background: #f1f2f6;
   padding: 5px 10px;
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
 .profile-box img {
-  width: 35px;
-  height: 35px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
 }
 
 .dropdown-menu-custom {
   position: absolute;
-  top: 55px;
+  top: 50px;
   right: 0;
   background: white;
   width: 180px;
@@ -166,7 +173,6 @@ body {
   box-shadow: 0 5px 15px rgba(0,0,0,0.15);
   display: none;
   overflow: hidden;
-  z-index: 1000;
 }
 
 .dropdown-menu-custom a {
@@ -184,64 +190,59 @@ body {
   display: block;
 }
 </style>
-
 </head>
 
 <body>
 
 <!-- ===== SIDEBAR ===== -->
-<div class="sidebar d-flex flex-column" id="sidebar">
+<div class="sidebar" id="sidebar">
 
-  <!-- TOP MENU -->
-  <div>
-    <div class="logo">
-      <img src="{{ url_for('static', filename='images/logo jetamaa.jpg') }}">
-    </div>
-
-    <a href="/admin/dashboard" class="{% if request.path == '/admin/dashboard' %}active{% endif %}">
-      <i class="bi bi-grid"></i> Dashboard
-    </a>
-
-    <a href="/admin/users" class="{% if '/admin/users' in request.path %}active{% endif %}">
-      <i class="bi bi-people"></i> Employee
-    </a>
-
-    <a href="/admin/leaves" class="{% if '/admin/leaves' in request.path %}active{% endif %}">
-      <i class="bi bi-calendar-check"></i> Leave
-    </a>
-
-    <a href="/admin/claims" class="{% if '/admin/claims' in request.path %}active{% endif %}">
-      <i class="bi bi-cash-stack"></i> Claims
-    </a>
-
-    <a href="/admin/departments" class="{% if '/admin/departments' in request.path %}active{% endif %}">
-      <i class="bi bi-building"></i> Departments
-    </a>
+  <div class="logo">
+    <img src="{{ url_for('static', filename='images/logo jetamaa.jpg') }}">
   </div>
 
-  <!-- BOTTOM MENU -->
-  <div class="mt-auto">
-    <a href="/admin/policy" class="{% if '/admin/policy' in request.path %}active{% endif %}">
-      <i class="bi bi-file-earmark-text"></i> Policy
-    </a>
-  </div>
+  <div class="menu-title">Dashboard</div>
+  <a href="/admin/dashboard" class="{% if request.path == '/admin/dashboard' %}active{% endif %}">
+    <i class="bi bi-grid"></i> Dashboard
+  </a>
+
+  <div class="menu-title">HR</div>
+  <a href="/admin/users" class="{% if '/admin/users' in request.path %}active{% endif %}">
+    <i class="bi bi-people"></i> Employee
+  </a>
+
+  <a href="/admin/leaves" class="{% if '/admin/leaves' in request.path %}active{% endif %}">
+    <i class="bi bi-calendar-check"></i> Leave
+  </a>
+
+  <a href="/admin/claims" class="{% if '/admin/claims' in request.path %}active{% endif %}">
+    <i class="bi bi-cash-stack"></i> Claims
+  </a>
+
+  <div class="menu-title">Company</div>
+  <a href="/admin/departments" class="{% if '/admin/departments' in request.path %}active{% endif %}">
+    <i class="bi bi-building"></i> Departments
+  </a>
+
+  <a href="/admin/policy" class="{% if '/admin/policy' in request.path %}active{% endif %}">
+    <i class="bi bi-file-earmark-text"></i> Policy
+  </a>
 
 </div>
 
 <!-- ===== MAIN ===== -->
 <div class="main" id="mainContent">
 
-<!-- ===== TOPBAR ===== -->
 <div class="topbar" id="topbar">
 
   <div class="topbar-left">
-    <i class="bi bi-list" id="toggleSidebar" style="cursor:pointer; font-size:20px;"></i>
+    <i class="bi bi-list" id="toggleSidebar" style="cursor:pointer;"></i>
 
     <div>
       <div class="hello-text">Hello {{ session.name }} 👋</div>
 
       <div class="breadcrumb">
-        Home > 
+        Home >
         {% if '/admin/users' in request.path %}
           Employee
         {% elif '/admin/dashboard' in request.path %}
@@ -262,67 +263,56 @@ body {
   <div class="topbar-right">
 
     <div class="search-box">
-      <input type="text" placeholder="Search Here...">
+      <input type="text" placeholder="Search...">
       <i class="bi bi-search"></i>
     </div>
 
-    <div class="icon-btn"><i class="bi bi-globe"></i></div>
-    <div class="icon-btn"><i class="bi bi-envelope"></i></div>
     <div class="icon-btn"><i class="bi bi-bell"></i></div>
 
     <!-- PROFILE -->
     <div class="profile-dropdown">
-
       <div class="profile-box" onclick="toggleDropdown()">
         <img src="{{ url_for('static', filename='images/JETAMA SDN BHD LOGO (TRANSPARENT).png') }}">
         <div>
           <div>{{ session.name }}</div>
           <small>online</small>
         </div>
-        <i class="bi bi-chevron-down"></i>
       </div>
 
       <div id="dropdownMenu" class="dropdown-menu-custom">
-        <a href="/profile"><i class="bi bi-person"></i> View Profile</a>
-        <a href="/logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+        <a href="/profile">View Profile</a>
+        <a href="/logout">Logout</a>
       </div>
-
     </div>
 
   </div>
-
 </div>
 
 {% block content %}{% endblock %}
 
 </div>
 
-<!-- ===== SCRIPT ===== -->
 <script>
-// PROFILE DROPDOWN
 function toggleDropdown() {
   document.getElementById("dropdownMenu").classList.toggle("show");
 }
 
-// CLOSE DROPDOWN
 window.onclick = function(e) {
   if (!e.target.closest('.profile-dropdown')) {
     document.getElementById("dropdownMenu").classList.remove("show");
   }
 }
 
-// SIDEBAR TOGGLE
 const toggleBtn = document.getElementById("toggleSidebar");
 const sidebar = document.getElementById("sidebar");
 const main = document.getElementById("mainContent");
-const topbar = document.getElementById("topbar");
 
 toggleBtn.addEventListener("click", function() {
   sidebar.classList.toggle("hide");
   main.classList.toggle("full");
-  topbar.classList.toggle("full");
 });
 </script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>

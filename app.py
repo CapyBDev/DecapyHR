@@ -252,11 +252,12 @@ def tasks():
 
     if request.method == "POST":
         cur.execute("""
-            INSERT INTO tasks (user_id, title, date, color)
-            VALUES (%s,%s,%s,%s)
+            INSERT INTO tasks (user_id, title, start_time, end_time, color)
+            VALUES (%s,%s,%s,%s,%s)
         """, (
             session["user_id"],
             request.form["title"],
+            request.form["date"],
             request.form["date"],
             request.form["color"]
         ))
@@ -825,6 +826,34 @@ def reject_leave(id):
     conn.close()
 
     return redirect("/leave/approval")
+
+@app.route("/claims/submit", methods=["GET","POST"])
+def user_claim():
+    conn = get_db()
+    cur = conn.cursor()
+
+    if request.method == "POST":
+        cur.execute("""
+            INSERT INTO claims (user_id, title, amount, status)
+            VALUES (%s,%s,%s,'Pending')
+        """, (
+            session["user_id"],
+            request.form["title"],
+            request.form["amount"]
+        ))
+        conn.commit()
+
+    cur.execute("""
+        SELECT id, title, amount, status
+        FROM claims
+        WHERE user_id=%s
+    """, (session["user_id"],))
+
+    claims = cur.fetchall()
+    conn.close()
+
+    return render_template("claim_user.html", claims=claims)
+
 # ================= CLAIMS =================
 @app.route("/admin/claims")
 def admin_claims():
@@ -910,7 +939,7 @@ def user_policy():
 
     conn.close()
 
-    return render_template("policy.html", policy_file=policy_file)
+    return render_template("user_policy.html", policy_file=policy_file)
 
 # ================= NOTICE =================
 @app.route("/admin/notice", methods=["POST"])
