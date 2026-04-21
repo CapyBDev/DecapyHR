@@ -69,7 +69,7 @@ def user_dashboard():
 
     # ===== CLAIMS =====
     cur.execute("""
-        SELECT id, amount, category, status, created_at, file
+        SELECT id, amount, category, status, created_at
         FROM claims
         WHERE user_id = %s
         ORDER BY id DESC
