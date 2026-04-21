@@ -174,24 +174,23 @@ fetch("/dashboard-data")
 });
 
 /* PERFORMANCE CHART */
-const ctx = document.getElementById("perfChart").getContext("2d");
-const gradient = ctx.createLinearGradient(0,0,0,300);
-gradient.addColorStop(0,"rgba(28,37,85,0.5)");
-gradient.addColorStop(1,"rgba(28,37,85,0)");
+const perfCanvas = document.getElementById("perfChart");
 
-new Chart(ctx,{
-  type:"line",
-  data:{
-    labels:["Jan","Feb","Mar","Apr"],
-    datasets:[{
-      data:[60,75,80,95],
-      borderColor:"#1c2555",
-      backgroundColor:gradient,
-      fill:true,
-      tension:0.4
-    }]
-  }
-});
+if(perfCanvas){
+  const ctx = perfCanvas.getContext("2d");
+
+  new Chart(ctx,{
+    type:"line",
+    data:{
+      labels:["Jan","Feb","Mar","Apr"],
+      datasets:[{
+        data:[60,75,80,95],
+        borderColor:"#1c2555",
+        fill:true
+      }]
+    }
+  });
+}
 
 /* CALENDAR */
 let calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
@@ -199,7 +198,6 @@ let calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
   editable:true,
   events:'/calendar-events',
 
-  /* ADD TASK */
   dateClick:function(info){
     let title = prompt("Enter task:");
     if(title){
@@ -211,13 +209,9 @@ let calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
     }
   },
 
-  /* OPEN MODAL */
   eventClick:function(info){
     selectedEvent = info.event;
 
-    document.getElementById("taskTitle").value = info.event.title;
-
-    // SHOW DETAILS PANEL
     document.getElementById("taskInfo").innerHTML = `
       <b>${info.event.title}</b><br>
       Date: ${info.event.start.toLocaleDateString()}<br>
@@ -227,16 +221,23 @@ let calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
         "⏳ Pending"
       }
     `;
+  },
 
-    new bootstrap.Modal(document.getElementById("taskModal")).show();
-  }
-  
   eventDrop:function(info){
     updateEvent(info.event);
   },
 
   eventResize:function(info){
     updateEvent(info.event);
+  },
+
+  eventDidMount: function(info) {
+    if(info.event.backgroundColor === "green"){
+      info.el.style.border = "2px solid #28a745";
+    }
+    if(info.event.backgroundColor === "red"){
+      info.el.style.border = "2px solid #dc3545";
+    }
   }
 });
 
