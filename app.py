@@ -19,14 +19,14 @@ app.secret_key = "secret123"
 UPLOAD_FOLDER = "static/uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-app.config.update(
-    MAIL_SERVER=os.getenv("MAIL_SERVER"),
-    MAIL_PORT=int(os.getenv("MAIL_PORT")),
-    MAIL_USE_TLS=True,
-    MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
-    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD")
-)
-mail = Mail(app)
+# app.config.update(
+#     MAIL_SERVER=os.getenv("MAIL_SERVER"),
+#     MAIL_PORT=int(os.getenv("MAIL_PORT")),
+#     MAIL_USE_TLS=True,
+#     MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
+#     MAIL_PASSWORD=os.getenv("MAIL_PASSWORD")
+# )
+# mail = Mail(app)
 
 scheduler = BackgroundScheduler()
 
@@ -979,11 +979,11 @@ def check_reminders():
     except Exception as e:
         print("Scheduler error:", e)
 
-# ================= EMAIL SENDER (EXAMPLE) =================
-def send_email(to, subject, body):
-    msg = Message(subject, recipients=[to])
-    msg.body = body
-    mail.send(msg)
+# # ================= EMAIL SENDER (EXAMPLE) =================
+# def send_email(to, subject, body):
+#     msg = Message(subject, recipients=[to])
+#     msg.body = body
+#     mail.send(msg)
 
 # ===========ADMIN ANALYTICS DASHBOARD===========
 @app.route("/admin/analytics")
