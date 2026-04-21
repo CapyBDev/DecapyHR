@@ -1,0 +1,51 @@
+{% extends "user_base.html" %}
+{% block content %}
+
+<div class="card-custom">
+<h4>My Leave</h4>
+
+<table class="table">
+<thead>
+<tr>
+<th>Type</th>
+<th>From</th>
+<th>To</th>
+<th>Days</th>
+<th>Status</th>
+<th>Doc</th>
+</tr>
+</thead>
+
+<tbody>
+{% for l in leaves %}
+<tr>
+<td>{{l[0]}}</td>
+<td>{{l[1]}}</td>
+<td>{{l[2]}}</td>
+<td>{{l[4]}}</td>
+
+<td>
+{% if "Approved" in l[3] %}
+<span class="badge bg-success">{{l[3]}}</span>
+{% elif "Rejected" in l[3] %}
+<span class="badge bg-danger">{{l[3]}}</span>
+{% else %}
+<span class="badge bg-warning">{{l[3]}}</span>
+{% endif %}
+</td>
+
+<td>
+{% if l[6] %}
+<a href="/static/uploads/leave_docs/{{l[6]}}" target="_blank">View</a>
+{% endif %}
+</td>
+
+</tr>
+{% endfor %}
+</tbody>
+
+</table>
+
+</div>
+
+{% endblock %}

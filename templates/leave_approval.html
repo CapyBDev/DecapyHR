@@ -1,0 +1,42 @@
+{% extends "user_base.html" %}
+{% block content %}
+
+<div class="card-custom">
+<h4>Leave Approval</h4>
+
+<table class="table">
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Date</th>
+<th>Days</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for l in leaves %}
+<tr>
+<td>{{l.full_name}}</td>
+<td>{{l.leave_type}}</td>
+<td>{{l.start_date}} → {{l.end_date}}</td>
+<td>{{l.total_days}}</td>
+<td>{{l.status}}</td>
+
+<td>
+<a href="/leave/approve/{{l.id}}" class="btn btn-success btn-sm">Approve</a>
+<a href="/leave/reject/{{l.id}}" class="btn btn-danger btn-sm">Reject</a>
+</td>
+
+</tr>
+{% endfor %}
+
+</tbody>
+</table>
+
+</div>
+
+{% endblock %}

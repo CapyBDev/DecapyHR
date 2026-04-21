@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MIRA.HR System</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: #f5f7fb;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  position: fixed;
+  background: #1c2555;
+  color: white;
+  padding: 20px 10px;
+  overflow-y: auto;
+}
+
+.sidebar h4 {
+  margin-bottom: 25px;
+  padding-left: 10px;
+}
+
+/* MENU */
+.menu-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #9aa4d1;
+  margin: 15px 10px 8px;
+}
+
+.sidebar a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  border-radius: 8px;
+  color: white;
+  text-decoration: none;
+  margin: 2px 5px;
+  transition: 0.2s;
+}
+
+.sidebar a:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.sidebar a.active {
+  background: white;
+  color: #1c2555;
+}
+
+/* DROPDOWN */
+.submenu {
+  display: none;
+  padding-left: 15px;
+}
+
+.submenu a {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* MAIN */
+.main {
+  margin-left: 260px;
+  padding: 20px;
+}
+
+/* TOPBAR */
+.topbar {
+  background: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* USER */
+.user-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-box img {
+  width: 35px;
+  border-radius: 50%;
+}
+
+/* NOTIFICATION */
+.bell {
+  position: relative;
+  cursor: pointer;
+}
+
+.badge-dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  background: red;
+  border-radius: 50%;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+  <h4>JSB-HR & ESG</h4>
+
+  <!-- DASHBOARD -->
+  <div class="menu-title">Dashboard</div>
+  <a href="/users"><i class="fas fa-home"></i> Overview</a>
+
+  <!-- HR MODULE -->
+  <div class="menu-title">HR</div>
+
+  <a onclick="toggleMenu('leaveMenu')">
+    <i class="fas fa-calendar"></i> Leave
+    <i class="fas fa-chevron-down ms-auto"></i>
+  </a>
+
+  <div id="leaveMenu" class="submenu">
+    <a href="/leave/my">My Leave</a>
+    <a href="/leave/apply">📅 Apply Leave</a>
+    <a href="/leave/approval">
+      <i class="fas fa-check-circle"></i> Leave Approval
+    </a>
+  </div>
+
+  <!-- CLAIM -->
+  <a onclick="toggleMenu('claimMenu')">
+    <i class="fas fa-file-invoice-dollar"></i> Claims
+    <i class="fas fa-chevron-down ms-auto"></i>
+  </a>
+
+  <div id="claimMenu" class="submenu">
+    <a href="/claims/submit">Submit Claim</a>
+  </div>
+
+  <!-- SELF -->
+  <div class="menu-title">Self Service</div>
+
+  <a onclick="toggleMenu('profileMenu')">
+    <i class="fas fa-user"></i> Profile
+    <i class="fas fa-chevron-down ms-auto"></i>
+  </a>
+
+  <div id="profileMenu" class="submenu">
+    <a href="#" data-bs-toggle="modal" data-bs-target="#editProfile">Edit Profile</a>
+  </div>
+
+  <!-- COMPANY -->
+  <div class="menu-title">Company</div>
+  <a href="/policy"><i class="fas fa-book"></i> Policy</a>
+
+  <!-- 🔥 ADMIN ONLY -->
+  {% if session.role == 'admin' %}
+  <div class="menu-title">Admin Panel</div>
+
+  <a href="/admin/dashboard">
+    <i class="fas fa-chart-line"></i> Admin Dashboard
+  </a>
+
+  <a onclick="toggleMenu('manageMenu')">
+    <i class="fas fa-users"></i> Manage
+    <i class="fas fa-chevron-down ms-auto"></i>
+  </a>
+
+  <div id="manageMenu" class="submenu">
+    <a href="/admin/users">Users</a>
+    <a href="/admin/departments">Departments</a>
+  </div>
+  {% endif %}
+
+  <!-- LOGOUT -->
+  <div class="menu-title">Account</div>
+  <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- TOPBAR -->
+<div class="topbar">
+
+  <div>
+    <h5 style="margin:0;">Dashboard</h5>
+    <small>Welcome back, {{session.name}}</small>
+  </div>
+
+  <div class="d-flex align-items-center gap-3">
+
+    <!-- 🔔 NOTIFICATION -->
+    <div class="dropdown bell">
+      <i class="fas fa-bell" data-bs-toggle="dropdown"></i>
+      <span class="badge-dot"></span>
+
+      <ul class="dropdown-menu" id="notifList"></ul>
+    </div>
+
+    <!-- USER -->
+    <div class="user-box">
+      <img src="/static/uploads/{{user.profile_image if user.profile_image else 'default.png'}}">
+      <span>{{session.name}}</span>
+    </div>
+
+  </div>
+
+</div>
+
+{% block content %}{% endblock %}
+
+</div>
+
+<!-- JS -->
+ <script>
+setInterval(()=>{
+  fetch("/notifications")
+  .then(res=>res.json())
+  .then(data=>{
+    if(data.notifications.length){
+      alert(data.notifications[0]); // simple popup
+    }
+  });
+}, 60000);
+</script>
+<script>
+function toggleMenu(id){
+  let menu = document.getElementById(id);
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+/* Load notifications */
+fetch("/notifications")
+.then(res => res.json())
+.then(data => {
+  let list = document.getElementById("notifList");
+  list.innerHTML = "";
+
+  if(data.notifications.length === 0){
+    list.innerHTML = "<li class='dropdown-item'>No notifications</li>";
+  } else {
+    data.notifications.forEach(n => {
+      list.innerHTML += `<li class="dropdown-item">${n}</li>`;
+    });
+  }
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

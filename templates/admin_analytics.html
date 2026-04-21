@@ -1,0 +1,18 @@
+<canvas id="chart"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+new Chart(document.getElementById("chart"), {
+  type:"bar",
+  data:{
+    labels:["Pending","Approved","Rejected"],
+    datasets:[{
+      data:[
+        {{claims.get('Pending',0)}},
+        {{claims.get('Approved',0)}},
+        {{claims.get('Rejected',0)}}
+      ]
+    }]
+  }
+});
+</script>

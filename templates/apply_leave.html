@@ -1,0 +1,138 @@
+{% extends "user_base.html" %}
+{% block content %}
+
+<style>
+.info-icon {
+  cursor: pointer;
+  position: relative;
+  color: #69ebed;
+}
+.info-bubble {
+  position: absolute;
+  top: -5px;
+  left: 20px;
+  background: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  width: 240px;
+  display: none;
+}
+</style>
+
+<div class="row justify-content-center">
+<div class="col-lg-10">
+
+<div class="card-custom">
+<h4 class="mb-3">📄 Apply for Leave</h4>
+
+<!-- Remaining -->
+<div class="alert alert-info d-flex justify-content-between">
+  <strong>Remaining Leave</strong>
+  <span class="badge bg-primary">{{ remaining_leave }} Days</span>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="row g-3">
+
+<!-- NAME -->
+<div class="col-md-6">
+<label>From Applicant</label>
+<input class="form-control" value="{{ user.full_name }}" readonly>
+</div>
+
+<!-- DATE -->
+<div class="col-md-6">
+<label>Date</label>
+<input class="form-control" value="{{ current_date }}" readonly>
+</div>
+
+<!-- CHECKER -->
+<div class="col-md-6">
+<label>Recommended By</label>
+<input class="form-control" value="{{ checker_name }}" readonly>
+<input type="hidden" name="checker_name" value="{{ checker_name }}">
+</div>
+
+<!-- APPROVER -->
+<div class="col-md-6">
+<label>Approved By</label>
+<input class="form-control" value="{{ approver_name }}" readonly>
+<input type="hidden" name="approver_name" value="{{ approver_name }}">
+</div>
+
+<!-- DATE -->
+<div class="col-md-6">
+<label>From</label>
+<input type="date" name="start_date" id="start_date" class="form-control" required>
+</div>
+
+<div class="col-md-6">
+<label>To</label>
+<input type="date" name="end_date" id="end_date" class="form-control" required>
+</div>
+
+<!-- CATEGORY -->
+<div class="col-12"><h5>Leave Category</h5></div>
+
+<div class="col-md-4">
+<b>Annual Leave</b><br>
+<input type="radio" name="leave_type" value="Normal" required> Normal<br>
+<input type="radio" name="leave_type" value="Emergency"> Emergency
+</div>
+
+<div class="col-md-4">
+<b>Compassionate</b><br>
+<input type="radio" name="leave_type" value="Death Family"> Death<br>
+<input type="radio" name="leave_type" value="Disaster"> Disaster
+</div>
+
+<div class="col-md-4">
+<b>Others</b><br>
+<input type="radio" name="leave_type" value="Unpaid Leave"> Unpaid<br>
+<input type="radio" name="leave_type" value="MC"> MC
+</div>
+
+<!-- REASON -->
+<div class="col-12">
+<label>Reason</label>
+<textarea name="reason" id="reason" class="form-control" required></textarea>
+</div>
+
+<!-- ADDRESS -->
+<div class="col-md-9">
+<label>Contact Address</label>
+<input name="contact_address" id="contact_address" class="form-control" required>
+</div>
+
+<!-- PHONE -->
+<div class="col-md-3">
+<label>Phone</label>
+<input name="contact_phone" id="contact_phone" class="form-control" required>
+</div>
+
+<!-- FILE -->
+<div class="col-12">
+<label>Supporting Document</label>
+<input type="file" name="support_doc" class="form-control">
+</div>
+
+<!-- BTN -->
+<div class="col-12 d-flex justify-content-end">
+<a href="/users" class="btn btn-outline-secondary me-2">Cancel</a>
+<button class="btn btn-primary">Submit</button>
+</div>
+
+</form>
+</div>
+
+</div>
+</div>
+
+<script>
+document.getElementById("start_date").min = new Date().toISOString().split("T")[0];
+document.getElementById("end_date").min = new Date().toISOString().split("T")[0];
+</script>
+
+{% endblock %}
