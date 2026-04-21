@@ -37,6 +37,80 @@ def login():
 
     return render_template("login.html")
 
+# ================= USER DASHBOARD =================
+@app.route("/users")
+def user_dashboard():
+    if "user_id" not in session:
+        return redirect("/")
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    user_id = session["user_id"]
+
+    # ===== USER INFO =====
+    cur.execute("""
+        SELECT full_name, email, phone, address, position
+        FROM users
+        WHERE id = %s
+    """, (user_id,))
+    u = cur.fetchone()
+
+    user = {
+        "name": u[0],
+        "email": u[1],
+        "phone": u[2],
+        "address": u[3],
+        "position": u[4],
+        "id": user_id,
+        "department": "N/A",
+        "duration": "1 year"
+    }
+
+    # ===== CLAIMS =====
+    cur.execute("""
+        SELECT id, amount, category, status, created_at, file
+        FROM claims
+        WHERE user_id = %s
+        ORDER BY id DESC
+    """, (user_id,))
+    claims = cur.fetchall()
+
+    # ===== CLAIM STATS =====
+    total = len(claims)
+    pending = len([c for c in claims if c[3] == "Pending"])
+    approved = len([c for c in claims if c[3] == "Approved"])
+    rejected = len([c for c in claims if c[3] == "Rejected"])
+
+    # ===== NOTICE =====
+    cur.execute("""
+        SELECT content FROM notices
+        ORDER BY created_at DESC LIMIT 1
+    """)
+    notice = cur.fetchone()
+
+    # ===== POLICY =====
+    cur.execute("""
+        SELECT filename FROM policies
+        ORDER BY id DESC LIMIT 1
+    """)
+    policy = cur.fetchone()
+
+    conn.close()
+
+    return render_template("user_dashboard.html",
+        user=user,
+        claims=claims,
+        total=total,
+        pending=pending,
+        approved=approved,
+        rejected=rejected,
+        notice=notice,
+        policy=policy,
+        attendance="0/28",
+        leaves="0/440",
+        awards="0"
+    )
 
 # ================= DASHBOARD =================
 @app.route("/admin/dashboard")
@@ -257,6 +331,8 @@ def delete_department(dept_id):
 
     return redirect("/admin/departments")
 
+# ================= DEPARTMENT EMPLOYEES =================
+
 # ================= LEAVES =================
 @app.route("/admin/leaves")
 def admin_leaves():
@@ -383,6 +459,24 @@ def upload_policy():
         conn.close()
 
     return redirect("/admin/policy")
+
+# ================ USER POLICY ==================
+@app.route("/policy")
+def user_policy():
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT filename FROM policies
+        ORDER BY id DESC LIMIT 1
+    """)
+
+    result = cur.fetchone()
+    policy_file = result[0] if result else None
+
+    conn.close()
+
+    return render_template("policy.html", policy_file=policy_file)
 
 # ================= NOTICE =================
 @app.route("/admin/notice", methods=["POST"])
