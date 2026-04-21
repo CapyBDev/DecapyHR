@@ -111,9 +111,11 @@ canvas {
 
       <input id="taskTitle" class="form-control mb-2">
 
-      <div class="d-flex gap-2">
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-primary" onclick="saveTask()">💾 Save</button>
         <button class="btn btn-success" onclick="markDone()">✔ Done</button>
         <button class="btn btn-danger" onclick="markMissed()">✖ Missed</button>
+        <button class="btn btn-dark" onclick="deleteTask()">🗑 Delete</button>
       </div>
 
     </div>
@@ -136,7 +138,9 @@ canvas {
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
 <script>
-/* LOAD KPI + ATTENDANCE */
+let selectedEvent;
+
+/* LOAD KPI */
 fetch("/dashboard-data")
 .then(res=>res.json())
 .then(d=>{
@@ -156,7 +160,7 @@ fetch("/dashboard-data")
   });
 });
 
-/* PERFORMANCE (ANIMATED GRADIENT) */
+/* PERFORMANCE CHART */
 const ctx = document.getElementById("perfChart").getContext("2d");
 const gradient = ctx.createLinearGradient(0,0,0,300);
 gradient.addColorStop(0,"rgba(28,37,85,0.5)");
@@ -182,6 +186,7 @@ let calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
   editable:true,
   events:'/calendar-events',
 
+  /* ADD TASK */
   dateClick:function(info){
     let title = prompt("Enter task:");
     if(title){
@@ -193,21 +198,12 @@ let calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
     }
   },
 
+  /* OPEN MODAL */
   eventClick:function(info){
-    let action = prompt("Edit task OR type DONE / MISSED / DELETE", info.event.title);
+    selectedEvent = info.event;
+    document.getElementById("taskTitle").value = info.event.title;
 
-    if(action === "DELETE"){
-      fetch("/tasks/delete/"+info.event.id).then(()=>location.reload());
-    }
-    else if(action === "DONE"){
-      info.event.setProp("color","green");
-    }
-    else if(action === "MISSED"){
-      info.event.setProp("color","red");
-    }
-    else if(action){
-      info.event.setProp("title", action);
-    }
+    new bootstrap.Modal(document.getElementById("taskModal")).show();
   },
 
   eventDrop:function(info){
@@ -221,6 +217,7 @@ let calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
 
 calendar.render();
 
+/* UPDATE DATE */
 function updateEvent(e){
   fetch("/calendar-update", {
     method:"POST",
@@ -233,25 +230,27 @@ function updateEvent(e){
   });
 }
 
-let selectedEvent;
-
-function openTaskModal(event){
-  selectedEvent = event;
-  document.getElementById("taskTitle").value = event.title;
-  new bootstrap.Modal(document.getElementById("taskModal")).show();
+/* SAVE TITLE */
+function saveTask(){
+  let newTitle = document.getElementById("taskTitle").value;
+  selectedEvent.setProp("title", newTitle);
 }
 
+/* DONE */
 function markDone(){
   selectedEvent.setProp("color","green");
 }
 
+/* MISSED */
 function markMissed(){
   selectedEvent.setProp("color","red");
 }
-eventClick:function(info){
-  openTaskModal(info.event);
-}
 
+/* DELETE */
+function deleteTask(){
+  fetch("/tasks/delete/"+selectedEvent.id)
+  .then(()=>location.reload());
+}
 </script>
 
 {% endblock %}
