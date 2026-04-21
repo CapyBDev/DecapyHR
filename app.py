@@ -5,7 +5,7 @@ import psycopg2
 from flask_mail import Mail, Message
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
-import os
+import psycopg2.extras
 from dotenv import load_dotenv
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
@@ -56,7 +56,10 @@ def allowed_leave_file(filename):
 # ================= DATABASE =================
 def get_db():
     db_url = os.environ.get("DATABASE_URL")
-    return psycopg2.connect(db_url, sslmode='require')
+    return psycopg2.connect(db_url,
+                            sslmode='require',
+                            cursor_factory=psycopg2.extras.RealDictCursor)
+
 DB_PATH = os.path.join(os.path.dirname(__file__), "database.db")
 # ---------------------- Position Hierarchy ----------------------
 POSITION_HIERARCHY = {
@@ -166,7 +169,7 @@ def login():
             session["user_id"] = 2
             session["role"] = "user"
             session["name"] = "User"
-            return redirect("/users")
+            session["position"] = "Staff"  
 
     return render_template("login.html")
 
@@ -828,6 +831,7 @@ def reject_leave(id):
     return redirect("/leave/approval")
 
 @app.route("/claims/submit", methods=["GET","POST"])
+@login_required
 def user_claim():
     conn = get_db()
     cur = conn.cursor()
@@ -925,21 +929,39 @@ def upload_policy():
 
 # ================ USER POLICY ==================
 @app.route("/policy")
+@login_required
 def user_policy():
     conn = get_db()
     cur = conn.cursor()
 
+    # GET POLICY
     cur.execute("""
         SELECT filename FROM policies
         ORDER BY id DESC LIMIT 1
     """)
-
     result = cur.fetchone()
     policy_file = result[0] if result else None
 
+    # ADD THIS (GET USER)
+    cur.execute("""
+        SELECT full_name, email, profile_image
+        FROM users
+        WHERE id=%s
+    """, (session["user_id"],))
+
+    u = cur.fetchone()
+
+    user = {
+        "name": u[0],
+        "email": u[1],
+        "profile_image": u[2]
+    }
+
     conn.close()
 
-    return render_template("user_policy.html", policy_file=policy_file)
+    return render_template("user_policy.html",
+                           policy_file=policy_file,
+                           user=user)
 
 # ================= NOTICE =================
 @app.route("/admin/notice", methods=["POST"])
