@@ -42,6 +42,23 @@
 canvas {
   max-height: 250px;
 }
+#calendar {
+  height: 420px;
+}
+
+.fc .fc-daygrid-day-frame {
+  padding: 2px;
+}
+
+.fc-toolbar-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.fc-button {
+  padding: 4px 8px !important;
+  font-size: 12px !important;
+}
 </style>
 
 <!--  KPI CARDS -->
@@ -78,7 +95,7 @@ canvas {
 
 </div>
 
-<!-- 🔥 CHARTS -->
+<!-- CHARTS -->
 <div class="row mt-3">
 
 <div class="col-md-6">
@@ -97,29 +114,25 @@ canvas {
 
 </div>
 
-<!-- 🔥 CALENDAR -->
-<div class="card-custom mt-3">
-<h6>MySchedule (Drag & Drop)</h6>
-<div id="calendar"></div>
-</div>
+<!-- CALENDAR -->
+<div class="row mt-3">
 
-<div class="modal fade" id="taskModal">
-  <div class="modal-dialog">
-    <div class="modal-content p-3">
-
-      <h5>Edit Task</h5>
-
-      <input id="taskTitle" class="form-control mb-2">
-
-      <div class="d-flex gap-2 flex-wrap">
-        <button class="btn btn-primary" onclick="saveTask()">💾 Save</button>
-        <button class="btn btn-success" onclick="markDone()">✔ Done</button>
-        <button class="btn btn-danger" onclick="markMissed()">✖ Missed</button>
-        <button class="btn btn-dark" onclick="deleteTask()">🗑 Delete</button>
-      </div>
-
+  <!-- CALENDAR -->
+  <div class="col-md-8">
+    <div class="card-custom">
+      <h6>My Schedule</h6>
+      <div id="calendar"></div>
     </div>
   </div>
+
+  <!-- SIDE PANEL -->
+  <div class="col-md-4">
+    <div class="card-custom">
+      <h6>Task Info</h6>
+      <div id="taskInfo">Click a task to view details</div>
+    </div>
+  </div>
+
 </div>
 
 <!-- 🔥 CLAIMS -->
@@ -201,11 +214,23 @@ let calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
   /* OPEN MODAL */
   eventClick:function(info){
     selectedEvent = info.event;
+
     document.getElementById("taskTitle").value = info.event.title;
 
-    new bootstrap.Modal(document.getElementById("taskModal")).show();
-  },
+    // SHOW DETAILS PANEL
+    document.getElementById("taskInfo").innerHTML = `
+      <b>${info.event.title}</b><br>
+      Date: ${info.event.start.toLocaleDateString()}<br>
+      Status: ${
+        info.event.backgroundColor === "green" ? "✅ Done" :
+        info.event.backgroundColor === "red" ? "❌ Missed" :
+        "⏳ Pending"
+      }
+    `;
 
+    new bootstrap.Modal(document.getElementById("taskModal")).show();
+  }
+  
   eventDrop:function(info){
     updateEvent(info.event);
   },
@@ -213,6 +238,16 @@ let calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
   eventResize:function(info){
     updateEvent(info.event);
   }
+
+  eventDidMount: function(info) {
+    if(info.event.backgroundColor === "green"){
+      info.el.style.border = "2px solid #28a745";
+    }
+    if(info.event.backgroundColor === "red"){
+      info.el.style.border = "2px solid #dc3545";
+    }
+  }
+  
 });
 
 calendar.render();
@@ -236,14 +271,12 @@ function saveTask(){
   selectedEvent.setProp("title", newTitle);
 }
 
-/* DONE */
 function markDone(){
-  selectedEvent.setProp("color","green");
+  selectedEvent.setProp("backgroundColor","green");
 }
 
-/* MISSED */
 function markMissed(){
-  selectedEvent.setProp("color","red");
+  selectedEvent.setProp("backgroundColor","red");
 }
 
 /* DELETE */
