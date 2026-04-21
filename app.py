@@ -648,10 +648,7 @@ def apply_leave():
     c = conn.cursor()
 
     # ================= GET USER =================
-    c.execute(
-        c.execute("SELECT * FROM users WHERE id=%s", (user_id,)),
-        (user_id,)
-    )
+    c.execute("SELECT * FROM users WHERE id=%s", (user_id,))
     user = c.fetchone()
 
     if request.method == "POST":
