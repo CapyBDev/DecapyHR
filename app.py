@@ -193,11 +193,11 @@ def user_dashboard():
     u = cur.fetchone()
 
     user = {
-        "name": u[0],
-        "email": u[1],
-        "phone": u[2],
-        "address": u[3],
-        "position": u[4],
+        "name": u["full_name"],
+        "email": u["email"],
+        "phone": u["phone"],
+        "address": u["address"],
+        "position": u["position"],
         "id": user_id,
         "department": "N/A",
         "duration": "1 year"
@@ -214,9 +214,9 @@ def user_dashboard():
 
     # ===== CLAIM STATS =====
     total = len(claims)
-    pending = len([c for c in claims if c[3] == "Pending"])
-    approved = len([c for c in claims if c[3] == "Approved"])
-    rejected = len([c for c in claims if c[3] == "Rejected"])
+    pending = len([c for c in claims if c["status"] == "Pending"])
+    approved = len([c for c in claims if c["status"] == "Approved"])
+    rejected = len([c for c in claims if c["status"] == "Rejected"])
 
     # ===== NOTICE =====
     cur.execute("""
@@ -952,9 +952,9 @@ def user_policy():
     u = cur.fetchone()
 
     user = {
-        "name": u[0],
-        "email": u[1],
-        "profile_image": u[2]
+        "name": u["full_name"],
+        "email": u["email"],
+        "profile_image": u["profile_image"]
     }
 
     conn.close()
