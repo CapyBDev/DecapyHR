@@ -95,6 +95,15 @@ canvas {
 
 </div>
 
+<div class="card-custom mt-3">
+  <h6>Announcement</h6>
+  {% if notice %}
+    <p>{{ notice.content }}</p>
+  {% else %}
+    <p>No announcement</p>
+  {% endif %}
+</div>
+
 <!-- CHARTS -->
 <div class="row mt-3">
 
@@ -140,8 +149,8 @@ canvas {
 <h6>Recent Claims</h6>
 {% for c in claims %}
 <div class="d-flex justify-content-between">
-  <div>{{c[2]}}</div>
-  <div>RM {{c[1]}}</div>
+  <div>{{ c.category }}</div>
+  <div>RM {{ c.amount }}</div>
 </div>
 {% endfor %}
 </div>
@@ -276,5 +285,6 @@ function deleteTask(){
   .then(()=>location.reload());
 }
 </script>
+
 
 {% endblock %}

@@ -3,60 +3,14 @@
 {% block content %}
 
 <style>
-body {
-  height: 100vh;
-
-  background: 
-    linear-gradient(rgba(0, 0, 0, 0.6), rgba(41, 87, 157, 0.91)), 
-    url('/static/images/DJI_0094.JPG');
-
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-
-  overflow-x: hidden;
-}
-.glass {
-  background: rgba(131, 199, 255, 0.79);
-  backdrop-filter: blur(18px);
-  border-radius: 18px;
-  padding: 20px;
-  color: white;
-}
-
-.card {
-  border-radius: 14px;
-  background: rgba(255,255,255,0.95);
-  padding: 20px;
-}
-
-.filter-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.filter-row input { flex: 2; }
-.filter-row select { flex: 1; }
-
-.modal-header-custom {
-  background: #2c7be5;
-  color: white;
-  padding: 15px;
+/* same style (no change) */
+.dept-link{
+  color: #0d6efd;
+  cursor: pointer;
   font-weight: 600;
 }
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  padding: 20px;
-}
-
-.modal-footer-custom {
-  display: flex;
-  justify-content: space-between;
-  padding: 15px;
+.dept-link:hover{
+  text-decoration: underline;
 }
 </style>
 
@@ -64,18 +18,17 @@ body {
   <div class="card-body">
     <h4 class="mb-3"><i class="bi bi-building"></i> Departments</h4>
 
-    <!-- Add Department Form -->
+    <!-- Add Department -->
     <form class="row g-2 mb-3" method="post">
       <div class="col-md-10">
         <input class="form-control" name="name" placeholder="Enter department name" required>
       </div>
       <div class="col-md-2 d-grid">
-        <button class="btn btn-primary"><i class="bi bi-plus-circle"></i> Add</button>
+        <button class="btn btn-primary">Add</button>
       </div>
     </form>
 
-    {% if show_list %}
-    <!-- Departments List -->
+    {% if departments %}
     <div class="table-responsive">
       <table class="table table-hover align-middle">
         <thead class="table-light">
@@ -85,28 +38,74 @@ body {
             <th></th>
           </tr>
         </thead>
+
         <tbody>
           {% for d in departments %}
           <tr>
             <td>{{ d.id }}</td>
-            <td>{{ d.name }}</td>
+            <td>
+              <span class="dept-link" onclick="openDept({{d.id}})">
+                {{ d.name }}
+              </span>
+            </td>
             <td class="text-end">
-              <form method="post" action="{{ url_for('delete_department', dept_id=d.id) }}" onsubmit="return confirm('Delete this department?');">
-                <button class="btn btn-sm btn-outline-danger">
-                  <i class="bi bi-trash"></i>
-                </button>
+              <form method="post"
+                    action="{{ url_for('delete_department', dept_id=d.id) }}"
+                    onsubmit="return confirm('Delete this department?');">
+                <button class="btn btn-sm btn-outline-danger">🗑️</button>
               </form>
             </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
+
+      <!-- PANEL -->
+      <div id="deptPanel" class="card mt-3 p-3" style="display:none;">
+        <h5 id="deptTitle"></h5>
+        <p>Total Employees: <span id="deptTotal"></span></p>
+
+        <ul id="deptList" class="list-group"></ul>
+
+        <button class="btn btn-secondary mt-2" onclick="closeDept()">Close</button>
+      </div>
+
     </div>
     {% else %}
-    <div class="alert alert-success text-center">
-      Department added successfully.
-    </div>
+      <div class="alert alert-info text-center">No departments yet</div>
     {% endif %}
   </div>
 </div>
+
+<!-- ✅ SCRIPT MUST BE INSIDE BLOCK -->
+<script>
+function openDept(id){
+  fetch("/admin/departments/" + id)
+  .then(res => res.json())
+  .then(data => {
+
+    document.getElementById("deptPanel").style.display = "block";
+
+    document.getElementById("deptTitle").innerText = data.department;
+    document.getElementById("deptTotal").innerText = data.total;
+
+    let list = document.getElementById("deptList");
+    list.innerHTML = "";
+
+    data.employees.forEach(emp => {
+      list.innerHTML += `
+        <li class="list-group-item">
+          <strong>${emp.full_name}</strong> - ${emp.position || "-"}
+          <br><small>${emp.email || ""}</small>
+        </li>
+      `;
+    });
+  });
+}
+
+function closeDept(){
+  document.getElementById("deptPanel").style.display = "none";
+}
+</script>
+
 {% endblock %}

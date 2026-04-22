@@ -80,7 +80,11 @@ body {
   </div>
 
   <p class="mt-2">
-    {{ notice.content if notice else "No announcement yet" }}
+    {% if notice %}
+      <p>{{ notice.content }}</p>
+    {% else %}
+      <p>No announcement yet</p>
+    {% endif %}
   </p>
 
   {% if notice and notice.file %}

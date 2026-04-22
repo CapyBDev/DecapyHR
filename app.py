@@ -308,7 +308,7 @@ def tasks():
         conn.commit()
 
     cur.execute("""
-        SELECT id, title, date, color
+        SELECT id, title, start_time, color
         FROM tasks
         WHERE user_id=%s
     """, (session["user_id"],))
@@ -412,17 +412,16 @@ def admin_users():
             u.dept_id,
             u.entitlement,
             u.availability,
-            d.name AS department_name
+            COALESCE(d.name, '-') AS department_name
         FROM users u
         LEFT JOIN departments d ON u.dept_id = d.id
+        ORDER BY u.id DESC
     """)
 
-    columns = [col[0] for col in cur.description]
-    users = [dict(zip(columns, row)) for row in cur.fetchall()]
+    users = cur.fetchall()
 
-    cur.execute("SELECT id, name FROM departments")
-    dept_columns = [col[0] for col in cur.description]
-    departments = [dict(zip(dept_columns, row)) for row in cur.fetchall()]
+    cur.execute("SELECT id, name FROM departments ORDER BY name")
+    departments = cur.fetchall()
 
     conn.close()
 
@@ -437,23 +436,47 @@ def create_user():
     conn = get_db()
     cur = conn.cursor()
 
+    full_name = request.form.get("full_name")
+    email = request.form.get("email")
+    phone = request.form.get("phone")
+    address = request.form.get("address")
+    position = request.form.get("position")
+    dept_id = request.form.get("dept_id")
+    entitlement = request.form.get("entitlement") or 14
+    username = request.form.get("username")
+    password = request.form.get("password")
+    role = request.form.get("role") or "user"
+
+    #  IMPORTANT: validate department
+    if not dept_id:
+        dept_id = None
+
     cur.execute("""
         INSERT INTO users 
         (full_name, email, phone, address, position, dept_id, entitlement, availability, username, password, role)
         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        RETURNING id
     """, (
-        request.form["full_name"],
-        request.form.get("email"),
-        request.form.get("phone"),
-        request.form.get("address"),
-        request.form.get("position"),
-        request.form.get("dept_id"),
-        request.form.get("entitlement", 14),
+        full_name,
+        email,
+        phone,
+        address,
+        position,
+        dept_id,
+        entitlement,
         "Available",
-        request.form.get("username"),
-        request.form.get("password"),
-        request.form.get("role", "user")
+        username,
+        password,
+        role
     ))
+
+    new_user_id = cur.fetchone()["id"]
+
+    #  add notification (optional but good)
+    cur.execute("""
+        INSERT INTO notifications (user_id, message)
+        VALUES (%s,%s)
+    """, (new_user_id, "Your account has been created"))
 
     conn.commit()
     conn.close()
@@ -492,7 +515,7 @@ def update_profile():
         SET full_name=%s, email=%s, password=%s
         WHERE id=%s
     """, (
-        request.form["name"],
+        request.form["full_name"],   # FIXED
         request.form["email"],
         request.form["password"],
         session["user_id"]
@@ -501,7 +524,7 @@ def update_profile():
     conn.commit()
     conn.close()
 
-    return redirect("/users")
+    return redirect("/profile")   # better UX
 
 @app.route("/user/upload-image", methods=["POST"])
 def upload_image():
@@ -613,6 +636,31 @@ def delete_department(dept_id):
     return redirect("/admin/departments")
 
 # ================= DEPARTMENT EMPLOYEES =================
+@app.route("/admin/departments/<int:dept_id>")
+def department_details(dept_id):
+    conn = get_db()
+    cur = conn.cursor()
+
+    # get department
+    cur.execute("SELECT name FROM departments WHERE id=%s", (dept_id,))
+    dept = cur.fetchone()
+
+    # get employees
+    cur.execute("""
+        SELECT full_name, position, email
+        FROM users
+        WHERE dept_id=%s
+    """, (dept_id,))
+
+    employees = cur.fetchall()
+
+    conn.close()
+
+    return {
+        "department": dept["name"] if dept else "",
+        "total": len(employees),
+        "employees": employees
+    }
 
 # ================= LEAVES (ADMIN DASHBOARD)=================
 @app.route("/admin/leaves")
@@ -620,6 +668,7 @@ def admin_leaves():
     conn = get_db()
     cur = conn.cursor()
 
+    # FIX: use correct table
     cur.execute("""
         SELECT 
             l.id,
@@ -628,24 +677,25 @@ def admin_leaves():
             l.start_date,
             l.end_date,
             l.status
-        FROM leaves l
+        FROM leave_applications l
         JOIN users u ON l.user_id = u.id
+        ORDER BY l.id DESC
     """)
 
     leaves = cur.fetchall()
 
-    # STATS
-    cur.execute("SELECT COUNT(*) FROM leaves")
-    total = cur.fetchone()[0]
+    # ===== STATS =====
+    cur.execute("SELECT COUNT(*) AS total FROM leave_applications")
+    total = cur.fetchone()["total"]
 
-    cur.execute("SELECT COUNT(*) FROM leaves WHERE status='Pending'")
-    pending = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) AS total FROM leave_applications WHERE status LIKE 'Pending%'")
+    pending = cur.fetchone()["total"]
 
-    cur.execute("SELECT COUNT(*) FROM leaves WHERE status='Approved'")
-    approved = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) AS total FROM leave_applications WHERE status='Approved'")
+    approved = cur.fetchone()["total"]
 
-    cur.execute("SELECT COUNT(*) FROM leaves WHERE status='Rejected'")
-    rejected = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) AS total FROM leave_applications WHERE status='Rejected'")
+    rejected = cur.fetchone()["total"]
 
     conn.close()
 
@@ -658,13 +708,16 @@ def admin_leaves():
         rejected=rejected
     )
 
-@app.route("/leave/update/<int:id>/<status>")
+@app.route("/leave/update/<int:id>/<status>", methods=["POST"])
 def update_leave(id, status):
     conn = get_db()
     cur = conn.cursor()
 
-    cur.execute("UPDATE leaves SET status=%s WHERE id=%s",
-                (status, id))
+    cur.execute("""
+        UPDATE leave_applications
+        SET status=%s
+        WHERE id=%s
+    """, (status, id))
 
     conn.commit()
     conn.close()
@@ -962,7 +1015,7 @@ def policy():
     """)
 
     result = cur.fetchone()
-    policy_file = result[0] if result else None
+    policy_file = result["filename"] if result else None
 
     conn.close()
 
@@ -972,20 +1025,23 @@ def policy():
 def upload_policy():
     file = request.files.get("file")
 
-    if file and file.filename != "":
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+    if not file or file.filename == "":
+        flash("No file selected")
+        return redirect("/admin/policy")
 
-        conn = get_db()
-        cur = conn.cursor()
+    filename = secure_filename(file.filename)
+    file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
-        cur.execute("""
-            INSERT INTO policies (filename)
-            VALUES (%s)
-        """, (filename,))
+    conn = get_db()
+    cur = conn.cursor()
 
-        conn.commit()
-        conn.close()
+    cur.execute("""
+        INSERT INTO policies (filename)
+        VALUES (%s)
+    """, (filename,))
+
+    conn.commit()
+    conn.close()
 
     return redirect("/admin/policy")
 
@@ -1118,6 +1174,7 @@ def admin_analytics():
     )
 # ================= DASHBOARD DATA (AJAX) =================
 @app.route("/dashboard-data")
+@login_required
 def dashboard_data():
     user_id = session["user_id"]
     conn = get_db()
@@ -1155,6 +1212,7 @@ def dashboard_data():
     }
 # ================= CALENDAR EVENTS =================
 @app.route("/calendar-events")
+@login_required
 def calendar_events():
     user_id = session["user_id"]
     conn = get_db()

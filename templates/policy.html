@@ -70,15 +70,16 @@
 
     <!-- PDF VIEWER -->
     {% if policy_file %}
-    <iframe class="pdf-viewer"
-        src="{{ url_for('static', filename='uploads/' + policy_file) }}">
-    </iframe>
+      <iframe class="pdf-viewer"
+          src="{{ url_for('static', filename='uploads/' + policy_file) }}">
+      </iframe>
     {% else %}
-    <p class="text-muted">No policy file uploaded yet.</p>
+      <div class="alert alert-warning mt-3">
+        No policy uploaded yet.
+      </div>
     {% endif %}
 
   </div>
-
 </div>
 
 <!-- ===== MODAL UPLOAD ===== -->

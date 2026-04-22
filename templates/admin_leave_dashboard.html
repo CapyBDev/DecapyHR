@@ -84,7 +84,7 @@ body {
 
 <div class="container-fluid mt-4">
 
-<!-- 🔥 STATS -->
+<!--  STATS -->
 <div class="row g-4 mb-4">
 
   <div class="col-md-3">
@@ -121,7 +121,7 @@ body {
 
 </div>
 
-<!-- 📋 TABLE -->
+<!--  TABLE -->
 <div class="glass">
 
 <h5 class="mb-3">Latest Leave Requests</h5>
@@ -139,33 +139,31 @@ body {
   </thead>
 
   <tbody>
-  {% for l in leaves %}
+    {% for l in leaves %}
     <tr>
-      <td>{{l[1]}}</td>
-      <td>{{l[2]}}</td>
-      <td>{{l[3]}}</td>
-      <td>{{l[4]}}</td>
+      <td>{{ l.full_name }}</td>
+      <td>{{ l.leave_type }}</td>
+      <td>{{ l.start_date }}</td>
+      <td>{{ l.end_date }}</td>
 
-      <!-- STATUS BADGE -->
       <td>
         <span class="badge
-          {% if l[5]=='Approved' %}bg-success
-          {% elif l[5]=='Pending' %}bg-warning
+          {% if l.status == 'Approved' %}bg-success
+          {% elif 'Pending' in l.status %}bg-warning
           {% else %}bg-danger
           {% endif %}
         ">
-          {{l[5]}}
+          {{ l.status }}
         </span>
       </td>
 
-      <!-- ACTION BUTTON -->
       <td>
-        {% if l[5] == 'Pending' %}
-        <form action="/leave/update/{{l[0]}}/Approved" method="POST" style="display:inline;">
+        {% if 'Pending' in l.status %}
+        <form action="/leave/update/{{l.id}}/Approved" method="POST" style="display:inline;">
           <button class="btn btn-success btn-sm">Approve</button>
         </form>
 
-        <form action="/leave/update/{{l[0]}}/Rejected" method="POST" style="display:inline;">
+        <form action="/leave/update/{{l.id}}/Rejected" method="POST" style="display:inline;">
           <button class="btn btn-danger btn-sm">Reject</button>
         </form>
         {% else %}
@@ -173,7 +171,7 @@ body {
         {% endif %}
       </td>
     </tr>
-  {% endfor %}
+    {% endfor %}
   </tbody>
 
 </table>
