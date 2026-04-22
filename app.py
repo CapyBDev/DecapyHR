@@ -306,21 +306,21 @@ def admin_dashboard():
     conn = get_db()
     cur = conn.cursor()
 
-    cur.execute("SELECT COUNT(*) FROM users")
-    total_employees = cur.fetchone()[0]
+    # TOTAL EMPLOYEES
+    cur.execute("SELECT COUNT(*) AS total FROM users")
+    total_employees = cur.fetchone()["total"]
 
-    cur.execute("SELECT COUNT(*) FROM departments")
-    total_departments = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) AS total FROM departments")
+    total_departments = cur.fetchone()["total"]
 
-    cur.execute("SELECT COUNT(*) FROM leaves WHERE status='Pending'")
-    pending_leaves = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) AS total FROM leaves WHERE status='Pending'")
+    pending_leaves = cur.fetchone()["total"]
 
-    cur.execute("SELECT COUNT(*) FROM claims")
-    total_claims = cur.fetchone()[0]
-    
-    # NEW EMPLOYEES (example: last 30 days)
-    cur.execute("SELECT COUNT(*) FROM users")
-    new_employees = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) AS total FROM claims")
+    total_claims = cur.fetchone()["total"]
+
+    cur.execute("SELECT COUNT(*) AS total FROM users")
+    new_employees = cur.fetchone()["total"]
 
     # SIMPLE HAPPINESS RATE (dummy logic)
     happiness_rate = 82
@@ -848,6 +848,19 @@ def user_claim():
         conn.commit()
 
     cur.execute("""
+        SELECT full_name, email, profile_image
+        FROM users
+        WHERE id=%s
+    """, (session["user_id"],))
+    u = cur.fetchone()
+
+    user = {
+        "name": u["full_name"],
+        "email": u["email"],
+        "profile_image": u["profile_image"]
+    }
+
+    cur.execute("""
         SELECT id, title, amount, status
         FROM claims
         WHERE user_id=%s
@@ -856,7 +869,7 @@ def user_claim():
     claims = cur.fetchall()
     conn.close()
 
-    return render_template("claim_user.html", claims=claims)
+    return render_template("claim_user.html", claims=claims, user=user)
 
 # ================= CLAIMS =================
 @app.route("/admin/claims")
