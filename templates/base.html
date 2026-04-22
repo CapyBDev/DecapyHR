@@ -267,7 +267,12 @@ body {
       <i class="bi bi-search"></i>
     </div>
 
-    <div class="icon-btn"><i class="bi bi-bell"></i></div>
+    <div class="icon-btn" onclick="toggleNotif()">
+      <i class="bi bi-bell"></i>
+    </div>
+
+    <div id="notifBox" class="dropdown-menu-custom" style="right:60px; top:50px;">
+    </div>
 
     <!-- PROFILE -->
     <div class="profile-dropdown">
@@ -293,6 +298,25 @@ body {
 </div>
 
 <script>
+function toggleNotif() {
+  let box = document.getElementById("notifBox");
+  box.classList.toggle("show");
+
+  fetch("/notifications")
+  .then(res => res.json())
+  .then(data => {
+    box.innerHTML = "";
+
+    if(data.notifications.length === 0){
+      box.innerHTML = "<div style='padding:10px'>No notifications</div>";
+      return;
+    }
+
+    data.notifications.forEach(n => {
+      box.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee;">${n}</div>`;
+    });
+  });
+}
 function toggleDropdown() {
   document.getElementById("dropdownMenu").classList.toggle("show");
 }

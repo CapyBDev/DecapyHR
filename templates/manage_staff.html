@@ -433,20 +433,24 @@ body {
 // SHOW PANEL
 document.getElementById("applyFilter").addEventListener("click", () => {
 
-  let name = searchName.value.toLowerCase();
-  let dept = filterDept.value.toLowerCase();
-  let avail = filterAvail.value.toLowerCase();
-  let sort = sortBy.value;
+  let name = document.getElementById("searchName").value.toLowerCase();
+  let dept = document.getElementById("filterDept").value.toLowerCase();
+  let avail = document.getElementById("filterAvail").value.toLowerCase();
+  let sort = document.getElementById("sortBy").value;
 
   let rows = [...document.querySelectorAll("#userTable tbody tr")];
 
   rows.forEach(row => {
+    let rName = (row.dataset.name || "").toLowerCase();
+    let rDept = (row.dataset.dept || "").toLowerCase();
+    let rAvail = (row.dataset.avail || "").toLowerCase();
 
-    row.style.display =
-      row.dataset.name.toLowerCase().includes(name) &&
-      (dept === "" || row.dataset.dept.toLowerCase() === dept) &&
-      (avail === "" || row.dataset.avail.toLowerCase() === avail)
-      ? "" : "none";
+    let show =
+      rName.includes(name) &&
+      (dept === "" || rDept === dept) &&
+      (avail === "" || rAvail === avail);
+
+    row.style.display = show ? "" : "none";
   });
 
   rows.sort((a, b) =>
@@ -454,7 +458,7 @@ document.getElementById("applyFilter").addEventListener("click", () => {
       ? a.dataset.name.localeCompare(b.dataset.name)
       : b.dataset.name.localeCompare(a.dataset.name)
   ).forEach(row =>
-    userTable.querySelector("tbody").appendChild(row)
+    document.querySelector("#userTable tbody").appendChild(row)
   );
 });
 

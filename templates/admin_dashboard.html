@@ -80,11 +80,11 @@ body {
   </div>
 
   <p class="mt-2">
-    {{ notice[0] if notice else "No announcement yet" }}
+    {{ notice.content if notice else "No announcement yet" }}
   </p>
 
-  {% if notice and notice[1] %}
-  <a href="{{ url_for('static', filename='uploads/' + notice[1]) }}" target="_blank" class="btn btn-dark btn-sm">
+  {% if notice and notice.file %}
+  <a href="{{ url_for('static', filename='uploads/' + notice.filepath) }}" target="_blank" class="btn btn-dark btn-sm">
     View Attachment
   </a>
   {% endif %}
@@ -103,7 +103,7 @@ body {
 
   <div class="modal-body">
     <textarea name="content" class="form-control" rows="4">
-{{ notice[0] if notice else "" }}
+{{ notice.content if notice else "" }}
     </textarea>
 
     <input type="file" name="file" class="form-control mt-2">

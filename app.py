@@ -159,17 +159,48 @@ def login():
         email = request.form["email"]
         password = request.form["password"]
 
-        if email == "admin@test.com":
+        conn = get_db()
+        cur = conn.cursor()
+
+        #  Check DB first
+        cur.execute("""
+            SELECT id, full_name, role, position, password
+            FROM users
+            WHERE email=%s
+        """, (email,))
+        user = cur.fetchone()
+        conn.close()
+
+        #  CASE 1: USER EXISTS IN DB
+        if user:
+            if user["password"] == password:
+                session["user_id"] = user["id"]
+                session["name"] = user["full_name"]
+                session["role"] = user["role"]
+                session["position"] = user["position"]
+
+                return redirect("/admin/dashboard" if user["role"] == "admin" else "/users")
+
+            flash("Wrong password")
+            return redirect("/")
+
+        #  CASE 2: FALLBACK (HARDCODE LOGIN)
+        if email == "admin@test.com" and password == "admin123":
             session["user_id"] = 1
             session["role"] = "admin"
             session["name"] = "Admin"
             return redirect("/admin/dashboard")
 
-        elif email == "user@test.com":
+        if email == "user@test.com" and password == "user123":
             session["user_id"] = 2
             session["role"] = "user"
             session["name"] = "User"
-            session["position"] = "Staff"  
+            session["position"] = "Staff"
+            return redirect("/users")
+
+        #  INVALID
+        flash("Invalid login")
+        return redirect("/")
 
     return render_template("login.html")
 
@@ -428,6 +459,24 @@ def create_user():
     conn.close()
 
     return redirect("/admin/users")
+
+# ================= USER PROFILE =================
+@app.route("/profile")
+@login_required
+def profile():
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT full_name, email, phone, address, position, profile_image
+        FROM users
+        WHERE id=%s
+    """, (session["user_id"],))
+
+    user = cur.fetchone()
+    conn.close()
+
+    return render_template("profile.html", user=user)
 
 # ===== UPDATE PROFILE (FIXED) =====
 @app.route("/user/update-profile", methods=["POST"])
@@ -1017,7 +1066,7 @@ def get_notifications():
     data = cur.fetchall()
     conn.close()
 
-    return {"notifications": [n[0] for n in data]}
+    return {"notifications": [n["message"] for n in data]}
 
 # ================= REMINDER CHECKER (SCHEDULED) =================
 def check_reminders():

@@ -1,0 +1,10 @@
+<h3>My Profile</h3>
+
+<p>Name: {{ user.full_name }}</p>
+<p>Email: {{ user.email }}</p>
+<p>Phone: {{ user.phone }}</p>
+<p>Position: {{ user.position }}</p>
+
+{% if user.profile_image %}
+<img src="{{ url_for('static', filename='uploads/' + user.profile_image) }}" width="120">
+{% endif %}
