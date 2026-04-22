@@ -185,13 +185,13 @@ def login():
             return redirect("/")
 
         #  CASE 2: FALLBACK (HARDCODE LOGIN)
-        if email == "admin@test.com" and password == "admin123":
+        if email == "admin@test.com" and password == "123":
             session["user_id"] = 1
             session["role"] = "admin"
             session["name"] = "Admin"
             return redirect("/admin/dashboard")
 
-        if email == "user@test.com" and password == "user123":
+        if email == "user@test.com" and password == "123":
             session["user_id"] = 2
             session["role"] = "user"
             session["name"] = "User"

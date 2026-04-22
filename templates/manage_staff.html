@@ -428,9 +428,24 @@ body {
     </div>
   </div>
 </div>
+
 <script>
 
-// SHOW PANEL
+// ===== ELEMENTS =====
+const updateForm = document.getElementById("updateUserForm");
+const deleteForm = document.getElementById("deleteUserForm");
+
+const empId = document.getElementById("empId");
+const empName = document.getElementById("empName");
+const empEmail = document.getElementById("empEmail");
+const empPhone = document.getElementById("empPhone");
+const empAddress = document.getElementById("empAddress");
+const empPosition = document.getElementById("empPosition");
+const empDept = document.getElementById("empDept");
+const empEntitlement = document.getElementById("empEntitlement");
+const empAvailability = document.getElementById("empAvailability");
+
+// ===== FILTER =====
 document.getElementById("applyFilter").addEventListener("click", () => {
 
   let name = document.getElementById("searchName").value.toLowerCase();
@@ -462,6 +477,7 @@ document.getElementById("applyFilter").addEventListener("click", () => {
   );
 });
 
+// ===== SHOW DETAILS =====
 function showDetails(user){
 
   document.getElementById("detailsPanel").classList.add("active");
@@ -479,14 +495,17 @@ function showDetails(user){
   updateForm.action = "/admin/users/update/" + user.id;
   deleteForm.action = "/admin/users/delete/" + user.id;
 }
+
+// ===== DELETE =====
 function deleteUser(id){
   if(confirm("Delete this user?")){
-    fetch("/admin/users/delete/" + id, {method:"POST"})
-    .then(()=>location.reload());
+    fetch("/admin/users/delete/" + id, {
+      method: "POST"
+    }).then(() => location.reload());
   }
 }
 
-// UPDATE (AJAX)
+// ===== UPDATE =====
 updateForm.onsubmit = function(e){
   e.preventDefault();
 
@@ -496,18 +515,11 @@ updateForm.onsubmit = function(e){
   }).then(()=>location.reload());
 };
 
-// DELETE
-deleteForm.onsubmit = function(e){
-  e.preventDefault();
-
-  if(confirm("Delete this user?")){
-    fetch(deleteForm.action,{method:"POST"})
-    .then(()=>location.reload());
-  }
-};
+// ===== CLOSE PANEL =====
 function closePanel(){
   document.getElementById("detailsPanel").classList.remove("active");
 }
+
 </script>
 
 {% endblock %}
