@@ -70,6 +70,59 @@ POSITION_HIERARCHY = {
     "CEO": None  # top of chain
 }
 
+def init_db():
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        full_name TEXT,
+        email TEXT UNIQUE,
+        phone TEXT,
+        address TEXT,
+        position TEXT,
+        dept_id INTEGER,
+        entitlement INTEGER DEFAULT 14,
+        availability TEXT DEFAULT 'Available',
+        username TEXT,
+        password TEXT,
+        role TEXT,
+        profile_image TEXT
+    )
+    """)
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS departments (
+        id SERIAL PRIMARY KEY,
+        name TEXT
+    )
+    """)
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS leave_applications (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER,
+        full_name TEXT,
+        position TEXT,
+        leave_type TEXT,
+        start_date TEXT,
+        end_date TEXT,
+        total_days INTEGER,
+        reason TEXT,
+        status TEXT DEFAULT 'Pending Recommender',
+        checker_name TEXT,
+        approver_name TEXT,
+        contact_address TEXT,
+        contact_phone TEXT,
+        support_doc TEXT,
+        created_at TEXT
+    )
+    """)
+
+    conn.commit()
+    conn.close()
+
 def calculate_working_days(start_date, end_date):
     """Return number of working days between start & end,
     excluding Sat/Sun & public holidays."""
@@ -297,7 +350,7 @@ def tasks():
         ))
         conn.commit()
 
-        # 🔔 add notification
+        #  add notification
         cur.execute("""
             INSERT INTO notifications (user_id, message)
             VALUES (%s,%s)
@@ -515,7 +568,7 @@ def update_profile():
         SET full_name=%s, email=%s, password=%s
         WHERE id=%s
     """, (
-        request.form["full_name"],   # FIXED
+        request.form["full_name"],   
         request.form["email"],
         request.form["password"],
         session["user_id"]
@@ -599,7 +652,6 @@ def manage_departments():
     conn = get_db()
     cur = conn.cursor()
 
-    # ADD DEPARTMENT
     if request.method == "POST":
         cur.execute(
             "INSERT INTO departments (name) VALUES (%s)",
@@ -607,17 +659,14 @@ def manage_departments():
         )
         conn.commit()
 
-    # GET ALL DEPARTMENTS
     cur.execute("SELECT id, name FROM departments")
-
-    columns = [col[0] for col in cur.description]
-    departments = [dict(zip(columns, row)) for row in cur.fetchall()]
+    departments = cur.fetchall()  
 
     conn.close()
 
     return render_template("manage_department.html",
                            departments=departments)
-
+    
 # ================= DELETE DEPARTMENT =================
 @app.route("/admin/departments/delete/<int:dept_id>", methods=["POST"])
 def delete_department(dept_id):
@@ -627,12 +676,11 @@ def delete_department(dept_id):
     try:
         cur.execute("DELETE FROM departments WHERE id=%s", (dept_id,))
         conn.commit()
-    except Exception as e:
+    except:
         conn.rollback()
-        return "Cannot delete department (might have employees assigned)"
+        return "Cannot delete department (used by employees)"
 
     conn.close()
-
     return redirect("/admin/departments")
 
 # ================= DEPARTMENT EMPLOYEES =================
@@ -668,7 +716,6 @@ def admin_leaves():
     conn = get_db()
     cur = conn.cursor()
 
-    # FIX: use correct table
     cur.execute("""
         SELECT 
             l.id,
@@ -684,7 +731,6 @@ def admin_leaves():
 
     leaves = cur.fetchall()
 
-    # ===== STATS =====
     cur.execute("SELECT COUNT(*) AS total FROM leave_applications")
     total = cur.fetchone()["total"]
 
@@ -1285,7 +1331,9 @@ def logout():
     session.clear()
     return redirect("/")
 
-
+with app.app_context():
+    init_db()
+    
 # ================= RUN =================
 if __name__ == "__main__":
     app.run(debug=True)
