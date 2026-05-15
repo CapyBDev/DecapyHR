@@ -119,6 +119,71 @@ def init_db():
         created_at TEXT
     )
     """)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS leaves (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER,
+        leave_type TEXT,
+        start_date TEXT,
+        end_date TEXT,
+        status TEXT,
+        created_at TEXT
+    )
+    """)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS claims (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER,
+        title TEXT,
+        amount DECIMAL,
+        category TEXT,
+        status TEXT,
+        created_at TEXT
+    )
+    """)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS notices (
+        id SERIAL PRIMARY KEY,
+        content TEXT,
+        file TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS policies (
+        id SERIAL PRIMARY KEY,
+        filename TEXT
+    )
+    """)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS notifications (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER,
+        message TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+    
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS tasks (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER,
+        title TEXT,
+        start_time TIMESTAMP,
+        end_time TIMESTAMP,
+        reminder_time TIMESTAMP,
+        color TEXT
+    )
+    """)
+    
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS attendance (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER,
+        status TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
 
     conn.commit()
     conn.close()
